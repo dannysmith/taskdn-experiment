@@ -27,16 +27,27 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { areas } from "@/data/areas-projects"
+import {
+  appData,
+  getProjectsByAreaId,
+  getOrphanProjects,
+  getProjectCompletion,
+} from "@/data/app-data"
+import type { Selection, NavId } from "@/types/selection"
 
-const navItems = [
-  { name: "Today", icon: SunIcon, iconClass: "text-icon-today" },
-  { name: "This Week", icon: CalendarDaysIcon, iconClass: "text-icon-week" },
-  { name: "Inbox", icon: InboxIcon, iconClass: "text-icon-inbox" },
-  { name: "Calendar", icon: CalendarIcon, iconClass: "text-icon-calendar" },
+const navItems: { id: NavId; name: string; icon: typeof SunIcon; iconClass: string }[] = [
+  { id: "today", name: "Today", icon: SunIcon, iconClass: "text-icon-today" },
+  { id: "this-week", name: "This Week", icon: CalendarDaysIcon, iconClass: "text-icon-week" },
+  { id: "inbox", name: "Inbox", icon: InboxIcon, iconClass: "text-icon-inbox" },
+  { id: "calendar", name: "Calendar", icon: CalendarIcon, iconClass: "text-icon-calendar" },
 ]
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
+  selection: Selection | null
+  onSelectionChange: (selection: Selection) => void
+}
+
+export function AppSidebar({ selection, onSelectionChange, ...props }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
@@ -48,10 +59,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarGroup className="py-0">
           <SidebarMenu>
             {navItems.map((item) => (
-              <SidebarMenuItem key={item.name}>
+              <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton
                   className="font-semibold"
                   tooltip={item.name}
+                  isActive={selection?.type === "nav" && selection.id === item.id}
+                  onClick={() => onSelectionChange({ type: "nav", id: item.id })}
                 >
                   <item.icon className={item.iconClass} />
                   <span>{item.name}</span>
@@ -61,47 +74,104 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenu>
         </SidebarGroup>
         <SidebarSeparator className="my-2 group-data-[collapsible=icon]:hidden" />
-        {areas.map((area) => (
-          <Collapsible
-            key={area.id}
-            defaultOpen
-            className="group/collapsible group-data-[collapsible=icon]:hidden"
-          >
-            <SidebarGroup className="py-0">
-              <SidebarGroupLabel
-                render={<CollapsibleTrigger />}
-                className="group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
-              >
-                <FolderIcon className="text-icon-folder" />
-                <span className="truncate">{area.name}</span>
-                <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
-              </SidebarGroupLabel>
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {area.projects.map((project) => (
-                      <SidebarMenuItem key={project.id}>
-                        <SidebarMenuButton
-                          size="sm"
-                          className="pl-7"
-                          tooltip={project.name}
-                        >
-                          <ProgressCircle
-                            value={project.completion}
-                            size={10}
-                            strokeWidth={1.25}
-                            className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
-                          />
-                          <span className="truncate">{project.name}</span>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-        ))}
+        {appData.areas.map((area) => {
+          const projects = getProjectsByAreaId(area.id)
+          return (
+            <Collapsible
+              key={area.id}
+              defaultOpen
+              className="group/collapsible group-data-[collapsible=icon]:hidden"
+            >
+              <SidebarGroup className="py-0">
+                <SidebarGroupLabel
+                  render={<CollapsibleTrigger />}
+                  className={`group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer ${
+                    selection?.type === "area" && selection.id === area.id
+                      ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                      : ""
+                  }`}
+                  onClick={() => onSelectionChange({ type: "area", id: area.id })}
+                >
+                  <FolderIcon className="text-icon-folder" />
+                  <span className="truncate">{area.title}</span>
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {projects.map((project) => (
+                        <SidebarMenuItem key={project.id}>
+                          <SidebarMenuButton
+                            size="sm"
+                            className="pl-7"
+                            tooltip={project.title}
+                            isActive={selection?.type === "project" && selection.id === project.id}
+                            onClick={() => onSelectionChange({ type: "project", id: project.id })}
+                          >
+                            <ProgressCircle
+                              value={getProjectCompletion(project.id)}
+                              size={10}
+                              strokeWidth={1.25}
+                              className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
+                            />
+                            <span className="truncate">{project.title}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          )
+        })}
+        {/* No Area section for orphan projects */}
+        {(() => {
+          const orphanProjects = getOrphanProjects()
+          if (orphanProjects.length === 0) return null
+          return (
+            <Collapsible
+              defaultOpen
+              className="group/collapsible group-data-[collapsible=icon]:hidden"
+            >
+              <SidebarGroup className="py-0">
+                <SidebarGroupLabel
+                  render={<CollapsibleTrigger />}
+                  className="group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                >
+                  <FolderIcon className="text-icon-folder-none" />
+                  <span className="truncate">No Area</span>
+                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                </SidebarGroupLabel>
+                <CollapsibleContent>
+                  <SidebarGroupContent>
+                    <SidebarMenu>
+                      {orphanProjects.map((project) => (
+                        <SidebarMenuItem key={project.id}>
+                          <SidebarMenuButton
+                            size="sm"
+                            className="pl-7"
+                            tooltip={project.title}
+                            isActive={selection?.type === "project" && selection.id === project.id}
+                            onClick={() => onSelectionChange({ type: "project", id: project.id })}
+                          >
+                            <ProgressCircle
+                              value={getProjectCompletion(project.id)}
+                              size={10}
+                              strokeWidth={1.25}
+                              className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
+                            />
+                            <span className="truncate">{project.title}</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                      ))}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </CollapsibleContent>
+              </SidebarGroup>
+            </Collapsible>
+          )
+        })()}
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
