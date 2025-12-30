@@ -12,6 +12,9 @@ interface AppDataContextValue {
   // Mutations
   updateProjectArea: (projectId: string, newAreaId: string | null) => void
   updateTaskTitle: (taskId: string, newTitle: string) => void
+  updateTaskScheduled: (taskId: string, date: string | undefined) => void
+  updateTaskDue: (taskId: string, date: string | undefined) => void
+  updateTaskStatus: (taskId: string, newStatus: Task["status"]) => void
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
   moveTaskToProject: (taskId: string, newProjectId: string) => void
@@ -52,6 +55,42 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
           ? { ...t, title: newTitle, updatedAt: new Date().toISOString() }
           : t
       )
+    }))
+  }, [])
+
+  const updateTaskScheduled = useCallback((taskId: string, date: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, scheduled: date, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskDue = useCallback((taskId: string, date: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, due: date, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskStatus = useCallback((taskId: string, newStatus: Task["status"]) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t => {
+        if (t.id !== taskId) return t
+        const now = new Date().toISOString()
+        const completedAt = (newStatus === "done" || newStatus === "dropped")
+          ? now
+          : undefined
+        return { ...t, status: newStatus, updatedAt: now, completedAt }
+      })
     }))
   }, [])
 
@@ -179,6 +218,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     data,
     updateProjectArea,
     updateTaskTitle,
+    updateTaskScheduled,
+    updateTaskDue,
+    updateTaskStatus,
     toggleTaskStatus,
     reorderProjectTasks,
     moveTaskToProject,

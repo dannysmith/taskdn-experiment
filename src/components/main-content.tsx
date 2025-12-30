@@ -24,7 +24,16 @@ export function MainContent({ selection, onSelectionChange }: MainContentProps) 
     case "nav":
       switch (selection.id) {
         case "today":
-          return <TodayView />
+          return (
+            <TodayView
+              onNavigateToProject={(projectId) =>
+                onSelectionChange({ type: "project", id: projectId })
+              }
+              onNavigateToArea={(areaId) =>
+                onSelectionChange({ type: "area", id: areaId })
+              }
+            />
+          )
         case "this-week":
           return <WeekView />
         case "inbox":
