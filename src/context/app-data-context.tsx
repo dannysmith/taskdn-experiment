@@ -11,6 +11,9 @@ interface AppDataContextValue {
   data: AppData
   // Mutations
   updateProjectArea: (projectId: string, newAreaId: string | null) => void
+  updateTaskTitle: (taskId: string, newTitle: string) => void
+  toggleTaskStatus: (taskId: string) => void
+  reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
   // Lookups (derived from data)
   getAreaById: (id: string) => Area | undefined
   getProjectById: (id: string) => Project | undefined
@@ -38,6 +41,64 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         p.id === projectId ? { ...p, areaId: newAreaId ?? undefined } : p
       )
     }))
+  }, [])
+
+  const updateTaskTitle = useCallback((taskId: string, newTitle: string) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, title: newTitle, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const toggleTaskStatus = useCallback((taskId: string) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t => {
+        if (t.id !== taskId) return t
+        const now = new Date().toISOString()
+        // Toggle between ready and done
+        if (t.status === "done") {
+          return { ...t, status: "ready" as const, updatedAt: now, completedAt: undefined }
+        } else {
+          return { ...t, status: "done" as const, updatedAt: now, completedAt: now }
+        }
+      })
+    }))
+  }, [])
+
+  const reorderProjectTasks = useCallback((projectId: string, reorderedTaskIds: string[]) => {
+    setData(prev => {
+      // Get tasks for this project
+      const projectTasks = prev.tasks.filter(t => t.projectId === projectId)
+
+      // Reorder the project tasks according to the new order
+      const reorderedProjectTasks = reorderedTaskIds
+        .map(id => projectTasks.find(t => t.id === id))
+        .filter((t): t is Task => t !== undefined)
+
+      // Combine: keep order of other tasks, insert reordered tasks in their original position
+      // Simple approach: put other tasks first, then reordered tasks
+      // Better: maintain relative positions
+      const result: Task[] = []
+      let projectTaskIndex = 0
+
+      for (const task of prev.tasks) {
+        if (task.projectId === projectId) {
+          if (projectTaskIndex < reorderedProjectTasks.length) {
+            result.push(reorderedProjectTasks[projectTaskIndex])
+            projectTaskIndex++
+          }
+        } else {
+          result.push(task)
+        }
+      }
+
+      return { ...prev, tasks: result }
+    })
   }, [])
 
   // Lookups
@@ -77,6 +138,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const value: AppDataContextValue = {
     data,
     updateProjectArea,
+    updateTaskTitle,
+    toggleTaskStatus,
+    reorderProjectTasks,
     getAreaById,
     getProjectById,
     getTaskById,
