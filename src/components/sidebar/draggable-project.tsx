@@ -1,0 +1,125 @@
+import * as React from "react"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { Ban, CircleCheck, CirclePause } from "lucide-react"
+
+import { ProgressCircle } from "@/components/ui/progress-circle"
+import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
+import { cn } from "@/lib/utils"
+import type { Project, ProjectStatus } from "@/types/data"
+import { getDragId } from "@/types/sidebar-order"
+import type { DragItem } from "@/types/sidebar-order"
+
+// -----------------------------------------------------------------------------
+// Status Indicator
+// -----------------------------------------------------------------------------
+
+interface ProjectStatusIndicatorProps {
+  status: ProjectStatus | undefined
+  completion: number
+}
+
+function ProjectStatusIndicator({ status, completion }: ProjectStatusIndicatorProps) {
+  const iconClass = "size-4 shrink-0"
+
+  switch (status) {
+    case "blocked":
+      return <Ban className={`${iconClass} text-status-blocked`} />
+    case "paused":
+      return <CirclePause className={`${iconClass} text-status-paused`} />
+    case "done":
+      return <CircleCheck className={`${iconClass} text-status-done`} />
+    case "planning":
+    case "ready":
+      return (
+        <ProgressCircle
+          value={completion}
+          size={16}
+          strokeWidth={2}
+          className={`${iconClass} text-status-planning`}
+        />
+      )
+    case "in-progress":
+    default:
+      return (
+        <ProgressCircle
+          value={completion}
+          size={16}
+          strokeWidth={2}
+          className={`${iconClass} text-status-in-progress`}
+        />
+      )
+  }
+}
+
+function getProjectTitleClass(status: ProjectStatus | undefined): string {
+  if (status === "done" || status === "paused") {
+    return "text-muted-foreground"
+  }
+  return ""
+}
+
+// -----------------------------------------------------------------------------
+// Draggable Project
+// -----------------------------------------------------------------------------
+
+interface DraggableProjectProps {
+  project: Project
+  containerId: string
+  isSelected: boolean
+  onSelect: () => void
+  completion: number
+}
+
+export function DraggableProject({
+  project,
+  containerId,
+  isSelected,
+  onSelect,
+  completion,
+}: DraggableProjectProps) {
+  const dragId = getDragId("project", project.id)
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: dragId,
+    data: {
+      type: "project",
+      id: project.id,
+      containerId,
+    } satisfies DragItem,
+  })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  }
+
+  return (
+    <SidebarMenuItem
+      ref={setNodeRef}
+      style={style}
+      className={cn(isDragging && "opacity-50 z-50")}
+      {...attributes}
+      {...listeners}
+    >
+      <SidebarMenuButton
+        className="pl-7 select-none"
+        tooltip={project.title}
+        isActive={isSelected}
+        onClick={onSelect}
+      >
+        <ProjectStatusIndicator status={project.status} completion={completion} />
+        <span className={cn("truncate", getProjectTitleClass(project.status))}>
+          {project.title}
+        </span>
+      </SidebarMenuButton>
+    </SidebarMenuItem>
+  )
+}

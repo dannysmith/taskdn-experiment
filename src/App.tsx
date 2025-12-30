@@ -7,31 +7,32 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { getAreaById, getProjectById } from "@/data/app-data"
+import { AppDataProvider, useAppData } from "@/context/app-data-context"
 import type { Selection } from "@/types/selection"
 
-function getHeaderTitle(selection: Selection | null): string {
-  if (!selection) return "Dashboard"
-
-  switch (selection.type) {
-    case "nav":
-      switch (selection.id) {
-        case "today": return "Today"
-        case "this-week": return "This Week"
-        case "inbox": return "Inbox"
-        case "calendar": return "Calendar"
-      }
-      break
-    case "area":
-      return getAreaById(selection.id)?.title ?? "Area"
-    case "project":
-      return getProjectById(selection.id)?.title ?? "Project"
-  }
-  return "Dashboard"
-}
-
-export function App() {
+function AppContent() {
   const [selection, setSelection] = useState<Selection | null>(null)
+  const { getAreaById, getProjectById } = useAppData()
+
+  function getHeaderTitle(selection: Selection | null): string {
+    if (!selection) return "Dashboard"
+
+    switch (selection.type) {
+      case "nav":
+        switch (selection.id) {
+          case "today": return "Today"
+          case "this-week": return "This Week"
+          case "inbox": return "Inbox"
+          case "calendar": return "Calendar"
+        }
+        break
+      case "area":
+        return getAreaById(selection.id)?.title ?? "Area"
+      case "project":
+        return getProjectById(selection.id)?.title ?? "Project"
+    }
+    return "Dashboard"
+  }
 
   return (
     <SidebarProvider>
@@ -47,6 +48,14 @@ export function App() {
         </main>
       </SidebarInset>
     </SidebarProvider>
+  )
+}
+
+export function App() {
+  return (
+    <AppDataProvider>
+      <AppContent />
+    </AppDataProvider>
   )
 }
 
