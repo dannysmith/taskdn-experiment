@@ -51,8 +51,8 @@ function ProjectStatusIndicator({ project }: { project: Project }) {
   const status = project.status
   const completion = getProjectCompletion(project.id)
 
-  // Icon size classes to match ProgressCircle
-  const iconClass = "!size-2.5 shrink-0"
+  // Icon size to match sidebar menu icons
+  const iconClass = "size-4 shrink-0"
 
   switch (status) {
     case "blocked":
@@ -66,8 +66,8 @@ function ProjectStatusIndicator({ project }: { project: Project }) {
       return (
         <ProgressCircle
           value={completion}
-          size={10}
-          strokeWidth={1.25}
+          size={16}
+          strokeWidth={2}
           className={`${iconClass} text-status-planning`}
         />
       )
@@ -76,8 +76,8 @@ function ProjectStatusIndicator({ project }: { project: Project }) {
       return (
         <ProgressCircle
           value={completion}
-          size={10}
-          strokeWidth={1.25}
+          size={16}
+          strokeWidth={2}
           className={`${iconClass} text-status-in-progress`}
         />
       )
@@ -161,7 +161,6 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                       {projects.map((project) => (
                         <SidebarMenuItem key={project.id}>
                           <SidebarMenuButton
-                            size="sm"
                             className="pl-7"
                             tooltip={project.title}
                             isActive={selection?.type === "project" && selection.id === project.id}
@@ -205,7 +204,6 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                       {orphanProjects.map((project) => (
                         <SidebarMenuItem key={project.id}>
                           <SidebarMenuButton
-                            size="sm"
                             className="pl-7"
                             tooltip={project.title}
                             isActive={selection?.type === "project" && selection.id === project.id}

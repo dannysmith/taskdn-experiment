@@ -514,7 +514,7 @@ Dad's interested in the coding projects. Mom wants to hear about relationships. 
       id: "family-3",
       title: "Summer Vacation 2025",
       areaId: "family-friends",
-      status: "planning",
+      status: "blocked",
       description: "Plan summer trip with family",
       startDate: "2025-06-01",
       endDate: "2025-08-31",
