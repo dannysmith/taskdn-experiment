@@ -225,12 +225,21 @@ export function TaskList({
     )
   }
 
+  // Clear selection when clicking outside
+  const handleBlur = (e: React.FocusEvent) => {
+    // Only clear if focus moved outside the container entirely
+    if (!containerRef.current?.contains(e.relatedTarget as Node)) {
+      setSelectedIndex(null)
+    }
+  }
+
   return (
     <div
       ref={containerRef}
       className={cn("outline-none", className)}
       tabIndex={0}
       onKeyDown={handleKeyDown}
+      onBlur={handleBlur}
     >
       <SortableContext items={dragIds} strategy={verticalListSortingStrategy}>
         <div className="space-y-0.5">
