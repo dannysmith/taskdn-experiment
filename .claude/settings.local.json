@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(bun run build:*)",
-      "WebFetch(domain:ui.shadcn.com)"
+      "WebFetch(domain:ui.shadcn.com)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "WebSearch"
     ]
   }
 }

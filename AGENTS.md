@@ -56,6 +56,48 @@ Configuration in `components.json` specifies:
 - Aliases: `@/components/ui`, `@/lib/utils`, `@/hooks`
 - Icon library: `lucide`
 
+## Data Model
+
+This UI will eventually be the frontend for a Tauri desktop app that reads/writes markdown files on disk. The file format is defined by the **S1: Core Data Store** specification.
+
+### Three Entity Types
+
+| Entity | Purpose | Status Values |
+|--------|---------|---------------|
+| **Area** | Ongoing responsibility (never "finished") | `active`, `archived` |
+| **Project** | Finishable collection of tasks | `planning`, `ready`, `blocked`, `in-progress`, `paused`, `done` |
+| **Task** | Single actionable item | `inbox`, `icebox`, `ready`, `in-progress`, `blocked`, `dropped`, `done` |
+
+### Relationships
+
+- Projects optionally belong to an Area (`areaId`)
+- Tasks optionally belong to a Project (`projectId`) and/or directly to an Area (`areaId`)
+- A task's "effective area" is its direct `areaId` if set, otherwise inherited from its project's area
+
+### Current Data Structure
+
+For UI exploration, data lives in `src/data/app-data.ts` as a TypeScript object with flat arrays:
+
+```typescript
+interface AppData {
+  areas: Area[]
+  projects: Project[]
+  tasks: Task[]
+}
+```
+
+Types are defined in `src/types/data.ts`. Helper functions in `app-data.ts` provide lookups (`getProjectById`, `getTasksByProjectId`, etc.) and derived values (`getProjectCompletion`, `getEffectiveAreaId`).
+
+### Key Fields
+
+**Tasks** have: `title`, `status`, `createdAt`, `updatedAt`, optional `projectId`, `areaId`, `due`, `scheduled`, `deferUntil`, `notes`
+
+**Projects** have: `title`, optional `status`, `areaId`, `description`, `startDate`, `endDate`, `notes`
+
+**Areas** have: `title`, optional `status`, `type`, `description`, `notes`
+
+The `notes` field holds markdown body content (what would be below the frontmatter in the actual files).
+
 ## UI Design Principles
 
 The UI should feel **slick and polished**, inspired by Cultured Code's Things 3:
