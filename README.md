@@ -1,3 +1,3 @@
-# React + TypeScript + Vite + shadcn/ui
+# Taskdn Experiments
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+This is a experiment playground to do some UI design for a project and task management app using Shad CN blocks and components. React + TypeScript + Vite + shadcn/ui
