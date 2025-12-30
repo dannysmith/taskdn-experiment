@@ -38,6 +38,12 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+    --icon-today: oklch(0.75 0.18 85);
+    --icon-week: oklch(0.6 0.18 300);
+    --icon-inbox: oklch(0.55 0.2 260);
+    --icon-calendar: oklch(0.55 0.2 25);
+    --icon-folder: oklch(0.55 0.18 155);
+    --progress: oklch(0.65 0.15 250);
 }
 
 .dark {
@@ -72,10 +78,22 @@
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
     --sidebar-ring: oklch(0.556 0 0);
+    --icon-today: oklch(0.8 0.16 85);
+    --icon-week: oklch(0.75 0.16 300);
+    --icon-inbox: oklch(0.7 0.18 260);
+    --icon-calendar: oklch(0.7 0.18 25);
+    --icon-folder: oklch(0.7 0.16 155);
+    --progress: oklch(0.7 0.12 250);
 }
 
 @theme inline {
     --font-sans: 'Inter Variable', sans-serif;
+    --color-icon-today: var(--icon-today);
+    --color-icon-week: var(--icon-week);
+    --color-icon-inbox: var(--icon-inbox);
+    --color-icon-calendar: var(--icon-calendar);
+    --color-icon-folder: var(--icon-folder);
+    --color-progress: var(--progress);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

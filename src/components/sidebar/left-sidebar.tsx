@@ -1,11 +1,19 @@
-import * as React from 'react'
-import { ChevronRight } from 'lucide-react'
+import * as React from "react"
+import {
+  CalendarIcon,
+  CalendarDaysIcon,
+  ChevronRight,
+  FolderIcon,
+  InboxIcon,
+  SunIcon,
+} from "lucide-react"
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+} from "@/components/ui/collapsible"
+import { ProgressCircle } from "@/components/ui/progress-circle"
 import {
   Sidebar,
   SidebarContent,
@@ -17,180 +25,74 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from '@/components/ui/sidebar'
+  SidebarSeparator,
+} from "@/components/ui/sidebar"
+import { areas } from "@/data/areas-projects"
 
-// This is sample data.
-const data = {
-  versions: ['1.0.1', '1.1.0-alpha', '2.0.0-beta1'],
-  navMain: [
-    {
-      title: 'Getting Started',
-      url: '#',
-      items: [
-        {
-          title: 'Installation',
-          url: '#',
-        },
-        {
-          title: 'Project Structure',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Building Your Application',
-      url: '#',
-      items: [
-        {
-          title: 'Routing',
-          url: '#',
-        },
-        {
-          title: 'Data Fetching',
-          url: '#',
-          isActive: true,
-        },
-        {
-          title: 'Rendering',
-          url: '#',
-        },
-        {
-          title: 'Caching',
-          url: '#',
-        },
-        {
-          title: 'Styling',
-          url: '#',
-        },
-        {
-          title: 'Optimizing',
-          url: '#',
-        },
-        {
-          title: 'Configuring',
-          url: '#',
-        },
-        {
-          title: 'Testing',
-          url: '#',
-        },
-        {
-          title: 'Authentication',
-          url: '#',
-        },
-        {
-          title: 'Deploying',
-          url: '#',
-        },
-        {
-          title: 'Upgrading',
-          url: '#',
-        },
-        {
-          title: 'Examples',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'API Reference',
-      url: '#',
-      items: [
-        {
-          title: 'Components',
-          url: '#',
-        },
-        {
-          title: 'File Conventions',
-          url: '#',
-        },
-        {
-          title: 'Functions',
-          url: '#',
-        },
-        {
-          title: 'next.config.js Options',
-          url: '#',
-        },
-        {
-          title: 'CLI',
-          url: '#',
-        },
-        {
-          title: 'Edge Runtime',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Architecture',
-      url: '#',
-      items: [
-        {
-          title: 'Accessibility',
-          url: '#',
-        },
-        {
-          title: 'Fast Refresh',
-          url: '#',
-        },
-        {
-          title: 'Next.js Compiler',
-          url: '#',
-        },
-        {
-          title: 'Supported Browsers',
-          url: '#',
-        },
-        {
-          title: 'Turbopack',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Community',
-      url: '#',
-      items: [
-        {
-          title: 'Contribution Guide',
-          url: '#',
-        },
-      ],
-    },
-  ],
-}
+const navItems = [
+  { name: "Today", icon: SunIcon, iconClass: "text-icon-today" },
+  { name: "This Week", icon: CalendarDaysIcon, iconClass: "text-icon-week" },
+  { name: "Inbox", icon: InboxIcon, iconClass: "text-icon-inbox" },
+  { name: "Calendar", icon: CalendarIcon, iconClass: "text-icon-calendar" },
+]
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>TDN</SidebarHeader>
-      <SidebarContent className="gap-0">
-        {/* We create a collapsible SidebarGroup for each parent. */}
-        {data.navMain.map((item) => (
+    <Sidebar collapsible="icon" {...props}>
+      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
+        <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">
+          Taskdn
+        </span>
+      </SidebarHeader>
+      <SidebarContent className="gap-0 py-2">
+        <SidebarGroup className="py-0">
+          <SidebarMenu>
+            {navItems.map((item) => (
+              <SidebarMenuItem key={item.name}>
+                <SidebarMenuButton
+                  className="font-semibold"
+                  tooltip={item.name}
+                >
+                  <item.icon className={item.iconClass} />
+                  <span>{item.name}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+        </SidebarGroup>
+        <SidebarSeparator className="my-2 group-data-[collapsible=icon]:hidden" />
+        {areas.map((area) => (
           <Collapsible
-            key={item.title}
-            title={item.title}
+            key={area.id}
             defaultOpen
-            className="group/collapsible"
+            className="group/collapsible group-data-[collapsible=icon]:hidden"
           >
-            <SidebarGroup>
+            <SidebarGroup className="py-0">
               <SidebarGroupLabel
-                asChild
-                className="group/label text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground text-sm"
+                render={<CollapsibleTrigger />}
+                className="group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
               >
-                <CollapsibleTrigger>
-                  {item.title}{' '}
-                  <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-                </CollapsibleTrigger>
+                <FolderIcon className="text-icon-folder" />
+                <span className="truncate">{area.name}</span>
+                <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
               </SidebarGroupLabel>
               <CollapsibleContent>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {item.items.map((item) => (
-                      <SidebarMenuItem key={item.title}>
-                        <SidebarMenuButton asChild isActive={item.isActive}>
-                          <a href={item.url}>{item.title}</a>
+                    {area.projects.map((project) => (
+                      <SidebarMenuItem key={project.id}>
+                        <SidebarMenuButton
+                          size="sm"
+                          className="pl-7"
+                          tooltip={project.name}
+                        >
+                          <ProgressCircle
+                            value={project.completion}
+                            size={10}
+                            strokeWidth={1.25}
+                            className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
+                          />
+                          <span className="truncate">{project.name}</span>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
