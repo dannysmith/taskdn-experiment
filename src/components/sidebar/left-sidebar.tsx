@@ -1,8 +1,11 @@
 import * as React from "react"
 import {
+  Ban,
   CalendarIcon,
   CalendarDaysIcon,
   ChevronRight,
+  CircleCheck,
+  CirclePause,
   FolderIcon,
   InboxIcon,
   SunIcon,
@@ -33,7 +36,63 @@ import {
   getOrphanProjects,
   getProjectCompletion,
 } from "@/data/app-data"
+import type { Project, ProjectStatus } from "@/types/data"
 import type { Selection, NavId } from "@/types/selection"
+
+/**
+ * Renders the appropriate status indicator for a project.
+ * - planning/ready: Orange progress circle
+ * - in-progress: Blue progress circle
+ * - blocked: Red ban icon
+ * - paused: Grey pause icon
+ * - done: Green checkmark
+ */
+function ProjectStatusIndicator({ project }: { project: Project }) {
+  const status = project.status
+  const completion = getProjectCompletion(project.id)
+
+  // Icon size classes to match ProgressCircle
+  const iconClass = "!size-2.5 shrink-0"
+
+  switch (status) {
+    case "blocked":
+      return <Ban className={`${iconClass} text-status-blocked`} />
+    case "paused":
+      return <CirclePause className={`${iconClass} text-status-paused`} />
+    case "done":
+      return <CircleCheck className={`${iconClass} text-status-done`} />
+    case "planning":
+    case "ready":
+      return (
+        <ProgressCircle
+          value={completion}
+          size={10}
+          strokeWidth={1.25}
+          className={`${iconClass} text-status-planning`}
+        />
+      )
+    case "in-progress":
+    default:
+      return (
+        <ProgressCircle
+          value={completion}
+          size={10}
+          strokeWidth={1.25}
+          className={`${iconClass} text-status-in-progress`}
+        />
+      )
+  }
+}
+
+/**
+ * Returns additional CSS classes for project title based on status.
+ */
+function getProjectTitleClass(status: ProjectStatus | undefined): string {
+  if (status === "done" || status === "paused") {
+    return "text-muted-foreground"
+  }
+  return ""
+}
 
 const navItems: { id: NavId; name: string; icon: typeof SunIcon; iconClass: string }[] = [
   { id: "today", name: "Today", icon: SunIcon, iconClass: "text-icon-today" },
@@ -108,13 +167,10 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                             isActive={selection?.type === "project" && selection.id === project.id}
                             onClick={() => onSelectionChange({ type: "project", id: project.id })}
                           >
-                            <ProgressCircle
-                              value={getProjectCompletion(project.id)}
-                              size={10}
-                              strokeWidth={1.25}
-                              className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
-                            />
-                            <span className="truncate">{project.title}</span>
+                            <ProjectStatusIndicator project={project} />
+                            <span className={`truncate ${getProjectTitleClass(project.status)}`}>
+                              {project.title}
+                            </span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
@@ -155,13 +211,10 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                             isActive={selection?.type === "project" && selection.id === project.id}
                             onClick={() => onSelectionChange({ type: "project", id: project.id })}
                           >
-                            <ProgressCircle
-                              value={getProjectCompletion(project.id)}
-                              size={10}
-                              strokeWidth={1.25}
-                              className="!size-2.5 text-progress group-data-[collapsible=icon]:hidden"
-                            />
-                            <span className="truncate">{project.title}</span>
+                            <ProjectStatusIndicator project={project} />
+                            <span className={`truncate ${getProjectTitleClass(project.status)}`}>
+                              {project.title}
+                            </span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
                       ))}
