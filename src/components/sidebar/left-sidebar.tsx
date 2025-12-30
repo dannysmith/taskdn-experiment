@@ -7,13 +7,15 @@ import {
   KeyboardSensor,
   useSensor,
   useSensors,
-  pointerWithin,
-  rectIntersection,
+  closestCenter,
+  useDroppable,
+  defaultDropAnimationSideEffects,
   type DragStartEvent,
   type DragEndEvent,
   type DragOverEvent,
-  type CollisionDetection,
+  type DropAnimation,
 } from "@dnd-kit/core"
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -48,9 +50,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 import { useAppData } from "@/context/app-data-context"
+import { cn } from "@/lib/utils"
 import { useSidebarOrder } from "@/hooks/use-sidebar-order"
 import { DraggableArea } from "./draggable-area"
-import { DraggableProject } from "./draggable-project"
+import { DraggableProject, ProjectStatusIndicator, getProjectTitleClass } from "./draggable-project"
 import type { Selection, NavId } from "@/types/selection"
 import { getDragId, ORPHAN_CONTAINER_ID } from "@/types/sidebar-order"
 import type { DragItem } from "@/types/sidebar-order"
@@ -104,14 +107,12 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
     })
   )
 
-  // Custom collision detection for nested sortables
-  const collisionDetection: CollisionDetection = useCallback((args) => {
-    // First check pointer-based collisions
-    const pointerCollisions = pointerWithin(args)
-    if (pointerCollisions.length > 0) return pointerCollisions
-    // Fall back to rect intersection
-    return rectIntersection(args)
-  }, [])
+  // Drop animation config
+  const dropAnimation: DropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: { active: { opacity: "0.5" } },
+    }),
+  }
 
   // Drag handlers
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -124,39 +125,47 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
   const handleDragOver = useCallback(
     (event: DragOverEvent) => {
       const { active, over } = event
-      if (!over) return
+      if (!over || active.id === over.id) return
 
       const activeData = active.data.current as DragItem | undefined
       const overData = over.data.current as DragItem | undefined
 
-      if (!activeData || activeData.type !== "project") return
+      if (!activeData) return
 
-      // Determine target container
-      let overContainerId: string | null = null
+      // Handle area reordering during drag (for immediate visual feedback)
+      if (activeData.type === "area" && overData?.type === "area") {
+        reorderAreas(activeData.id, overData.id)
+        return
+      }
 
-      if (overData?.type === "project") {
-        overContainerId = overData.containerId
-      } else if (overData?.type === "area") {
-        // Dropping on an area header - use that area as container
-        overContainerId = overData.id
-      } else {
-        // Might be dropping on the orphan container itself
-        const overId = over.id.toString()
-        if (overId === ORPHAN_CONTAINER_ID) {
-          overContainerId = ORPHAN_CONTAINER_ID
+      // Handle project cross-container moves
+      if (activeData.type === "project") {
+        let overContainerId: string | null = null
+
+        if (overData?.type === "project") {
+          overContainerId = overData.containerId
+        } else if (overData?.type === "area") {
+          // Dropping on an area header - use that area as container
+          overContainerId = overData.id
+        } else {
+          // Might be dropping on the orphan container itself
+          const overId = over.id.toString()
+          if (overId === ORPHAN_CONTAINER_ID) {
+            overContainerId = ORPHAN_CONTAINER_ID
+          }
+        }
+
+        if (overContainerId === null) return
+
+        const activeContainerId = activeData.containerId ?? ORPHAN_CONTAINER_ID
+
+        // Cross-container move
+        if (activeContainerId !== overContainerId) {
+          moveProjectToArea(activeData.id, activeContainerId, overContainerId)
         }
       }
-
-      if (overContainerId === null) return
-
-      const activeContainerId = activeData.containerId ?? ORPHAN_CONTAINER_ID
-
-      // Cross-container move
-      if (activeContainerId !== overContainerId) {
-        moveProjectToArea(activeData.id, activeContainerId, overContainerId)
-      }
     },
-    [moveProjectToArea]
+    [moveProjectToArea, reorderAreas]
   )
 
   const handleDragEnd = useCallback(
@@ -171,12 +180,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
 
       if (!activeData || !overData) return
 
-      // Reorder areas
-      if (activeData.type === "area" && overData.type === "area") {
-        reorderAreas(activeData.id, overData.id)
-      }
-
-      // Reorder projects within same container
+      // Reorder projects within same container (areas handled in dragOver)
       if (
         activeData.type === "project" &&
         overData.type === "project" &&
@@ -186,7 +190,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
         reorderProjectsInArea(containerId, activeData.id, overData.id)
       }
     },
-    [reorderAreas, reorderProjectsInArea]
+    [reorderProjectsInArea]
   )
 
   // Get drag item IDs for SortableContext
@@ -202,7 +206,8 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
 
       <DndContext
         sensors={isCollapsed ? [] : sensors}
-        collisionDetection={collisionDetection}
+        collisionDetection={closestCenter}
+        modifiers={[restrictToVerticalAxis]}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -279,11 +284,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {orderedOrphanProjects.length === 0 ? (
-                      <SidebarMenuItem>
-                        <div className="h-8 mx-2 my-1 border-2 border-dashed border-muted-foreground/25 rounded flex items-center justify-center">
-                          <span className="text-xs text-muted-foreground">Drop here</span>
-                        </div>
-                      </SidebarMenuItem>
+                      <EmptyDropZone id={ORPHAN_CONTAINER_ID} />
                     ) : (
                       <SortableContext
                         items={orderedOrphanProjects.map((p) => getDragId("project", p.id))}
@@ -311,7 +312,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
         </SidebarContent>
 
         {/* Drag Overlay */}
-        <DragOverlay>
+        <DragOverlay dropAnimation={dropAnimation}>
           {activeItem && <DragPreview item={activeItem} />}
         </DragOverlay>
       </DndContext>
@@ -322,20 +323,48 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
 }
 
 // -----------------------------------------------------------------------------
+// Empty Drop Zone
+// -----------------------------------------------------------------------------
+
+function EmptyDropZone({ id }: { id: string }) {
+  const { isOver, setNodeRef } = useDroppable({ id })
+
+  return (
+    <SidebarMenuItem ref={setNodeRef}>
+      <div
+        className={cn(
+          "h-8 mx-2 my-1 border-2 border-dashed rounded flex items-center justify-center transition-colors",
+          isOver
+            ? "border-primary/50 bg-primary/5"
+            : "border-muted-foreground/25"
+        )}
+      >
+        <span className="text-xs text-muted-foreground">
+          {isOver ? "Drop to add" : "Drop here"}
+        </span>
+      </div>
+    </SidebarMenuItem>
+  )
+}
+
+// -----------------------------------------------------------------------------
 // Drag Preview
 // -----------------------------------------------------------------------------
 
 function DragPreview({ item }: { item: DragItem }) {
-  const { getAreaById, getProjectById } = useAppData()
+  const { getAreaById, getProjectById, getProjectCompletion } = useAppData()
 
   if (item.type === "area") {
     const area = getAreaById(item.id)
     if (!area) return null
 
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-sidebar rounded-md shadow-lg border border-border">
-        <FolderIcon className="size-4 text-icon-folder" />
-        <span className="font-semibold text-sm">{area.title}</span>
+      <div className="bg-sidebar rounded-md shadow-lg border border-border">
+        <SidebarGroupLabel className="gap-2 text-sm font-semibold">
+          <FolderIcon className="text-icon-folder" />
+          <span className="truncate">{area.title}</span>
+          <ChevronRight className="ml-auto" />
+        </SidebarGroupLabel>
       </div>
     )
   }
@@ -344,9 +373,16 @@ function DragPreview({ item }: { item: DragItem }) {
     const project = getProjectById(item.id)
     if (!project) return null
 
+    const completion = getProjectCompletion(project.id)
+
     return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-sidebar rounded-md shadow-lg border border-border">
-        <span className="text-sm">{project.title}</span>
+      <div className="bg-sidebar rounded-md shadow-lg border border-border">
+        <SidebarMenuButton className="pl-7">
+          <ProjectStatusIndicator status={project.status} completion={completion} />
+          <span className={cn("truncate", getProjectTitleClass(project.status))}>
+            {project.title}
+          </span>
+        </SidebarMenuButton>
       </div>
     )
   }

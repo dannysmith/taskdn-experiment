@@ -19,7 +19,7 @@ interface ProjectStatusIndicatorProps {
   completion: number
 }
 
-function ProjectStatusIndicator({ status, completion }: ProjectStatusIndicatorProps) {
+export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndicatorProps) {
   const iconClass = "size-4 shrink-0"
 
   switch (status) {
@@ -52,7 +52,7 @@ function ProjectStatusIndicator({ status, completion }: ProjectStatusIndicatorPr
   }
 }
 
-function getProjectTitleClass(status: ProjectStatus | undefined): string {
+export function getProjectTitleClass(status: ProjectStatus | undefined): string {
   if (status === "done" || status === "paused") {
     return "text-muted-foreground"
   }
@@ -97,7 +97,7 @@ export function DraggableProject({
   })
 
   const style: React.CSSProperties = {
-    transform: CSS.Transform.toString(transform),
+    transform: CSS.Translate.toString(transform),
     transition,
   }
 
