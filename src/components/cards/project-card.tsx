@@ -4,7 +4,6 @@ import { Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatRelativeDate } from "@/lib/date-utils"
 import type { Project, ProjectStatus } from "@/types/data"
-import { Badge } from "@/components/ui/badge"
 import { ProgressCircle } from "@/components/ui/progress-circle"
 
 export interface ProjectCardProps {
@@ -86,7 +85,7 @@ export function ProjectCard({
         <div className="mb-3">
           <div className="h-1.5 bg-muted rounded-full overflow-hidden">
             <div
-              className="h-full bg-primary transition-all duration-300"
+              className="h-full bg-entity-project transition-all duration-300"
               style={{ width: `${completion}%` }}
             />
           </div>
@@ -135,24 +134,26 @@ export function ProjectCard({
 // Project Status Badge
 // -----------------------------------------------------------------------------
 
-const statusConfig: Record<
-  ProjectStatus,
-  { label: string; variant: "default" | "secondary" | "outline" | "destructive" }
-> = {
-  planning: { label: "Planning", variant: "outline" },
-  ready: { label: "Ready", variant: "secondary" },
-  "in-progress": { label: "Active", variant: "default" },
-  blocked: { label: "Blocked", variant: "destructive" },
-  paused: { label: "Paused", variant: "outline" },
-  done: { label: "Done", variant: "secondary" },
+const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
+  planning: { label: "Planning", color: "bg-status-planning/15 text-status-planning" },
+  ready: { label: "Ready", color: "bg-status-ready/15 text-status-ready" },
+  "in-progress": { label: "Active", color: "bg-status-in-progress/15 text-status-in-progress" },
+  blocked: { label: "Blocked", color: "bg-status-blocked/15 text-status-blocked" },
+  paused: { label: "Paused", color: "bg-status-paused/15 text-status-paused" },
+  done: { label: "Done", color: "bg-status-done/15 text-status-done" },
 }
 
 function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   const config = statusConfig[status]
 
   return (
-    <Badge variant={config.variant} className="shrink-0 text-[10px] h-4 px-1.5">
+    <span
+      className={cn(
+        "shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center",
+        config.color
+      )}
+    >
       {config.label}
-    </Badge>
+    </span>
   )
 }

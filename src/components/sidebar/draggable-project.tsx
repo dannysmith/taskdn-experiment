@@ -30,13 +30,21 @@ export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndi
     case "done":
       return <CircleCheck className={`${iconClass} text-status-done`} />
     case "planning":
-    case "ready":
       return (
         <ProgressCircle
           value={completion}
           size={16}
           strokeWidth={2}
           className={`${iconClass} text-status-planning`}
+        />
+      )
+    case "ready":
+      return (
+        <ProgressCircle
+          value={completion}
+          size={16}
+          strokeWidth={2}
+          className={`${iconClass} text-status-ready`}
         />
       )
     case "in-progress":

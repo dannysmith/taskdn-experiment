@@ -20,13 +20,13 @@ interface TaskStatusCheckboxProps {
  * Clicking toggles between "ready" and "done".
  *
  * Visual states (rounded square shape, like Things 3):
- * - ready: empty rounded square
- * - done: filled blue with checkmark
- * - in-progress: blue border with dot
- * - blocked: orange/red with X
- * - icebox: gray with snowflake
- * - inbox: blue with inbox icon
- * - dropped: gray with X
+ * - ready: empty grey square
+ * - done: filled green with checkmark
+ * - in-progress: amber border with dot
+ * - blocked: dark red with X
+ * - icebox: light blue border with snowflake
+ * - inbox: blue border with inbox icon
+ * - dropped: light red with X
  */
 export function TaskStatusCheckbox({
   status,
@@ -64,7 +64,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "bg-[oklch(0.55_0.2_250)] text-white"
+            "bg-status-done text-white"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -80,14 +80,14 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-[oklch(0.55_0.2_250)]"
+            "border-2 border-status-in-progress"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
           {/* Filled inner dot */}
-          <div className="size-1.5 rounded-[2px] bg-[oklch(0.55_0.2_250)]" />
+          <div className="size-1.5 rounded-[2px] bg-status-in-progress" />
         </button>
       )
 
@@ -113,7 +113,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-muted-foreground/40 text-muted-foreground/60"
+            "border-2 border-status-icebox text-status-icebox"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -129,7 +129,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-[oklch(0.55_0.2_250)] text-[oklch(0.55_0.2_250)]"
+            "border-2 border-status-inbox text-status-inbox"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -145,7 +145,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "bg-muted-foreground/30 text-muted-foreground"
+            "bg-status-dropped text-white"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -162,7 +162,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-muted-foreground/40 hover:border-[oklch(0.55_0.2_250)]/60",
+            "border-2 border-status-ready hover:border-status-done/60",
             "group"
           )}
           onClick={handleClick}
@@ -173,7 +173,7 @@ export function TaskStatusCheckbox({
           <Check
             className={cn(
               iconClasses,
-              "text-muted-foreground/0 group-hover:text-[oklch(0.55_0.2_250)]/40 transition-colors"
+              "text-muted-foreground/0 group-hover:text-status-done/40 transition-colors"
             )}
             strokeWidth={2.5}
           />

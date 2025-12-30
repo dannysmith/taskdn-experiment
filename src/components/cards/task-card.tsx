@@ -46,13 +46,13 @@ export interface TaskCardProps {
 
 // Status configuration with labels and colors
 const statusConfig: Record<TaskStatus, { label: string; color: string }> = {
-  inbox: { label: "Inbox", color: "bg-gray-500/15 text-gray-600 dark:text-gray-400" },
-  icebox: { label: "Icebox", color: "bg-sky-500/15 text-sky-600 dark:text-sky-400" },
-  ready: { label: "Ready", color: "bg-amber-500/15 text-amber-600 dark:text-amber-400" },
-  "in-progress": { label: "In Progress", color: "bg-blue-500/15 text-blue-600 dark:text-blue-400" },
-  blocked: { label: "Blocked", color: "bg-red-500/15 text-red-600 dark:text-red-400" },
-  dropped: { label: "Dropped", color: "bg-gray-500/15 text-gray-500 dark:text-gray-500" },
-  done: { label: "Done", color: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" },
+  inbox: { label: "Inbox", color: "bg-status-inbox/15 text-status-inbox" },
+  icebox: { label: "Icebox", color: "bg-status-icebox/15 text-status-icebox" },
+  ready: { label: "Ready", color: "bg-status-ready/15 text-status-ready" },
+  "in-progress": { label: "In Progress", color: "bg-status-in-progress/15 text-status-in-progress" },
+  blocked: { label: "Blocked", color: "bg-status-blocked/15 text-status-blocked" },
+  dropped: { label: "Dropped", color: "bg-status-dropped/15 text-status-dropped" },
+  done: { label: "Done", color: "bg-status-done/15 text-status-done" },
 }
 
 const allStatuses: TaskStatus[] = ["inbox", "ready", "in-progress", "blocked", "done", "icebox", "dropped"]

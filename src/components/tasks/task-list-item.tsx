@@ -143,8 +143,8 @@ export function TaskListItem({
         className={cn(
           "group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all",
           "select-none",
-          // Editing: thin blue border, no background
-          isEditing && "ring-2 ring-[oklch(0.55_0.2_250)] bg-transparent",
+          // Editing: thin primary border, no background
+          isEditing && "ring-2 ring-primary bg-transparent",
           // Selected but not editing: blue background
           isSelected && !isEditing && !isDragging && "bg-primary/20 dark:bg-primary/30",
           // Not selected: subtle hover

@@ -47,7 +47,7 @@ export function AreaCard({
         <div
           className={cn(
             "shrink-0 size-8 rounded-lg flex items-center justify-center",
-            "bg-primary/10 text-primary"
+            "bg-entity-area/10 text-entity-area"
           )}
         >
           {activeProjectCount > 0 ? (
