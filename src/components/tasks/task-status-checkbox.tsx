@@ -1,7 +1,6 @@
 import * as React from "react"
 import {
   Check,
-  CircleDot,
   X,
   Snowflake,
   Inbox,
@@ -20,10 +19,10 @@ interface TaskStatusCheckboxProps {
  * A checkbox-like component that displays task status visually.
  * Clicking toggles between "ready" and "done".
  *
- * Visual states:
- * - ready: empty circle
+ * Visual states (rounded square shape, like Things 3):
+ * - ready: empty rounded square
  * - done: filled blue with checkmark
- * - in-progress: blue with dot
+ * - in-progress: blue border with dot
  * - blocked: orange/red with X
  * - icebox: gray with snowflake
  * - inbox: blue with inbox icon
@@ -47,14 +46,15 @@ export function TaskStatusCheckbox({
     }
   }
 
+  // Rounded square shape like Things 3
   const baseClasses = cn(
-    "relative flex items-center justify-center size-[18px] rounded-full shrink-0",
+    "relative flex items-center justify-center size-[18px] rounded-[5px] shrink-0",
     "transition-all duration-150 cursor-pointer",
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
     className
   )
 
-  const iconClasses = "size-2.5"
+  const iconClasses = "size-3"
 
   // Determine visual representation based on status
   switch (status) {
@@ -64,13 +64,13 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "bg-status-done text-white"
+            "bg-[oklch(0.55_0.2_250)] text-white"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as incomplete"
         >
-          <Check className={iconClasses} strokeWidth={3} />
+          <Check className={iconClasses} strokeWidth={2.5} />
         </button>
       )
 
@@ -80,13 +80,14 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-status-in-progress text-status-in-progress"
+            "border-2 border-[oklch(0.55_0.2_250)]"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
-          <CircleDot className="size-3" strokeWidth={2} />
+          {/* Filled inner dot */}
+          <div className="size-2 rounded-sm bg-[oklch(0.55_0.2_250)]" />
         </button>
       )
 
@@ -102,7 +103,7 @@ export function TaskStatusCheckbox({
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
-          <X className={iconClasses} strokeWidth={3} />
+          <X className={iconClasses} strokeWidth={2.5} />
         </button>
       )
 
@@ -112,7 +113,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-muted-foreground/50 text-muted-foreground/70"
+            "border-2 border-muted-foreground/40 text-muted-foreground/60"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -128,7 +129,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-icon-inbox text-icon-inbox"
+            "border-2 border-[oklch(0.55_0.2_250)] text-[oklch(0.55_0.2_250)]"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -150,7 +151,7 @@ export function TaskStatusCheckbox({
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
-          <X className={iconClasses} strokeWidth={3} />
+          <X className={iconClasses} strokeWidth={2.5} />
         </button>
       )
 
@@ -161,7 +162,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-muted-foreground/40 hover:border-muted-foreground/60",
+            "border-2 border-muted-foreground/40 hover:border-[oklch(0.55_0.2_250)]/60",
             "group"
           )}
           onClick={handleClick}
@@ -172,9 +173,9 @@ export function TaskStatusCheckbox({
           <Check
             className={cn(
               iconClasses,
-              "text-muted-foreground/0 group-hover:text-muted-foreground/40 transition-colors"
+              "text-muted-foreground/0 group-hover:text-[oklch(0.55_0.2_250)]/40 transition-colors"
             )}
-            strokeWidth={3}
+            strokeWidth={2.5}
           />
         </button>
       )

@@ -3,7 +3,6 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
-  KeyboardSensor,
   useSensor,
   useSensors,
   closestCenter,
@@ -15,7 +14,6 @@ import {
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   SortableContext,
-  sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   arrayMove,
 } from "@dnd-kit/sortable"
@@ -55,15 +53,13 @@ export function TaskList({
   const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
   const [activeTaskId, setActiveTaskId] = React.useState<string | null>(null)
 
-  // Sensors for drag and drop
+  // Sensors for drag and drop - only PointerSensor
+  // We handle keyboard reordering ourselves with Cmd+Up/Down
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8,
       },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
     })
   )
 

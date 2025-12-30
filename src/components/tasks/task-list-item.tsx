@@ -90,6 +90,9 @@ export function TaskListItem({
   }
 
   const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Stop propagation for ALL keys to prevent parent handlers from interfering
+    e.stopPropagation()
+
     if (e.key === "Enter") {
       e.preventDefault()
       if (editValue.trim() !== task.title) {
@@ -105,6 +108,9 @@ export function TaskListItem({
 
   const isDone = task.status === "done"
   const isDropped = task.status === "dropped"
+
+  // Only apply drag listeners when NOT editing to prevent interference with input
+  const dragProps = isEditing ? {} : { ...attributes, ...listeners }
 
   return (
     <div
@@ -122,8 +128,7 @@ export function TaskListItem({
       data-selected={isSelected}
       data-editing={isEditing}
       data-task-id={task.id}
-      {...attributes}
-      {...listeners}
+      {...dragProps}
     >
       {/* Status checkbox */}
       <TaskStatusCheckbox
