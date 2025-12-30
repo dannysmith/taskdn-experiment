@@ -117,10 +117,15 @@ export function TaskListItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-colors",
+        "group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all",
         "select-none",
-        isSelected && !isDragging && "bg-primary/20 dark:bg-primary/30",
-        !isSelected && "hover:bg-muted/50",
+        // Editing: thin blue border, no background
+        isEditing && "ring-2 ring-[oklch(0.55_0.2_250)] bg-transparent",
+        // Selected but not editing: blue background
+        isSelected && !isEditing && !isDragging && "bg-primary/20 dark:bg-primary/30",
+        // Not selected: subtle hover
+        !isSelected && !isEditing && "hover:bg-muted/50",
+        // Dragging state
         isDragging && "opacity-50 shadow-lg bg-card z-50 ring-1 ring-border"
       )}
       onClick={handleClick}
@@ -145,11 +150,7 @@ export function TaskListItem({
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
-          className={cn(
-            "flex-1 bg-transparent outline-none text-sm",
-            "border-b-2 border-primary/60 py-0.5 -my-0.5",
-            "placeholder:text-muted-foreground"
-          )}
+          className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
           placeholder="Task title..."
         />
       ) : (

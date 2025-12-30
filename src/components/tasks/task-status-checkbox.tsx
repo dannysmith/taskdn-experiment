@@ -48,13 +48,13 @@ export function TaskStatusCheckbox({
 
   // Rounded square shape like Things 3
   const baseClasses = cn(
-    "relative flex items-center justify-center size-[18px] rounded-[5px] shrink-0",
+    "relative flex items-center justify-center size-4 rounded-[4px] shrink-0",
     "transition-all duration-150 cursor-pointer",
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
     className
   )
 
-  const iconClasses = "size-3"
+  const iconClasses = "size-2.5"
 
   // Determine visual representation based on status
   switch (status) {
@@ -87,7 +87,7 @@ export function TaskStatusCheckbox({
           aria-label="Mark as complete"
         >
           {/* Filled inner dot */}
-          <div className="size-2 rounded-sm bg-[oklch(0.55_0.2_250)]" />
+          <div className="size-1.5 rounded-[2px] bg-[oklch(0.55_0.2_250)]" />
         </button>
       )
 
@@ -119,7 +119,7 @@ export function TaskStatusCheckbox({
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
-          <Snowflake className="size-2.5" strokeWidth={2} />
+          <Snowflake className="size-2" strokeWidth={2} />
         </button>
       )
 
@@ -135,7 +135,7 @@ export function TaskStatusCheckbox({
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
         >
-          <Inbox className="size-2.5" strokeWidth={2} />
+          <Inbox className="size-2" strokeWidth={2} />
         </button>
       )
 
