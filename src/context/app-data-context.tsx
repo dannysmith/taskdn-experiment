@@ -14,6 +14,7 @@ interface AppDataContextValue {
   updateTaskTitle: (taskId: string, newTitle: string) => void
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
+  moveTaskToProject: (taskId: string, newProjectId: string) => void
   // Lookups (derived from data)
   getAreaById: (id: string) => Area | undefined
   getProjectById: (id: string) => Project | undefined
@@ -101,6 +102,45 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const moveTaskToProject = useCallback((taskId: string, newProjectId: string) => {
+    setData(prev => {
+      const task = prev.tasks.find(t => t.id === taskId)
+      if (!task || task.projectId === newProjectId) return prev
+
+      // Remove task from its current position
+      const tasksWithoutMoved = prev.tasks.filter(t => t.id !== taskId)
+
+      // Find where to insert: after the last task of the target project
+      let lastTargetTaskIndex = -1
+      for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
+        if (tasksWithoutMoved[i].projectId === newProjectId) {
+          lastTargetTaskIndex = i
+          break
+        }
+      }
+
+      // Update the task with new projectId
+      const updatedTask: Task = {
+        ...task,
+        projectId: newProjectId,
+        updatedAt: new Date().toISOString(),
+      }
+
+      // Insert after last task of target project, or at end if no tasks in target
+      const insertIndex = lastTargetTaskIndex === -1
+        ? tasksWithoutMoved.length
+        : lastTargetTaskIndex + 1
+
+      const newTasks = [
+        ...tasksWithoutMoved.slice(0, insertIndex),
+        updatedTask,
+        ...tasksWithoutMoved.slice(insertIndex),
+      ]
+
+      return { ...prev, tasks: newTasks }
+    })
+  }, [])
+
   // Lookups
   const getAreaById = useCallback((id: string): Area | undefined => {
     return data.areas.find(a => a.id === id)
@@ -141,6 +181,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     updateTaskTitle,
     toggleTaskStatus,
     reorderProjectTasks,
+    moveTaskToProject,
     getAreaById,
     getProjectById,
     getTaskById,

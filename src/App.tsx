@@ -44,7 +44,7 @@ function AppContent() {
           <h1 className="text-sm font-medium">{getHeaderTitle(selection)}</h1>
         </header>
         <main className="flex-1 p-6">
-          <MainContent selection={selection} />
+          <MainContent selection={selection} onSelectionChange={setSelection} />
         </main>
       </SidebarInset>
     </SidebarProvider>

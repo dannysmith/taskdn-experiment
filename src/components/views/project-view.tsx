@@ -1,5 +1,5 @@
 import { useAppData } from "@/context/app-data-context"
-import { TaskList } from "@/components/tasks/task-list"
+import { DraggableTaskList } from "@/components/tasks/task-list"
 import type { Task } from "@/types/data"
 
 interface ProjectViewProps {
@@ -57,8 +57,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
       </div>
 
       {/* Task List */}
-      <TaskList
+      <DraggableTaskList
         tasks={tasks}
+        projectId={projectId}
         onTasksReorder={handleTasksReorder}
         onTaskTitleChange={handleTaskTitleChange}
         onTaskStatusToggle={handleTaskStatusToggle}

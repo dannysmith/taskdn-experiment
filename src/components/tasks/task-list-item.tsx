@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { formatRelativeDate, isOverdue } from "@/lib/date-utils"
 import type { Task } from "@/types/data"
 import { TaskStatusCheckbox } from "./task-status-checkbox"
+import { useTaskDragPreview, shouldShowDropIndicator } from "./task-dnd-context"
 
 export interface TaskListItemProps {
   task: Task
@@ -19,6 +20,8 @@ export interface TaskListItemProps {
   onStatusToggle: () => void
   /** Used for dnd-kit sortable */
   dragId: string
+  /** Project ID for cross-container drag detection */
+  projectId: string
   /** Optional context label (project or area name) shown on the right */
   contextName?: string
   /** Whether to show the scheduled date (default: true if exists) */
@@ -37,12 +40,17 @@ export function TaskListItem({
   onTitleChange,
   onStatusToggle,
   dragId,
+  projectId,
   contextName,
   showScheduled = true,
   showDue = true,
 }: TaskListItemProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [editValue, setEditValue] = React.useState(task.title)
+  const { dragPreview } = useTaskDragPreview()
+
+  // Check if we should show a drop indicator above this task
+  const showDropIndicator = shouldShowDropIndicator(task.id, projectId, dragPreview)
 
   // Sync editValue with task.title when task changes
   React.useEffect(() => {
@@ -71,7 +79,8 @@ export function TaskListItem({
     id: dragId,
     data: {
       type: "task",
-      id: task.id,
+      taskId: task.id,
+      projectId: projectId,
     },
   })
 
@@ -124,28 +133,32 @@ export function TaskListItem({
   const dragProps = isEditing ? {} : { ...attributes, ...listeners }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={cn(
-        "group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all",
-        "select-none",
-        // Editing: thin blue border, no background
-        isEditing && "ring-2 ring-[oklch(0.55_0.2_250)] bg-transparent",
-        // Selected but not editing: blue background
-        isSelected && !isEditing && !isDragging && "bg-primary/20 dark:bg-primary/30",
-        // Not selected: subtle hover
-        !isSelected && !isEditing && "hover:bg-muted/50",
-        // Dragging state
-        isDragging && "opacity-50 shadow-lg bg-card z-50 ring-1 ring-border"
+    <div ref={setNodeRef} style={style}>
+      {/* Drop indicator line for cross-project drag */}
+      {showDropIndicator && (
+        <div className="h-0.5 bg-primary rounded-full mx-2 mb-1" />
       )}
-      onClick={handleClick}
-      onDoubleClick={handleDoubleClick}
-      data-selected={isSelected}
-      data-editing={isEditing}
-      data-task-id={task.id}
-      {...dragProps}
-    >
+
+      <div
+        className={cn(
+          "group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all",
+          "select-none",
+          // Editing: thin blue border, no background
+          isEditing && "ring-2 ring-[oklch(0.55_0.2_250)] bg-transparent",
+          // Selected but not editing: blue background
+          isSelected && !isEditing && !isDragging && "bg-primary/20 dark:bg-primary/30",
+          // Not selected: subtle hover
+          !isSelected && !isEditing && "hover:bg-muted/50",
+          // Dragging state
+          isDragging && "opacity-50 shadow-lg bg-card z-50 ring-1 ring-border"
+        )}
+        onClick={handleClick}
+        onDoubleClick={handleDoubleClick}
+        data-selected={isSelected}
+        data-editing={isEditing}
+        data-task-id={task.id}
+        {...dragProps}
+      >
       {/* Status checkbox */}
       <TaskStatusCheckbox
         status={task.status}
@@ -184,6 +197,7 @@ export function TaskListItem({
           />
         </>
       )}
+      </div>
     </div>
   )
 }

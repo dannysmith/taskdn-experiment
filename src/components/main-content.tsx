@@ -8,9 +8,10 @@ import { ProjectView } from "@/components/views/project-view"
 
 interface MainContentProps {
   selection: Selection | null
+  onSelectionChange: (selection: Selection) => void
 }
 
-export function MainContent({ selection }: MainContentProps) {
+export function MainContent({ selection, onSelectionChange }: MainContentProps) {
   if (!selection) {
     return (
       <div className="text-muted-foreground text-sm">
@@ -33,7 +34,14 @@ export function MainContent({ selection }: MainContentProps) {
       }
       break
     case "area":
-      return <AreaView areaId={selection.id} />
+      return (
+        <AreaView
+          areaId={selection.id}
+          onNavigateToProject={(projectId) =>
+            onSelectionChange({ type: "project", id: projectId })
+          }
+        />
+      )
     case "project":
       return <ProjectView projectId={selection.id} />
   }

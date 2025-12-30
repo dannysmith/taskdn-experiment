@@ -22,9 +22,15 @@ import { cn } from "@/lib/utils"
 import type { Task } from "@/types/data"
 import { TaskListItem } from "./task-list-item"
 import { TaskStatusCheckbox } from "./task-status-checkbox"
+import { useTaskDragPreview } from "./task-dnd-context"
 
-interface TaskListProps {
+// -----------------------------------------------------------------------------
+// Shared Props
+// -----------------------------------------------------------------------------
+
+interface BaseTaskListProps {
   tasks: Task[]
+  projectId: string
   onTasksReorder: (reorderedTasks: Task[]) => void
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskStatusToggle: (taskId: string) => void
@@ -37,8 +43,22 @@ interface TaskListProps {
   showDue?: boolean
 }
 
+// -----------------------------------------------------------------------------
+// TaskList - Base component for use with external DndContext
+// -----------------------------------------------------------------------------
+
+interface TaskListProps extends BaseTaskListProps {
+  /** External selection state (for parent-controlled selection) */
+  selectedIndex?: number | null
+  onSelectedIndexChange?: (index: number | null) => void
+  /** External editing state (for parent-controlled editing) */
+  editingTaskId?: string | null
+  onEditingTaskIdChange?: (taskId: string | null) => void
+}
+
 /**
- * A keyboard-navigable, drag-and-drop enabled task list.
+ * A keyboard-navigable task list for use with an external DndContext.
+ * Renders items within a SortableContext but expects parent to provide DndContext.
  *
  * Keyboard shortcuts:
  * - Arrow Up/Down: Move selection
@@ -49,6 +69,7 @@ interface TaskListProps {
  */
 export function TaskList({
   tasks,
+  projectId,
   onTasksReorder,
   onTaskTitleChange,
   onTaskStatusToggle,
@@ -56,35 +77,47 @@ export function TaskList({
   getContextName,
   showScheduled = true,
   showDue = true,
+  selectedIndex: externalSelectedIndex,
+  onSelectedIndexChange,
+  editingTaskId: externalEditingTaskId,
+  onEditingTaskIdChange,
 }: TaskListProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
-  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
-  const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
-  const [activeTaskId, setActiveTaskId] = React.useState<string | null>(null)
 
-  // Sensors for drag and drop - only PointerSensor
-  // We handle keyboard reordering ourselves with Cmd+Up/Down
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    })
-  )
+  // Internal state (used when not controlled externally)
+  const [internalSelectedIndex, setInternalSelectedIndex] = React.useState<number | null>(null)
+  const [internalEditingTaskId, setInternalEditingTaskId] = React.useState<string | null>(null)
 
-  // Drop animation
-  const dropAnimation: DropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
-    }),
-  }
+  // Use external state if provided, otherwise internal
+  const selectedIndex = externalSelectedIndex !== undefined ? externalSelectedIndex : internalSelectedIndex
+  const setSelectedIndex = onSelectedIndexChange ?? setInternalSelectedIndex
+  const editingTaskId = externalEditingTaskId !== undefined ? externalEditingTaskId : internalEditingTaskId
+  const setEditingTaskId = onEditingTaskIdChange ?? setInternalEditingTaskId
+
+  // Get drag context to check for dropped task
+  const { lastDroppedTaskId, clearLastDroppedTaskId } = useTaskDragPreview()
+
+  // Select the dropped task after a drag ends, or clear selection if task went to another list
+  React.useEffect(() => {
+    if (lastDroppedTaskId) {
+      const droppedIndex = tasks.findIndex(t => t.id === lastDroppedTaskId)
+      if (droppedIndex !== -1) {
+        // This list contains the dropped task - select it
+        setSelectedIndex(droppedIndex)
+        clearLastDroppedTaskId()
+      } else {
+        // This list doesn't contain the dropped task - clear selection
+        setSelectedIndex(null)
+      }
+    }
+  }, [lastDroppedTaskId, tasks, setSelectedIndex, clearLastDroppedTaskId])
 
   // Keep selection valid when tasks change
   React.useEffect(() => {
     if (selectedIndex !== null && selectedIndex >= tasks.length) {
       setSelectedIndex(tasks.length > 0 ? tasks.length - 1 : null)
     }
-  }, [tasks.length, selectedIndex])
+  }, [tasks.length, selectedIndex, setSelectedIndex])
 
   // Focus container when selection changes (for keyboard events)
   React.useEffect(() => {
@@ -162,40 +195,6 @@ export function TaskList({
     }
   }
 
-  // Drag handlers
-  const handleDragStart = (event: DragStartEvent) => {
-    const taskId = event.active.data.current?.id as string | undefined
-    if (taskId) {
-      setActiveTaskId(taskId)
-      // Update selection to match dragged item
-      const index = tasks.findIndex((t) => t.id === taskId)
-      if (index !== -1) {
-        setSelectedIndex(index)
-      }
-    }
-  }
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setActiveTaskId(null)
-
-    const { active, over } = event
-    if (!over || active.id === over.id) return
-
-    const activeData = active.data.current as { id: string } | undefined
-    const overData = over.data.current as { id: string } | undefined
-
-    if (!activeData || !overData) return
-
-    const oldIndex = tasks.findIndex((t) => t.id === activeData.id)
-    const newIndex = tasks.findIndex((t) => t.id === overData.id)
-
-    if (oldIndex !== -1 && newIndex !== -1) {
-      const newTasks = arrayMove(tasks, oldIndex, newIndex)
-      onTasksReorder(newTasks)
-      setSelectedIndex(newIndex)
-    }
-  }
-
   // Selection handlers
   const handleSelect = (index: number) => {
     setSelectedIndex(index)
@@ -212,8 +211,124 @@ export function TaskList({
     containerRef.current?.focus()
   }
 
-  // Generate drag IDs
-  const dragIds = tasks.map((t) => `task-${t.id}`)
+  // Generate drag IDs with project prefix for uniqueness across containers
+  const dragIds = tasks.map((t) => `task-${projectId}-${t.id}`)
+
+  if (tasks.length === 0) {
+    return (
+      <div className={cn("py-4 text-center text-muted-foreground text-sm", className)}>
+        No tasks
+      </div>
+    )
+  }
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn("outline-none", className)}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+    >
+      <SortableContext items={dragIds} strategy={verticalListSortingStrategy}>
+        <div className="space-y-0.5">
+          {tasks.map((task, index) => (
+            <TaskListItem
+              key={task.id}
+              task={task}
+              dragId={`task-${projectId}-${task.id}`}
+              projectId={projectId}
+              isSelected={selectedIndex === index}
+              isEditing={editingTaskId === task.id}
+              onSelect={() => handleSelect(index)}
+              onStartEdit={() => handleStartEdit(task.id)}
+              onEndEdit={handleEndEdit}
+              onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
+              onStatusToggle={() => onTaskStatusToggle(task.id)}
+              contextName={getContextName?.(task)}
+              showScheduled={showScheduled}
+              showDue={showDue}
+            />
+          ))}
+        </div>
+      </SortableContext>
+    </div>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// DraggableTaskList - Standalone component with its own DndContext
+// -----------------------------------------------------------------------------
+
+interface DraggableTaskListProps extends BaseTaskListProps {}
+
+/**
+ * A standalone task list with its own DndContext for drag-and-drop.
+ * Use this when the task list is the only drag-drop container (e.g., ProjectView).
+ */
+export function DraggableTaskList({
+  tasks,
+  projectId,
+  onTasksReorder,
+  onTaskTitleChange,
+  onTaskStatusToggle,
+  className,
+  getContextName,
+  showScheduled = true,
+  showDue = true,
+}: DraggableTaskListProps) {
+  const [activeTaskId, setActiveTaskId] = React.useState<string | null>(null)
+  const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
+  const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
+
+  // Sensors for drag and drop - only PointerSensor
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    })
+  )
+
+  // Drop animation
+  const dropAnimation: DropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({
+      styles: { active: { opacity: "0.5" } },
+    }),
+  }
+
+  // Drag handlers
+  const handleDragStart = (event: DragStartEvent) => {
+    const data = event.active.data.current as { taskId: string } | undefined
+    if (data?.taskId) {
+      setActiveTaskId(data.taskId)
+      // Update selection to match dragged item
+      const index = tasks.findIndex((t) => t.id === data.taskId)
+      if (index !== -1) {
+        setSelectedIndex(index)
+      }
+    }
+  }
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveTaskId(null)
+
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const activeData = active.data.current as { taskId: string } | undefined
+    const overData = over.data.current as { taskId: string } | undefined
+
+    if (!activeData || !overData) return
+
+    const oldIndex = tasks.findIndex((t) => t.id === activeData.taskId)
+    const newIndex = tasks.findIndex((t) => t.id === overData.taskId)
+
+    if (oldIndex !== -1 && newIndex !== -1) {
+      const newTasks = arrayMove(tasks, oldIndex, newIndex)
+      onTasksReorder(newTasks)
+      setSelectedIndex(newIndex)
+    }
+  }
 
   // Find active task for drag overlay
   const activeTask = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null
@@ -227,47 +342,34 @@ export function TaskList({
   }
 
   return (
-    <div
-      ref={containerRef}
-      className={cn("outline-none", className)}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      modifiers={[restrictToVerticalAxis]}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
     >
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={dragIds} strategy={verticalListSortingStrategy}>
-          <div className="space-y-0.5">
-            {tasks.map((task, index) => (
-              <TaskListItem
-                key={task.id}
-                task={task}
-                dragId={`task-${task.id}`}
-                isSelected={selectedIndex === index}
-                isEditing={editingTaskId === task.id}
-                onSelect={() => handleSelect(index)}
-                onStartEdit={() => handleStartEdit(task.id)}
-                onEndEdit={handleEndEdit}
-                onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
-                onStatusToggle={() => onTaskStatusToggle(task.id)}
-                contextName={getContextName?.(task)}
-                showScheduled={showScheduled}
-                showDue={showDue}
-              />
-            ))}
-          </div>
-        </SortableContext>
+      <TaskList
+        tasks={tasks}
+        projectId={projectId}
+        onTasksReorder={onTasksReorder}
+        onTaskTitleChange={onTaskTitleChange}
+        onTaskStatusToggle={onTaskStatusToggle}
+        className={className}
+        getContextName={getContextName}
+        showScheduled={showScheduled}
+        showDue={showDue}
+        selectedIndex={selectedIndex}
+        onSelectedIndexChange={setSelectedIndex}
+        editingTaskId={editingTaskId}
+        onEditingTaskIdChange={setEditingTaskId}
+      />
 
-        {/* Drag Overlay */}
-        <DragOverlay dropAnimation={dropAnimation}>
-          {activeTask && <TaskDragPreview task={activeTask} />}
-        </DragOverlay>
-      </DndContext>
-    </div>
+      {/* Drag Overlay */}
+      <DragOverlay dropAnimation={dropAnimation}>
+        {activeTask && <TaskDragPreview task={activeTask} />}
+      </DragOverlay>
+    </DndContext>
   )
 }
 
@@ -275,7 +377,7 @@ export function TaskList({
 // Drag Preview
 // -----------------------------------------------------------------------------
 
-function TaskDragPreview({ task }: { task: Task }) {
+export function TaskDragPreview({ task }: { task: Task }) {
   return (
     <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-card shadow-xl border border-border/50">
       <TaskStatusCheckbox
