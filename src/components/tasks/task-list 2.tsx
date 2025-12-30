@@ -29,12 +29,6 @@ interface TaskListProps {
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskStatusToggle: (taskId: string) => void
   className?: string
-  /** Function to get context name (project/area) for a task */
-  getContextName?: (task: Task) => string | undefined
-  /** Whether to show scheduled dates (default: true) */
-  showScheduled?: boolean
-  /** Whether to show due dates (default: true) */
-  showDue?: boolean
 }
 
 /**
@@ -53,9 +47,6 @@ export function TaskList({
   onTaskTitleChange,
   onTaskStatusToggle,
   className,
-  getContextName,
-  showScheduled = true,
-  showDue = true,
 }: TaskListProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null)
@@ -254,9 +245,6 @@ export function TaskList({
                 onEndEdit={handleEndEdit}
                 onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
                 onStatusToggle={() => onTaskStatusToggle(task.id)}
-                contextName={getContextName?.(task)}
-                showScheduled={showScheduled}
-                showDue={showDue}
               />
             ))}
           </div>

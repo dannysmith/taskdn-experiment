@@ -1,8 +1,10 @@
 import * as React from "react"
 import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
+import { Flag } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { formatRelativeDate, isOverdue } from "@/lib/date-utils"
 import type { Task } from "@/types/data"
 import { TaskStatusCheckbox } from "./task-status-checkbox"
 
@@ -17,6 +19,12 @@ export interface TaskListItemProps {
   onStatusToggle: () => void
   /** Used for dnd-kit sortable */
   dragId: string
+  /** Optional context label (project or area name) shown on the right */
+  contextName?: string
+  /** Whether to show the scheduled date (default: true if exists) */
+  showScheduled?: boolean
+  /** Whether to show the due date (default: true if exists) */
+  showDue?: boolean
 }
 
 export function TaskListItem({
@@ -29,6 +37,9 @@ export function TaskListItem({
   onTitleChange,
   onStatusToggle,
   dragId,
+  contextName,
+  showScheduled = true,
+  showDue = true,
 }: TaskListItemProps) {
   const inputRef = React.useRef<HTMLInputElement>(null)
   const [editValue, setEditValue] = React.useState(task.title)
@@ -154,13 +165,75 @@ export function TaskListItem({
           placeholder="Task title..."
         />
       ) : (
+        <>
+          <span
+            className={cn(
+              "flex-1 text-sm truncate",
+              (isDone || isDropped) && "line-through text-muted-foreground"
+            )}
+          >
+            {task.title}
+          </span>
+
+          {/* Right-aligned metadata */}
+          <TaskMetadata
+            contextName={contextName}
+            scheduled={showScheduled ? task.scheduled : undefined}
+            due={showDue ? task.due : undefined}
+            isDone={isDone || isDropped}
+          />
+        </>
+      )}
+    </div>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// Task Metadata (right-aligned info)
+// -----------------------------------------------------------------------------
+
+interface TaskMetadataProps {
+  contextName?: string
+  scheduled?: string
+  due?: string
+  isDone: boolean
+}
+
+function TaskMetadata({ contextName, scheduled, due, isDone }: TaskMetadataProps) {
+  // Don't render anything if no metadata
+  if (!contextName && !scheduled && !due) return null
+
+  // Mute everything if task is done
+  const mutedClass = isDone ? "opacity-50" : ""
+
+  return (
+    <div className={cn("flex items-center gap-2 text-xs shrink-0", mutedClass)}>
+      {/* Context (project/area name) */}
+      {contextName && (
+        <span className="text-muted-foreground truncate max-w-[120px]">
+          {contextName}
+        </span>
+      )}
+
+      {/* Scheduled date */}
+      {scheduled && (
+        <span className="text-muted-foreground">
+          {formatRelativeDate(scheduled)}
+        </span>
+      )}
+
+      {/* Due date with flag */}
+      {due && (
         <span
           className={cn(
-            "flex-1 text-sm truncate",
-            (isDone || isDropped) && "line-through text-muted-foreground"
+            "flex items-center gap-1",
+            isOverdue(due) && !isDone
+              ? "text-red-500 dark:text-red-400"
+              : "text-red-400/80 dark:text-red-400/70"
           )}
         >
-          {task.title}
+          <Flag className="size-3" />
+          {formatRelativeDate(due)}
         </span>
       )}
     </div>
