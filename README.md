@@ -1,3 +1,14 @@
-# Taskdn Experiments
+# Taskdn
 
-This is a experiment playground to do some UI design for a project and task management app using Shad CN blocks and components. React + TypeScript + Vite + shadcn/ui
+Design exploration for a personal task management app. Manages areas (ongoing life responsibilities), projects (finishable efforts), and tasks. Inspired by Things 3.
+
+## Setup
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## Stack
+
+React 19, TypeScript, Vite, Tailwind v4, shadcn/ui
