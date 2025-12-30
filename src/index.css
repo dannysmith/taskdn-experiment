@@ -185,3 +185,117 @@
     @apply font-sans;
     }
 }
+
+/* Milkdown Editor Styling */
+.milkdown-wrapper {
+  --crepe-color-background: var(--background);
+  --crepe-color-foreground: var(--foreground);
+  --crepe-color-surface: var(--muted);
+  --crepe-color-on-surface: var(--muted-foreground);
+  --crepe-color-primary: var(--primary);
+  --crepe-color-on-primary: var(--primary-foreground);
+  --crepe-color-secondary: var(--secondary);
+  --crepe-color-border: var(--border);
+  --crepe-color-outline: var(--ring);
+  --crepe-shadow: none;
+  --crepe-radius: var(--radius);
+}
+
+.milkdown-wrapper .milkdown {
+  padding: 0.75rem;
+  min-height: 180px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.milkdown-wrapper .milkdown .editor {
+  outline: none;
+}
+
+.milkdown-wrapper .milkdown p {
+  margin: 0.5em 0;
+}
+
+.milkdown-wrapper .milkdown h1,
+.milkdown-wrapper .milkdown h2,
+.milkdown-wrapper .milkdown h3 {
+  font-weight: 600;
+  margin: 1em 0 0.5em;
+}
+
+.milkdown-wrapper .milkdown h1 {
+  font-size: 1.5em;
+}
+
+.milkdown-wrapper .milkdown h2 {
+  font-size: 1.25em;
+}
+
+.milkdown-wrapper .milkdown h3 {
+  font-size: 1.1em;
+}
+
+.milkdown-wrapper .milkdown ul,
+.milkdown-wrapper .milkdown ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+
+.milkdown-wrapper .milkdown li {
+  margin: 0.25em 0;
+}
+
+/* Task list checkboxes */
+.milkdown-wrapper .milkdown .task-list-item {
+  list-style: none;
+  margin-left: -1.5em;
+  padding-left: 1.5em;
+  position: relative;
+}
+
+.milkdown-wrapper .milkdown .task-list-item input[type="checkbox"] {
+  position: absolute;
+  left: 0;
+  top: 0.25em;
+  width: 1em;
+  height: 1em;
+  accent-color: var(--status-done);
+}
+
+.milkdown-wrapper .milkdown blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  margin: 0.5em 0;
+  color: var(--muted-foreground);
+}
+
+.milkdown-wrapper .milkdown code {
+  background: var(--muted);
+  padding: 0.125em 0.25em;
+  border-radius: 0.25em;
+  font-size: 0.9em;
+}
+
+.milkdown-wrapper .milkdown pre {
+  background: var(--muted);
+  padding: 0.75em;
+  border-radius: var(--radius);
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.milkdown-wrapper .milkdown pre code {
+  background: none;
+  padding: 0;
+}
+
+.milkdown-wrapper .milkdown a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+.milkdown-wrapper .milkdown hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1em 0;
+}

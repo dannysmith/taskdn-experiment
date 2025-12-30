@@ -8,6 +8,8 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AppDataProvider, useAppData } from "@/context/app-data-context"
+import { TaskDetailProvider, useTaskDetail } from "@/context/task-detail-context"
+import { TaskDetailPanel } from "@/components/tasks/task-detail-panel"
 import type { Selection } from "@/types/selection"
 
 function AppContent() {
@@ -34,18 +36,27 @@ function AppContent() {
     return "Dashboard"
   }
 
+  const { isOpen: isDetailOpen } = useTaskDetail()
+
   return (
     <SidebarProvider>
       <AppSidebar selection={selection} onSelectionChange={setSelection} />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col overflow-hidden min-w-0">
         <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <h1 className="text-sm font-medium">{getHeaderTitle(selection)}</h1>
         </header>
-        <main className="flex-1 p-6">
-          <MainContent selection={selection} onSelectionChange={setSelection} />
-        </main>
+        <div className="flex flex-1 min-h-0">
+          <main className="flex-1 overflow-y-auto p-6">
+            <MainContent selection={selection} onSelectionChange={setSelection} />
+          </main>
+          {isDetailOpen && (
+            <aside className="w-[400px] border-l bg-background flex-shrink-0 overflow-hidden">
+              <TaskDetailPanel />
+            </aside>
+          )}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )
@@ -54,7 +65,9 @@ function AppContent() {
 export function App() {
   return (
     <AppDataProvider>
-      <AppContent />
+      <TaskDetailProvider>
+        <AppContent />
+      </TaskDetailProvider>
     </AppDataProvider>
   )
 }

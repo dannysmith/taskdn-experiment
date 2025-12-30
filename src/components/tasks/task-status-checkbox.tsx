@@ -64,7 +64,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "bg-status-done text-white"
+            "bg-primary text-primary-foreground"
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -162,7 +162,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-status-ready hover:border-status-done/60",
+            "border-2 border-status-ready hover:border-primary/60",
             "group"
           )}
           onClick={handleClick}
@@ -173,7 +173,7 @@ export function TaskStatusCheckbox({
           <Check
             className={cn(
               iconClasses,
-              "text-muted-foreground/0 group-hover:text-status-done/40 transition-colors"
+              "text-muted-foreground/0 group-hover:text-primary/40 transition-colors"
             )}
             strokeWidth={2.5}
           />

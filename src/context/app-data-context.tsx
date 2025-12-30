@@ -14,7 +14,11 @@ interface AppDataContextValue {
   updateTaskTitle: (taskId: string, newTitle: string) => void
   updateTaskScheduled: (taskId: string, date: string | undefined) => void
   updateTaskDue: (taskId: string, date: string | undefined) => void
+  updateTaskDeferUntil: (taskId: string, date: string | undefined) => void
   updateTaskStatus: (taskId: string, newStatus: Task["status"]) => void
+  updateTaskNotes: (taskId: string, notes: string | undefined) => void
+  updateTaskProject: (taskId: string, projectId: string | undefined) => void
+  updateTaskArea: (taskId: string, areaId: string | undefined) => void
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
   moveTaskToProject: (taskId: string, newProjectId: string) => void
@@ -26,6 +30,8 @@ interface AppDataContextValue {
   getOrphanProjects: () => Project[]
   getTasksByProjectId: (projectId: string) => Task[]
   getProjectCompletion: (projectId: string) => number
+  getActiveProjects: () => Project[]
+  getActiveAreas: () => Area[]
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null)
@@ -75,6 +81,50 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       tasks: prev.tasks.map(t =>
         t.id === taskId
           ? { ...t, due: date, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskDeferUntil = useCallback((taskId: string, date: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, deferUntil: date, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskNotes = useCallback((taskId: string, notes: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, notes: notes || undefined, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskProject = useCallback((taskId: string, projectId: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, projectId: projectId || undefined, updatedAt: new Date().toISOString() }
+          : t
+      )
+    }))
+  }, [])
+
+  const updateTaskArea = useCallback((taskId: string, areaId: string | undefined) => {
+    setData(prev => ({
+      ...prev,
+      tasks: prev.tasks.map(t =>
+        t.id === taskId
+          ? { ...t, areaId: areaId || undefined, updatedAt: new Date().toISOString() }
           : t
       )
     }))
@@ -214,13 +264,27 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     return Math.round((completedCount / tasks.length) * 100)
   }, [data.tasks])
 
+  const getActiveProjects = useCallback((): Project[] => {
+    return data.projects.filter(
+      p => p.status !== "done" && p.status !== "paused"
+    )
+  }, [data.projects])
+
+  const getActiveAreas = useCallback((): Area[] => {
+    return data.areas.filter(a => a.status !== "archived")
+  }, [data.areas])
+
   const value: AppDataContextValue = {
     data,
     updateProjectArea,
     updateTaskTitle,
     updateTaskScheduled,
     updateTaskDue,
+    updateTaskDeferUntil,
     updateTaskStatus,
+    updateTaskNotes,
+    updateTaskProject,
+    updateTaskArea,
     toggleTaskStatus,
     reorderProjectTasks,
     moveTaskToProject,
@@ -231,6 +295,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     getOrphanProjects,
     getTasksByProjectId,
     getProjectCompletion,
+    getActiveProjects,
+    getActiveAreas,
   }
 
   return (
