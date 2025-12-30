@@ -34,6 +34,8 @@ interface BaseTaskListProps {
   onTasksReorder: (reorderedTasks: Task[]) => void
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskStatusToggle: (taskId: string) => void
+  /** Called when a task's open-detail button is clicked */
+  onTaskOpenDetail?: (taskId: string) => void
   className?: string
   /** Function to get context name (project/area) for a task */
   getContextName?: (task: Task) => string | undefined
@@ -73,6 +75,7 @@ export function TaskList({
   onTasksReorder,
   onTaskTitleChange,
   onTaskStatusToggle,
+  onTaskOpenDetail,
   className,
   getContextName,
   showScheduled = true,
@@ -244,6 +247,7 @@ export function TaskList({
               onEndEdit={handleEndEdit}
               onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
               onStatusToggle={() => onTaskStatusToggle(task.id)}
+              onOpenDetail={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
               contextName={getContextName?.(task)}
               showScheduled={showScheduled}
               showDue={showDue}
@@ -271,6 +275,7 @@ export function DraggableTaskList({
   onTasksReorder,
   onTaskTitleChange,
   onTaskStatusToggle,
+  onTaskOpenDetail,
   className,
   getContextName,
   showScheduled = true,
@@ -355,6 +360,7 @@ export function DraggableTaskList({
         onTasksReorder={onTasksReorder}
         onTaskTitleChange={onTaskTitleChange}
         onTaskStatusToggle={onTaskStatusToggle}
+        onTaskOpenDetail={onTaskOpenDetail}
         className={className}
         getContextName={getContextName}
         showScheduled={showScheduled}

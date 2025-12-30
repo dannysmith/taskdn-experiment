@@ -5,7 +5,10 @@
       "WebFetch(domain:ui.shadcn.com)",
       "mcp__context7__resolve-library-id",
       "mcp__context7__query-docs",
-      "WebSearch"
+      "WebSearch",
+      "mcp__chrome-devtools__navigate_page",
+      "mcp__chrome-devtools__take_snapshot",
+      "mcp__chrome-devtools__click"
     ]
   }
 }

@@ -15,6 +15,8 @@ interface ProjectTaskGroupProps {
   onTasksReorder: (reorderedTasks: Task[]) => void
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskStatusToggle: (taskId: string) => void
+  /** Called when a task's open-detail button is clicked */
+  onTaskOpenDetail?: (taskId: string) => void
   /** Function to get context name for a task (usually not needed within project group) */
   getContextName?: (task: Task) => string | undefined
   /** Whether to show scheduled dates (default: true) */
@@ -38,6 +40,7 @@ export function ProjectTaskGroup({
   onTasksReorder,
   onTaskTitleChange,
   onTaskStatusToggle,
+  onTaskOpenDetail,
   getContextName,
   showScheduled = true,
   showDue = true,
@@ -70,6 +73,7 @@ export function ProjectTaskGroup({
               onTasksReorder={onTasksReorder}
               onTaskTitleChange={onTaskTitleChange}
               onTaskStatusToggle={onTaskStatusToggle}
+              onTaskOpenDetail={onTaskOpenDetail}
               getContextName={getContextName}
               showScheduled={showScheduled}
               showDue={showDue}

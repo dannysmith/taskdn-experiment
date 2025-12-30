@@ -16,7 +16,7 @@ import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Popover,
   PopoverContent,
@@ -94,88 +94,88 @@ export function TaskDetailPanel() {
 
   return (
     <div className="flex h-full flex-col">
-      {/* Header: Status + Title + Close */}
-      <div className="flex items-start gap-3 border-b px-4 py-3">
+      {/* Header: Checkbox + Title + Close */}
+      <div className="flex items-center gap-3 border-b px-4 py-3">
         <TaskStatusCheckbox
           status={task.status}
           onToggle={() => toggleTaskStatus(task.id)}
-          className="mt-1 size-5"
+          className="size-5 shrink-0"
         />
-        <Input
+        <Textarea
           value={task.title}
           onChange={(e) => updateTaskTitle(task.id, e.target.value)}
-          className="flex-1 text-base font-medium border-none p-0 h-auto focus-visible:ring-1 focus-visible:ring-primary rounded-sm"
+          className="flex-1 text-lg font-medium border-none shadow-none p-1 min-h-0 h-auto resize-none focus-visible:ring-1 focus-visible:ring-primary rounded-sm field-sizing-content"
           placeholder="Task title..."
+          rows={1}
         />
-        <Button variant="ghost" size="icon-sm" onClick={closeTask} className="-mr-1">
+        <Button variant="ghost" size="icon-sm" onClick={closeTask} className="-mr-1 shrink-0">
           <X className="size-4" />
         </Button>
       </div>
 
-      {/* Scrollable Content */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="p-4 space-y-3">
-          {/* Status */}
+      {/* Metadata section */}
+      <div className="px-4 py-3 space-y-2.5 border-b">
+        {/* Project & Area row */}
+        <div className="flex gap-2">
+          <SearchableSelect
+            value={task.projectId}
+            options={allProjects.map(p => ({ value: p.id, label: p.title }))}
+            placeholder="Project..."
+            displayValue={currentProject?.title}
+            icon={<CircleDot className="size-3 text-entity-project" />}
+            onChange={(id) => updateTaskProject(task.id, id)}
+            emptyText="No projects found"
+          />
+          <SearchableSelect
+            value={task.areaId}
+            options={allAreas.map(a => ({ value: a.id, label: a.title }))}
+            placeholder="Area..."
+            displayValue={currentArea?.title}
+            icon={<FolderOpen className="size-3 text-entity-area" />}
+            onChange={(id) => updateTaskArea(task.id, id)}
+            emptyText="No areas found"
+          />
+        </div>
+
+        {/* Status + Dates row */}
+        <div className="flex items-center gap-2">
           <TaskStatusPill
             status={task.status}
             onStatusChange={(newStatus) => updateTaskStatus(task.id, newStatus)}
           />
-
-          {/* Project & Area row */}
-          <div className="flex gap-2">
-            <SearchableSelect
-              value={task.projectId}
-              options={allProjects.map(p => ({ value: p.id, label: p.title }))}
-              placeholder="Project..."
-              displayValue={currentProject?.title}
-              icon={<CircleDot className="size-3 text-entity-project" />}
-              onChange={(id) => updateTaskProject(task.id, id)}
-              emptyText="No projects found"
-            />
-            <SearchableSelect
-              value={task.areaId}
-              options={allAreas.map(a => ({ value: a.id, label: a.title }))}
-              placeholder="Area..."
-              displayValue={currentArea?.title}
-              icon={<FolderOpen className="size-3 text-entity-area" />}
-              onChange={(id) => updateTaskArea(task.id, id)}
-              emptyText="No areas found"
-            />
-          </div>
-
-          {/* Dates row */}
-          <div className="flex gap-2">
-            <DateButton
-              icon={<Calendar className="size-3.5" />}
-              value={task.scheduled}
-              onChange={(date) => updateTaskScheduled(task.id, date)}
-              tooltip="Scheduled"
-              className="text-muted-foreground"
-            />
-            <DateButton
-              icon={<Flag className="size-3.5" />}
-              value={task.due}
-              onChange={(date) => updateTaskDue(task.id, date)}
-              tooltip="Due"
-              className="text-destructive"
-            />
-            <DateButton
-              icon={<Snowflake className="size-3.5" />}
-              value={task.deferUntil}
-              onChange={(date) => updateTaskDeferUntil(task.id, date)}
-              tooltip="Defer until"
-              className="text-status-icebox"
-            />
-          </div>
-
-          {/* Notes */}
-          <div className="pt-2">
-            <MilkdownEditor
-              value={task.notes ?? ""}
-              onChange={(value) => updateTaskNotes(task.id, value)}
-            />
-          </div>
+          <div className="flex-1" />
+          <DateButton
+            icon={<Calendar className="size-3" />}
+            value={task.scheduled}
+            onChange={(date) => updateTaskScheduled(task.id, date)}
+            tooltip="Scheduled"
+            variant="scheduled"
+          />
+          <DateButton
+            icon={<Flag className="size-3" />}
+            value={task.due}
+            onChange={(date) => updateTaskDue(task.id, date)}
+            tooltip="Due"
+            variant="due"
+          />
+          <DateButton
+            icon={<Snowflake className="size-3" />}
+            value={task.deferUntil}
+            onChange={(date) => updateTaskDeferUntil(task.id, date)}
+            tooltip="Defer"
+            variant="defer"
+          />
         </div>
+      </div>
+
+      {/* Notes - fills remaining space */}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <MilkdownEditor
+          editorKey={task.id}
+          defaultValue={task.notes ?? ""}
+          onChange={(value) => updateTaskNotes(task.id, value)}
+          className="h-full"
+        />
       </div>
 
       {/* Footer - Metadata */}
@@ -284,11 +284,27 @@ interface DateButtonProps {
   value: string | undefined
   onChange: (date: string | undefined) => void
   tooltip: string
-  className?: string
+  variant: "scheduled" | "due" | "defer"
 }
 
-function DateButton({ icon, value, onChange, tooltip, className }: DateButtonProps) {
+const dateButtonStyles = {
+  scheduled: {
+    base: "text-muted-foreground bg-muted/50 hover:bg-muted",
+    active: "text-muted-foreground bg-muted/80",
+  },
+  due: {
+    base: "text-destructive/70 bg-destructive/5 hover:bg-destructive/10",
+    active: "text-destructive bg-destructive/10",
+  },
+  defer: {
+    base: "text-status-icebox/70 bg-status-icebox/5 hover:bg-status-icebox/10",
+    active: "text-status-icebox bg-status-icebox/10",
+  },
+}
+
+function DateButton({ icon, value, onChange, tooltip, variant }: DateButtonProps) {
   const [open, setOpen] = React.useState(false)
+  const styles = dateButtonStyles[variant]
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
@@ -304,23 +320,20 @@ function DateButton({ icon, value, onChange, tooltip, className }: DateButtonPro
       <PopoverTrigger
         render={
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             className={cn(
-              "h-8 gap-1.5 px-2",
-              !value && "text-muted-foreground",
-              className
+              "h-7 gap-1 px-2 text-xs font-normal border-0",
+              value ? styles.active : styles.base
             )}
             title={tooltip}
           />
         }
       >
         {icon}
-        <span className="text-xs">
-          {value ? format(new Date(value), "MMM d") : tooltip}
-        </span>
+        <span>{value ? format(new Date(value), "MMM d") : tooltip}</span>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="start">
+      <PopoverContent className="w-auto p-0" align="end">
         <CalendarComponent
           mode="single"
           selected={value ? new Date(value) : undefined}

@@ -1,4 +1,5 @@
 import { useAppData } from "@/context/app-data-context"
+import { useTaskDetail } from "@/context/task-detail-context"
 import { DraggableTaskList } from "@/components/tasks/task-list"
 import type { Task } from "@/types/data"
 
@@ -16,6 +17,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     toggleTaskStatus,
     reorderProjectTasks,
   } = useAppData()
+  const { openTask } = useTaskDetail()
 
   const project = getProjectById(projectId)
 
@@ -63,6 +65,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         onTasksReorder={handleTasksReorder}
         onTaskTitleChange={handleTaskTitleChange}
         onTaskStatusToggle={handleTaskStatusToggle}
+        onTaskOpenDetail={openTask}
       />
     </div>
   )

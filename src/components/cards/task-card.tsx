@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Flag, Calendar, X } from "lucide-react"
+import { Flag, Calendar, X, Pencil } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { formatRelativeDate, isOverdue } from "@/lib/date-utils"
@@ -19,8 +19,10 @@ export interface TaskCardProps {
   projectName?: string
   /** Area name (direct or inherited from project) */
   areaName?: string
-  /** Click handler for the card */
+  /** Click handler for the card (e.g., select) */
   onClick?: () => void
+  /** Click handler for edit icon (opens detail panel) */
+  onEditClick?: () => void
   /** Click handler for project name */
   onProjectClick?: () => void
   /** Click handler for area name */
@@ -47,6 +49,7 @@ export function TaskCard({
   projectName,
   areaName,
   onClick,
+  onEditClick,
   onProjectClick,
   onAreaClick,
   onStatusChange,
@@ -160,7 +163,7 @@ export function TaskCard({
       )}
     >
       {/* Title row */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2">
         {isEditing ? (
           <input
             ref={inputRef}
@@ -173,14 +176,34 @@ export function TaskCard({
             placeholder="Task title..."
           />
         ) : (
-          <span
-            className={cn(
-              "flex-1 text-sm font-medium leading-snug",
-              isCompleted && "line-through text-muted-foreground"
+          <>
+            <span
+              className={cn(
+                "flex-1 text-sm font-medium leading-snug",
+                isCompleted && "line-through text-muted-foreground"
+              )}
+            >
+              {task.title}
+            </span>
+            {onEditClick && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEditClick()
+                }}
+                className={cn(
+                  "shrink-0 p-1 -m-1 rounded text-muted-foreground/50",
+                  "opacity-0 group-hover:opacity-100 transition-opacity",
+                  "hover:text-muted-foreground hover:bg-muted/50",
+                  isSelected && "opacity-100"
+                )}
+                title="Edit task"
+              >
+                <Pencil className="size-3.5" />
+              </button>
             )}
-          >
-            {task.title}
-          </span>
+          </>
         )}
       </div>
 

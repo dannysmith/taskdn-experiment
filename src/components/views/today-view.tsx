@@ -1,4 +1,5 @@
 import { useAppData } from "@/context/app-data-context"
+import { useTaskDetail } from "@/context/task-detail-context"
 import { TaskCard } from "@/components/cards/task-card"
 import { ProjectCard } from "@/components/cards/project-card"
 import { AreaCard } from "@/components/cards/area-card"
@@ -26,6 +27,7 @@ export function TodayView({
     updateTaskScheduled,
     updateTaskDue,
   } = useAppData()
+  const { openTask } = useTaskDetail()
 
   // Get tasks scheduled for today
   const today = new Date().toISOString().split("T")[0]
@@ -85,6 +87,7 @@ export function TodayView({
         task={task}
         projectName={projectName}
         areaName={areaName}
+        onEditClick={() => openTask(task.id)}
         onStatusChange={(newStatus) => updateTaskStatus(task.id, newStatus)}
         onTitleChange={(newTitle) => updateTaskTitle(task.id, newTitle)}
         onScheduledChange={(date) => updateTaskScheduled(task.id, date)}

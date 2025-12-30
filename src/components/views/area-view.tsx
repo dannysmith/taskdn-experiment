@@ -1,6 +1,7 @@
 import * as React from "react"
 
 import { useAppData } from "@/context/app-data-context"
+import { useTaskDetail } from "@/context/task-detail-context"
 import { ProjectTaskGroup } from "@/components/tasks/project-task-group"
 import { TaskDndContext } from "@/components/tasks/task-dnd-context"
 import type { Task } from "@/types/data"
@@ -22,6 +23,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     reorderProjectTasks,
     moveTaskToProject,
   } = useAppData()
+  const { openTask } = useTaskDetail()
 
   const area = getAreaById(areaId)
 
@@ -84,6 +86,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
                 onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
                 onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
                 onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
+                onTaskOpenDetail={openTask}
                 showScheduled={true}
                 showDue={true}
               />

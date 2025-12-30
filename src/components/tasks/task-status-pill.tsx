@@ -41,7 +41,7 @@ export function TaskStatusPill({ status, onStatusChange, className }: TaskStatus
     return (
       <span
         className={cn(
-          "px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0",
+          "px-2 py-0.5 rounded-full text-xs font-medium shrink-0",
           config.color,
           className
         )}
@@ -56,7 +56,7 @@ export function TaskStatusPill({ status, onStatusChange, className }: TaskStatus
       <DropdownMenuTrigger
         onClick={handleClick}
         className={cn(
-          "px-2 py-0.5 rounded-full text-[11px] font-medium shrink-0 inline-flex items-center gap-1 transition-opacity hover:opacity-80",
+          "px-2 py-0.5 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1 transition-opacity hover:opacity-80",
           config.color,
           className
         )}
@@ -79,7 +79,7 @@ export function TaskStatusPill({ status, onStatusChange, className }: TaskStatus
           >
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                "px-1.5 py-0.5 rounded text-xs font-medium",
                 statusConfig[s].color
               )}
             >
@@ -102,7 +102,7 @@ export function TaskStatusPill({ status, onStatusChange, className }: TaskStatus
           >
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded text-[10px] font-medium",
+                "px-1.5 py-0.5 rounded text-xs font-medium",
                 statusConfig[s].color
               )}
             >
