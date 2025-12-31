@@ -12,13 +12,17 @@ import {
 } from "@/components/ui/popover"
 import { Button } from "@/components/ui/button"
 import { TaskStatusPill } from "@/components/tasks/task-status-pill"
+import { TaskStatusCheckbox } from "@/components/tasks/task-status-checkbox"
 
 export type TaskCardVariant = "default" | "overdue" | "deferred" | "done"
+export type TaskCardSize = "default" | "compact"
 
 export interface TaskCardProps {
   task: Task
   /** Visual variant for the card */
   variant?: TaskCardVariant
+  /** Size variant - compact shows only checkbox + title */
+  size?: TaskCardSize
   /** Project name (if task belongs to a project) */
   projectName?: string
   /** Area name (direct or inherited from project) */
@@ -51,6 +55,7 @@ export interface TaskCardProps {
 export function TaskCard({
   task,
   variant = "default",
+  size = "default",
   projectName,
   areaName,
   onClick,
@@ -162,6 +167,51 @@ export function TaskCard({
   const scheduledDate = task.scheduled ? new Date(task.scheduled) : undefined
   const dueDate = task.due ? new Date(task.due) : undefined
 
+  // Toggle status between done and ready
+  const handleStatusToggle = () => {
+    if (task.status === "done") {
+      onStatusChange?.("ready")
+    } else {
+      onStatusChange?.("done")
+    }
+  }
+
+  // Compact variant - just checkbox + title, click opens detail
+  if (size === "compact") {
+    return (
+      <div
+        onClick={onEditClick}
+        className={cn(
+          "group flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-all cursor-pointer",
+          "hover:shadow-sm hover:shadow-black/5",
+          // Variant styles (same as default)
+          variant === "default" && "bg-card border-border/50 hover:border-border",
+          variant === "overdue" &&
+            "bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800",
+          variant === "deferred" &&
+            "bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50",
+          variant === "done" &&
+            "bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50",
+          className
+        )}
+      >
+        <TaskStatusCheckbox
+          status={task.status}
+          onToggle={handleStatusToggle}
+        />
+        <span
+          className={cn(
+            "flex-1 text-xs font-medium truncate",
+            isCompleted && "line-through text-muted-foreground"
+          )}
+        >
+          {task.title}
+        </span>
+      </div>
+    )
+  }
+
+  // Default size - full card
   return (
     <div
       onClick={onClick}

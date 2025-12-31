@@ -1,0 +1,112 @@
+import { useDroppable } from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
+import { format, isToday, isWeekend } from "date-fns"
+
+import { cn } from "@/lib/utils"
+import type { Task, TaskStatus } from "@/types/data"
+import { getCalendarTaskDragId } from "@/types/calendar-order"
+import { SortableTaskCard } from "./draggable-task-card"
+import type { TaskCardVariant } from "@/components/cards/task-card"
+
+interface MonthDayCellProps {
+  date: Date
+  tasks: Task[]
+  /** Whether this day is in the currently displayed month */
+  isCurrentMonth: boolean
+  /** Function to get the visual variant for a task */
+  getTaskVariant?: (task: Task) => TaskCardVariant
+  onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
+  onTaskOpenDetail?: (taskId: string) => void
+  /** Whether this cell is being dragged over */
+  isDropTarget?: boolean
+}
+
+/**
+ * A single day cell in the month calendar.
+ * Acts as a droppable container for compact task cards.
+ */
+export function MonthDayCell({
+  date,
+  tasks,
+  isCurrentMonth,
+  getTaskVariant,
+  onTaskStatusChange,
+  onTaskOpenDetail,
+  isDropTarget = false,
+}: MonthDayCellProps) {
+  const dateString = format(date, "yyyy-MM-dd")
+  const isCurrentDay = isToday(date)
+  const isWeekendDay = isWeekend(date)
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: `day-${dateString}`,
+    data: {
+      type: "day",
+      date: dateString,
+    },
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        "flex flex-col min-h-[120px] border-r border-border/30 last:border-r-0",
+        !isCurrentMonth && "bg-muted/30 opacity-50",
+        isWeekendDay && isCurrentMonth && "bg-muted/10",
+        (isOver || isDropTarget) && "bg-primary/5"
+      )}
+    >
+      {/* Day number */}
+      <div className="px-1.5 py-1 flex justify-end">
+        <span
+          className={cn(
+            "text-xs tabular-nums",
+            isCurrentDay
+              ? "bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center font-semibold"
+              : isCurrentMonth
+                ? "text-foreground font-medium"
+                : "text-muted-foreground"
+          )}
+        >
+          {format(date, "d")}
+        </span>
+      </div>
+
+      {/* Tasks container */}
+      <div className="flex-1 px-1 pb-1 space-y-0.5 overflow-y-auto">
+        <SortableContext
+          items={tasks.map((t) => getCalendarTaskDragId(dateString, t.id))}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => {
+            const variant = getTaskVariant?.(task)
+            return (
+              <SortableTaskCard
+                key={task.id}
+                task={task}
+                date={dateString}
+                variant={variant}
+                size="compact"
+                onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
+                onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+              />
+            )
+          })}
+        </SortableContext>
+
+        {/* Empty state / drop zone indicator */}
+        {tasks.length === 0 && (
+          <div
+            className={cn(
+              "h-full min-h-[40px] rounded border border-dashed border-transparent transition-colors",
+              (isOver || isDropTarget) && "border-primary/30"
+            )}
+          />
+        )}
+      </div>
+    </div>
+  )
+}

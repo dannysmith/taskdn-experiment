@@ -8,13 +8,15 @@ import {
   getCalendarTaskDragId,
   type CalendarTaskDragData,
 } from "@/types/calendar-order"
-import { TaskCard, type TaskCardVariant } from "@/components/cards/task-card"
+import { TaskCard, type TaskCardVariant, type TaskCardSize } from "@/components/cards/task-card"
 
 interface SortableTaskCardProps {
   task: Task
   date: string
   /** Visual variant for the card */
   variant?: TaskCardVariant
+  /** Size variant - compact shows only checkbox + title */
+  size?: TaskCardSize
   /** Project name for context */
   projectName?: string
   /** Area name for context */
@@ -36,6 +38,7 @@ export function SortableTaskCard({
   task,
   date,
   variant,
+  size,
   projectName,
   areaName,
   onStatusChange,
@@ -83,6 +86,7 @@ export function SortableTaskCard({
       <TaskCard
         task={task}
         variant={variant}
+        size={size}
         projectName={projectName}
         areaName={areaName}
         onStatusChange={onStatusChange}
@@ -100,14 +104,19 @@ export function SortableTaskCard({
 // Keep the old name as an alias for backwards compatibility during migration
 export const DraggableTaskCard = SortableTaskCard
 
+interface TaskCardDragPreviewProps {
+  task: Task
+  size?: TaskCardSize
+}
+
 /**
  * Drag preview for TaskCard shown in the DragOverlay.
  * Uses the same TaskCard component for visual consistency.
  */
-export function TaskCardDragPreview({ task }: { task: Task }) {
+export function TaskCardDragPreview({ task, size }: TaskCardDragPreviewProps) {
   return (
-    <div className="max-w-[280px] shadow-xl">
-      <TaskCard task={task} />
+    <div className={cn("shadow-xl", size === "compact" ? "max-w-[200px]" : "max-w-[280px]")}>
+      <TaskCard task={task} size={size} />
     </div>
   )
 }
