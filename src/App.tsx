@@ -9,11 +9,12 @@ import { AppDataProvider, useAppData } from "@/context/app-data-context"
 import { TaskDetailProvider, useTaskDetail } from "@/context/task-detail-context"
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel"
 import { ProjectStatusBadges } from "@/components/projects/project-status-badges"
+import { ProjectStatusPill } from "@/components/projects/project-status-pill"
 import type { Selection } from "@/types/selection"
 
 function AppContent() {
   const [selection, setSelection] = useState<Selection | null>(null)
-  const { getAreaById, getProjectById, getProjectsByAreaId } = useAppData()
+  const { getAreaById, getProjectById, getProjectsByAreaId, updateProjectStatus } = useAppData()
 
   // Get project status counts for the current area (if viewing an area)
   const projectStatusCounts = useMemo(() => {
@@ -26,6 +27,12 @@ function AppContent() {
     }
     return counts
   }, [selection, getProjectsByAreaId])
+
+  // Get current project (if viewing a project)
+  const currentProject = useMemo(() => {
+    if (selection?.type !== "project") return null
+    return getProjectById(selection.id) ?? null
+  }, [selection, getProjectById])
 
   function getHeaderTitle(selection: Selection | null): string {
     if (!selection) return "Dashboard"
@@ -57,6 +64,12 @@ function AppContent() {
           <h1 className="text-xl font-semibold">{getHeaderTitle(selection)}</h1>
           {projectStatusCounts && (
             <ProjectStatusBadges counts={projectStatusCounts} />
+          )}
+          {currentProject && (
+            <ProjectStatusPill
+              status={currentProject.status ?? "planning"}
+              onStatusChange={(newStatus) => updateProjectStatus(currentProject.id, newStatus)}
+            />
           )}
         </header>
         <div className="flex flex-1 min-h-0">

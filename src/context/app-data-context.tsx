@@ -11,6 +11,7 @@ interface AppDataContextValue {
   data: AppData
   // Mutations
   updateProjectArea: (projectId: string, newAreaId: string | null) => void
+  updateProjectStatus: (projectId: string, newStatus: Project["status"]) => void
   updateTaskTitle: (taskId: string, newTitle: string) => void
   updateTaskScheduled: (taskId: string, date: string | undefined) => void
   updateTaskDue: (taskId: string, date: string | undefined) => void
@@ -49,6 +50,15 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       ...prev,
       projects: prev.projects.map(p =>
         p.id === projectId ? { ...p, areaId: newAreaId ?? undefined } : p
+      )
+    }))
+  }, [])
+
+  const updateProjectStatus = useCallback((projectId: string, newStatus: Project["status"]) => {
+    setData(prev => ({
+      ...prev,
+      projects: prev.projects.map(p =>
+        p.id === projectId ? { ...p, status: newStatus } : p
       )
     }))
   }, [])
@@ -277,6 +287,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const value: AppDataContextValue = {
     data,
     updateProjectArea,
+    updateProjectStatus,
     updateTaskTitle,
     updateTaskScheduled,
     updateTaskDue,
