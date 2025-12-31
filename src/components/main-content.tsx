@@ -35,7 +35,16 @@ export function MainContent({ selection, onSelectionChange }: MainContentProps) 
             />
           )
         case "this-week":
-          return <WeekView />
+          return (
+            <WeekView
+              onNavigateToProject={(projectId) =>
+                onSelectionChange({ type: "project", id: projectId })
+              }
+              onNavigateToArea={(areaId) =>
+                onSelectionChange({ type: "area", id: areaId })
+              }
+            />
+          )
         case "inbox":
           return <InboxView />
         case "calendar":
