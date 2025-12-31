@@ -20,6 +20,9 @@ import {
   addWeeks,
   subWeeks,
   isSameDay,
+  isToday,
+  isBefore,
+  startOfDay,
 } from "date-fns"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -32,6 +35,7 @@ import {
 } from "@/types/calendar-order"
 import { useCalendarOrder } from "@/hooks/use-calendar-order"
 import { Button } from "@/components/ui/button"
+import type { TaskCardVariant } from "@/components/cards/task-card"
 import { DayColumn } from "./day-column"
 import { TaskCardDragPreview } from "./draggable-task-card"
 
@@ -112,7 +116,7 @@ export function WeekCalendar({
     [weekDays]
   )
 
-  // Group tasks by their scheduled date (raw, unordered)
+  // Group tasks by their display date (scheduled or deferUntil)
   const tasksByDate = React.useMemo(() => {
     const map = new Map<string, Task[]>()
 
@@ -121,13 +125,23 @@ export function WeekCalendar({
       map.set(format(day, "yyyy-MM-dd"), [])
     }
 
-    // Filter to only scheduled tasks that fall within this week
     for (const task of tasks) {
-      if (!task.scheduled) continue
       if (task.status === "done" || task.status === "dropped") continue
 
-      const taskDate = new Date(task.scheduled)
-      const matchingDay = weekDays.find((day) => isSameDay(day, taskDate))
+      // Determine which date to show this task on
+      let displayDate: Date | null = null
+
+      if (task.scheduled) {
+        // Tasks with scheduled date show on that date
+        displayDate = new Date(task.scheduled)
+      } else if (task.deferUntil) {
+        // Tasks with only deferUntil (no scheduled) show on defer date
+        displayDate = new Date(task.deferUntil)
+      }
+
+      if (!displayDate) continue
+
+      const matchingDay = weekDays.find((day) => isSameDay(day, displayDate!))
       if (matchingDay) {
         const dateKey = format(matchingDay, "yyyy-MM-dd")
         const existing = map.get(dateKey) ?? []
@@ -137,6 +151,25 @@ export function WeekCalendar({
 
     return map
   }, [tasks, weekDays])
+
+  // Determine task card variant based on task state
+  const getTaskVariant = React.useCallback((task: Task): TaskCardVariant => {
+    // Deferred tasks (has deferUntil but no scheduled)
+    if (task.deferUntil && !task.scheduled) {
+      return "deferred"
+    }
+
+    // Overdue tasks (has scheduled AND due date is today or in past)
+    if (task.scheduled && task.due) {
+      const dueDate = startOfDay(new Date(task.due))
+      const today = startOfDay(new Date())
+      if (isBefore(dueDate, today) || isToday(dueDate)) {
+        return "overdue"
+      }
+    }
+
+    return "default"
+  }, [])
 
   // Get tasks for a specific date (callback for order hook)
   const getTasksForDate = React.useCallback(
@@ -332,6 +365,7 @@ export function WeekCalendar({
                   date={day}
                   tasks={orderedTasks}
                   getTaskContext={getTaskContext}
+                  getTaskVariant={getTaskVariant}
                   onTaskStatusChange={onTaskStatusChange}
                   onTaskTitleChange={onTaskTitleChange}
                   onTaskScheduledChange={onTaskScheduleChange}

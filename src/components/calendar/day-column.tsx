@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
 import { getCalendarTaskDragId } from "@/types/calendar-order"
 import { SortableTaskCard } from "./draggable-task-card"
+import type { TaskCardVariant } from "@/components/cards/task-card"
 
 interface TaskContext {
   projectName?: string
@@ -22,6 +23,8 @@ interface DayColumnProps {
   tasks: Task[]
   /** Function to get context (project/area names and IDs) for a task */
   getTaskContext?: (task: Task) => TaskContext
+  /** Function to get the visual variant for a task */
+  getTaskVariant?: (task: Task) => TaskCardVariant
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskScheduledChange: (taskId: string, date: string | undefined) => void
@@ -41,6 +44,7 @@ export function DayColumn({
   date,
   tasks,
   getTaskContext,
+  getTaskVariant,
   onTaskStatusChange,
   onTaskTitleChange,
   onTaskScheduledChange,
@@ -101,11 +105,13 @@ export function DayColumn({
         >
           {tasks.map((task) => {
             const context = getTaskContext?.(task) ?? {}
+            const variant = getTaskVariant?.(task)
             return (
               <SortableTaskCard
                 key={task.id}
                 task={task}
                 date={dateString}
+                variant={variant}
                 projectName={context.projectName}
                 areaName={context.areaName}
                 onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}

@@ -1506,6 +1506,74 @@ Update monthly in this note.`,
     },
 
     // ==========================================================================
+    // DEFERRED tasks (no scheduled, only deferUntil) - for calendar view testing
+    // ==========================================================================
+    {
+      id: "deferred-1",
+      title: "Follow up on job application",
+      status: "ready",
+      createdAt: "2025-12-20T10:00:00",
+      updatedAt: "2025-12-20T10:00:00",
+      deferUntil: "2025-12-30",
+      notes: `Applied two weeks ago. Wait until after holidays to follow up.`,
+    },
+    {
+      id: "deferred-2",
+      title: "Check on package delivery status",
+      status: "ready",
+      createdAt: "2025-12-28T10:00:00",
+      updatedAt: "2025-12-28T10:00:00",
+      deferUntil: "2025-12-31",
+      notes: `Expected delivery by Dec 31. Check tracking if not arrived.`,
+    },
+    {
+      id: "deferred-3",
+      title: "Review gym membership trial",
+      status: "ready",
+      areaId: "health",
+      createdAt: "2025-12-15T10:00:00",
+      updatedAt: "2025-12-15T10:00:00",
+      deferUntil: "2026-01-02",
+      notes: `Free trial ends Jan 5. Decide if worth keeping.`,
+    },
+    {
+      id: "deferred-4",
+      title: "Send invoice for December work",
+      status: "ready",
+      areaId: "finance",
+      createdAt: "2025-12-28T10:00:00",
+      updatedAt: "2025-12-28T10:00:00",
+      deferUntil: "2026-01-01",
+      notes: `Wait until new year to invoice.`,
+    },
+
+    // ==========================================================================
+    // OVERDUE tasks (scheduled + due date in past) - for calendar view testing
+    // ==========================================================================
+    {
+      id: "overdue-1",
+      title: "Submit expense report",
+      status: "ready",
+      areaId: "finance",
+      createdAt: "2025-12-20T10:00:00",
+      updatedAt: "2025-12-20T10:00:00",
+      scheduled: "2025-12-30",
+      due: "2025-12-28",
+      notes: `Was due before Christmas, still need to do it.`,
+    },
+    {
+      id: "overdue-2",
+      title: "Reply to client email",
+      status: "ready",
+      projectId: "marketing-1",
+      createdAt: "2025-12-26T10:00:00",
+      updatedAt: "2025-12-26T10:00:00",
+      scheduled: "2025-12-31",
+      due: "2025-12-29",
+      notes: `Should have replied by now. Urgent.`,
+    },
+
+    // ==========================================================================
     // Tasks scheduled for THIS WEEK
     // ==========================================================================
     {

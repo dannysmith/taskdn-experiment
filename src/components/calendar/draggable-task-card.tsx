@@ -8,11 +8,13 @@ import {
   getCalendarTaskDragId,
   type CalendarTaskDragData,
 } from "@/types/calendar-order"
-import { TaskCard } from "@/components/cards/task-card"
+import { TaskCard, type TaskCardVariant } from "@/components/cards/task-card"
 
 interface SortableTaskCardProps {
   task: Task
   date: string
+  /** Visual variant for the card */
+  variant?: TaskCardVariant
   /** Project name for context */
   projectName?: string
   /** Area name for context */
@@ -33,6 +35,7 @@ interface SortableTaskCardProps {
 export function SortableTaskCard({
   task,
   date,
+  variant,
   projectName,
   areaName,
   onStatusChange,
@@ -79,6 +82,7 @@ export function SortableTaskCard({
     >
       <TaskCard
         task={task}
+        variant={variant}
         projectName={projectName}
         areaName={areaName}
         onStatusChange={onStatusChange}

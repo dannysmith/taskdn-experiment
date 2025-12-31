@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Flag, Calendar, X, Pencil } from "lucide-react"
+import { Flag, Calendar, X, Pencil, Hourglass } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { formatRelativeDate, isOverdue } from "@/lib/date-utils"
@@ -13,8 +13,12 @@ import {
 import { Button } from "@/components/ui/button"
 import { TaskStatusPill } from "@/components/tasks/task-status-pill"
 
+export type TaskCardVariant = "default" | "overdue" | "deferred"
+
 export interface TaskCardProps {
   task: Task
+  /** Visual variant for the card */
+  variant?: TaskCardVariant
   /** Project name (if task belongs to a project) */
   projectName?: string
   /** Area name (direct or inherited from project) */
@@ -46,6 +50,7 @@ export interface TaskCardProps {
  */
 export function TaskCard({
   task,
+  variant = "default",
   projectName,
   areaName,
   onClick,
@@ -164,9 +169,15 @@ export function TaskCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       className={cn(
-        "group bg-card rounded-xl border border-border/50 p-3.5 transition-all outline-none",
-        "hover:border-border hover:shadow-md hover:shadow-black/5",
+        "group rounded-xl border p-3.5 transition-all outline-none",
+        "hover:shadow-md hover:shadow-black/5",
         "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        // Variant styles
+        variant === "default" && "bg-card border-border/50 hover:border-border",
+        variant === "overdue" &&
+          "bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800",
+        variant === "deferred" &&
+          "bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50",
         onClick && "cursor-pointer",
         isSelected && "ring-2 ring-primary border-primary",
         isEditing && "ring-2 ring-primary",
@@ -175,6 +186,10 @@ export function TaskCard({
     >
       {/* Title row */}
       <div className="flex items-start gap-2">
+        {/* Deferred indicator */}
+        {variant === "deferred" && !isEditing && (
+          <Hourglass className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        )}
         {isEditing ? (
           <textarea
             ref={textareaRef}
