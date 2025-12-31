@@ -162,7 +162,7 @@ export function TaskStatusCheckbox({
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-status-ready hover:border-primary/60",
+            "border-2 border-muted-foreground/40 hover:border-primary/60",
             "group"
           )}
           onClick={handleClick}

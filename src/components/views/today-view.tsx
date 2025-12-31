@@ -1,9 +1,10 @@
+import * as React from "react"
+import { Sun, Flag, Sunrise } from "lucide-react"
+
 import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
-import { TaskCard } from "@/components/cards/task-card"
-import { ProjectCard } from "@/components/cards/project-card"
-import { AreaCard } from "@/components/cards/area-card"
-import { CardGrid } from "@/components/cards/card-grid"
+import { SectionTaskGroup } from "@/components/tasks/section-task-group"
+import { isOverdue, isToday } from "@/lib/date-utils"
 import type { Task } from "@/types/data"
 
 interface TodayViewProps {
@@ -12,193 +13,174 @@ interface TodayViewProps {
 }
 
 export function TodayView({
-  onNavigateToProject,
-  onNavigateToArea,
+  // Reserved for future: clicking context name navigates to project/area
+  onNavigateToProject: _onNavigateToProject,
+  onNavigateToArea: _onNavigateToArea,
 }: TodayViewProps) {
   const {
     data,
     getProjectById,
     getAreaById,
-    getProjectCompletion,
-    getTasksByProjectId,
-    getProjectsByAreaId,
-    updateTaskStatus,
     updateTaskTitle,
-    updateTaskScheduled,
-    updateTaskDue,
+    toggleTaskStatus,
   } = useAppData()
   const { openTask } = useTaskDetail()
 
-  // Get tasks scheduled for today
+  // Get today's date in ISO format (YYYY-MM-DD)
   const today = new Date().toISOString().split("T")[0]
-  const todayTasks = data.tasks.filter(
-    (t) => t.scheduled === today && t.status !== "done" && t.status !== "dropped"
+
+  // Helper to check if task is active (not done/dropped)
+  const isActiveTask = (task: Task) =>
+    task.status !== "done" && task.status !== "dropped"
+
+  // Section 1: Tasks scheduled for today
+  const scheduledToday = React.useMemo(() => {
+    return data.tasks.filter(
+      (t) => t.scheduled === today && isActiveTask(t)
+    )
+  }, [data.tasks, today])
+
+  // Section 2: Tasks overdue or due today (but NOT scheduled for today)
+  const overdueOrDueToday = React.useMemo(() => {
+    return data.tasks.filter((t) => {
+      if (!isActiveTask(t)) return false
+      // Skip if already in scheduled today section
+      if (t.scheduled === today) return false
+      // Include if due and (overdue or due today)
+      if (t.due && (isOverdue(t.due) || isToday(t.due))) return true
+      return false
+    })
+  }, [data.tasks, today])
+
+  // Section 3: Tasks that became available today (deferUntil passed)
+  const becameAvailableToday = React.useMemo(() => {
+    return data.tasks.filter((t) => {
+      if (!isActiveTask(t)) return false
+      // Skip if already in other sections
+      if (t.scheduled === today) return false
+      if (t.due && (isOverdue(t.due) || isToday(t.due))) return false
+      // Include if deferUntil is today (task became available)
+      if (t.deferUntil && isToday(t.deferUntil)) return true
+      return false
+    })
+  }, [data.tasks, today])
+
+  // Get context name (project or area) for a task
+  const getContextName = React.useCallback(
+    (task: Task): string | undefined => {
+      if (task.projectId) {
+        const project = getProjectById(task.projectId)
+        return project?.title
+      }
+      if (task.areaId) {
+        const area = getAreaById(task.areaId)
+        return area?.title
+      }
+      return undefined
+    },
+    [getProjectById, getAreaById]
   )
 
-  // Get some active projects for demo
-  const activeProjects = data.projects.filter(
-    (p) => p.status === "in-progress"
-  ).slice(0, 6)
+  // Reorder handlers (for now, these are no-ops since we don't persist section order)
+  // Each section manages its own visual order
+  const handleReorder = React.useCallback((_reorderedTasks: Task[]) => {
+    // Visual reorder only - not persisted
+  }, [])
 
-  // Get all active areas for demo
-  const activeAreas = data.areas.filter((a) => a.status !== "archived")
+  const handleTitleChange = React.useCallback(
+    (taskId: string, newTitle: string) => {
+      updateTaskTitle(taskId, newTitle)
+    },
+    [updateTaskTitle]
+  )
 
-  // Helper to get project and area info for a task
-  const getTaskContext = (task: Task) => {
-    let projectName: string | undefined
-    let areaName: string | undefined
-    let projectId: string | undefined
-    let areaId: string | undefined
+  const handleStatusToggle = React.useCallback(
+    (taskId: string) => {
+      toggleTaskStatus(taskId)
+    },
+    [toggleTaskStatus]
+  )
 
-    if (task.projectId) {
-      const project = getProjectById(task.projectId)
-      if (project) {
-        projectName = project.title
-        projectId = project.id
-        // Get area from project if not directly set on task
-        if (project.areaId) {
-          const area = getAreaById(project.areaId)
-          if (area) {
-            areaName = area.title
-            areaId = area.id
-          }
-        }
-      }
-    }
+  const handleOpenDetail = React.useCallback(
+    (taskId: string) => {
+      openTask(taskId)
+    },
+    [openTask]
+  )
 
-    // Direct area on task overrides project's area
-    if (task.areaId) {
-      const area = getAreaById(task.areaId)
-      if (area) {
-        areaName = area.title
-        areaId = area.id
-      }
-    }
-
-    return { projectName, areaName, projectId, areaId }
-  }
-
-  const renderTaskCard = (task: Task) => {
-    const { projectName, areaName, projectId, areaId } = getTaskContext(task)
-
-    return (
-      <TaskCard
-        key={task.id}
-        task={task}
-        projectName={projectName}
-        areaName={areaName}
-        onEditClick={() => openTask(task.id)}
-        onStatusChange={(newStatus) => updateTaskStatus(task.id, newStatus)}
-        onTitleChange={(newTitle) => updateTaskTitle(task.id, newTitle)}
-        onScheduledChange={(date) => updateTaskScheduled(task.id, date)}
-        onDueChange={(date) => updateTaskDue(task.id, date)}
-        onProjectClick={projectId && onNavigateToProject
-          ? () => onNavigateToProject(projectId)
-          : undefined
-        }
-        onAreaClick={areaId && onNavigateToArea
-          ? () => onNavigateToArea(areaId)
-          : undefined
-        }
-      />
-    )
-  }
+  // Check if there are any tasks to show
+  const hasAnyTasks =
+    scheduledToday.length > 0 ||
+    overdueOrDueToday.length > 0 ||
+    becameAvailableToday.length > 0
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold">Today</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Card component showcase
-        </p>
-      </div>
+    <div className="space-y-6">
+      {/* Scheduled for Today */}
+      {scheduledToday.length > 0 && (
+        <SectionTaskGroup
+          sectionId="scheduled-today"
+          title="Scheduled for Today"
+          icon={<Sun className="size-4" />}
+          tasks={scheduledToday}
+          onTasksReorder={handleReorder}
+          onTaskTitleChange={handleTitleChange}
+          onTaskStatusToggle={handleStatusToggle}
+          onTaskOpenDetail={handleOpenDetail}
+          getContextName={getContextName}
+          showScheduled={false}
+          showDue={true}
+          defaultExpanded={true}
+        />
+      )}
 
-      {/* Task Cards Section */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-medium">Task Cards</h2>
-        {todayTasks.length > 0 ? (
-          <CardGrid minCardWidth={280}>
-            {todayTasks.map(renderTaskCard)}
-          </CardGrid>
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            No tasks scheduled for today. Here are some sample tasks:
+      {/* Overdue or Due Today */}
+      {overdueOrDueToday.length > 0 && (
+        <SectionTaskGroup
+          sectionId="overdue-due-today"
+          title="Overdue or Due Today"
+          icon={<Flag className="size-4" />}
+          tasks={overdueOrDueToday}
+          onTasksReorder={handleReorder}
+          onTaskTitleChange={handleTitleChange}
+          onTaskStatusToggle={handleStatusToggle}
+          onTaskOpenDetail={handleOpenDetail}
+          getContextName={getContextName}
+          showScheduled={true}
+          showDue={true}
+          defaultExpanded={true}
+        />
+      )}
+
+      {/* Became Available Today */}
+      {becameAvailableToday.length > 0 && (
+        <SectionTaskGroup
+          sectionId="became-available-today"
+          title="Became Available Today"
+          icon={<Sunrise className="size-4" />}
+          tasks={becameAvailableToday}
+          onTasksReorder={handleReorder}
+          onTaskTitleChange={handleTitleChange}
+          onTaskStatusToggle={handleStatusToggle}
+          onTaskOpenDetail={handleOpenDetail}
+          getContextName={getContextName}
+          showScheduled={true}
+          showDue={true}
+          defaultExpanded={true}
+        />
+      )}
+
+      {/* Empty state */}
+      {!hasAnyTasks && (
+        <div className="py-12 text-center">
+          <p className="text-muted-foreground">
+            Nothing scheduled for today.
           </p>
-        )}
-
-        {/* Show some sample tasks if none scheduled for today */}
-        {todayTasks.length === 0 && (
-          <CardGrid minCardWidth={280}>
-            {data.tasks
-              .filter((t) => t.status !== "done" && t.status !== "dropped")
-              .slice(0, 6)
-              .map(renderTaskCard)}
-          </CardGrid>
-        )}
-      </section>
-
-      {/* Project Cards Section */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-medium">Project Cards</h2>
-        <CardGrid minCardWidth={280}>
-          {activeProjects.map((project) => {
-            const tasks = getTasksByProjectId(project.id)
-            const completion = getProjectCompletion(project.id)
-            const completedCount = tasks.filter(
-              (t) => t.status === "done" || t.status === "dropped"
-            ).length
-            const area = project.areaId
-              ? getAreaById(project.areaId)
-              : undefined
-
-            return (
-              <ProjectCard
-                key={project.id}
-                project={project}
-                completion={completion}
-                taskCount={tasks.length}
-                completedTaskCount={completedCount}
-                areaName={area?.title}
-                onClick={onNavigateToProject
-                  ? () => onNavigateToProject(project.id)
-                  : undefined
-                }
-                onAreaClick={area && onNavigateToArea
-                  ? () => onNavigateToArea(area.id)
-                  : undefined
-                }
-              />
-            )
-          })}
-        </CardGrid>
-      </section>
-
-      {/* Area Cards Section */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-medium">Area Cards</h2>
-        <CardGrid minCardWidth={300}>
-          {activeAreas.map((area) => {
-            const projects = getProjectsByAreaId(area.id)
-            const activeProjectCount = projects.filter(
-              (p) => p.status !== "done" && p.status !== "paused"
-            ).length
-
-            return (
-              <AreaCard
-                key={area.id}
-                area={area}
-                projectCount={projects.length}
-                activeProjectCount={activeProjectCount}
-                onClick={onNavigateToArea
-                  ? () => onNavigateToArea(area.id)
-                  : undefined
-                }
-              />
-            )
-          })}
-        </CardGrid>
-      </section>
+          <p className="text-sm text-muted-foreground/70 mt-1">
+            Schedule tasks to see them here.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
