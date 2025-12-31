@@ -150,6 +150,15 @@ A single actionable item.
 
 - **TaskList** — Ordered list of tasks, supports selection and reordering
 
+### Views
+
+- **KanbanBoard** — Column-per-status view with collapsible columns; supports drag-drop between statuses
+- **CalendarView** — Month/week views showing scheduled tasks; drag tasks to reschedule
+
+### Panels
+
+- **TaskDetailPanel** — Right sidebar for editing task details (status, dates, project, area, notes)
+
 ---
 
 ## Interactions

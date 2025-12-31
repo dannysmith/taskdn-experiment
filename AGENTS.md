@@ -26,6 +26,8 @@ bun run preview  # Preview production build
 - **shadcn/ui** (base-nova style) — components use `@base-ui/react` primitives, not Radix
 - **Styling**: Tailwind CSS v4 with OKLCH color space, `class-variance-authority` for variants
 - **Icons**: `lucide-react`
+- **Drag-and-drop**: `@dnd-kit/core` + `@dnd-kit/sortable`
+- **Markdown editing**: `@milkdown/kit`
 
 ## Key Patterns
 
@@ -60,12 +62,22 @@ Types in `src/types/data.ts`. Mock data in `src/data/app-data.ts` as flat arrays
 src/
 ├── components/
 │   ├── ui/          # shadcn/base-ui primitives
+│   ├── views/       # View components (Today, Week, Inbox, Calendar, Area, Project)
 │   ├── cards/       # TaskCard, ProjectCard, AreaCard
-│   ├── tasks/       # TaskList, TaskListItem, TaskStatusCheckbox
+│   ├── tasks/       # TaskList, TaskListItem, TaskDetailPanel
+│   ├── kanban/      # Kanban board with drag-drop columns
+│   ├── calendar/    # Month and week calendar views
 │   └── sidebar/     # Navigation and drag-drop
+├── config/          # Status configuration (colors, labels)
 ├── context/         # React context providers
 ├── data/            # Mock data and helpers
 ├── hooks/           # Custom React hooks
-├── lib/             # Utilities (cn, etc.)
+├── lib/             # Utilities (cn, date formatting)
 └── types/           # TypeScript types
 ```
+
+## Context Providers
+
+- **AppDataContext** — Full app state (areas, projects, tasks) with CRUD operations and lookup helpers
+- **ViewModeContext** — Tracks view mode (list/kanban/calendar) per view type
+- **TaskDetailContext** — Controls the right-panel task detail view
