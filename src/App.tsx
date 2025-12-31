@@ -72,17 +72,22 @@ function AppContent() {
             />
           )}
         </header>
-        <div className="flex flex-1 min-h-0">
-          <main className="flex-1 overflow-y-auto p-6">
-            <MainContent selection={selection} onSelectionChange={setSelection} />
-          </main>
-          {isDetailOpen && (
-            <aside className="w-[400px] border-l bg-background flex-shrink-0 overflow-hidden">
-              <TaskDetailPanel />
-            </aside>
-          )}
-        </div>
+        <main className="flex-1 overflow-y-auto p-6">
+          <MainContent selection={selection} onSelectionChange={setSelection} />
+        </main>
       </SidebarInset>
+      {/* Right sidebar - full height, slides in from right */}
+      <aside
+        className={`
+          bg-sidebar border-l flex-shrink-0 overflow-hidden
+          transition-[width,opacity] duration-150 ease-out
+          ${isDetailOpen ? "w-[400px] opacity-100" : "w-0 opacity-0"}
+        `}
+      >
+        <div className="w-[400px] h-full">
+          <TaskDetailPanel />
+        </div>
+      </aside>
     </SidebarProvider>
   )
 }

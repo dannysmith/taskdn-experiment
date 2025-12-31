@@ -95,7 +95,7 @@ export function TaskDetailPanel() {
   return (
     <div className="flex h-full flex-col">
       {/* Header: Checkbox + Title + Close */}
-      <div className="flex items-center gap-3 border-b px-4 py-3">
+      <div className="flex items-center gap-3 px-4 py-3">
         <TaskStatusCheckbox
           status={task.status}
           onToggle={() => toggleTaskStatus(task.id)}
@@ -114,7 +114,7 @@ export function TaskDetailPanel() {
       </div>
 
       {/* Metadata section */}
-      <div className="px-4 py-3 space-y-2.5 border-b">
+      <div className="px-4 pb-3 space-y-2.5">
         {/* Project & Area row */}
         <div className="flex gap-2">
           <SearchableSelect
@@ -168,18 +168,20 @@ export function TaskDetailPanel() {
         </div>
       </div>
 
-      {/* Notes - fills remaining space */}
-      <div className="flex-1 min-h-0 overflow-hidden">
-        <MilkdownEditor
-          editorKey={task.id}
-          defaultValue={task.notes ?? ""}
-          onChange={(value) => updateTaskNotes(task.id, value)}
-          className="h-full"
-        />
+      {/* Notes - fills remaining space with card background */}
+      <div className="flex-1 min-h-0 overflow-hidden p-3 pt-0">
+        <div className="h-full bg-card rounded-lg border overflow-hidden">
+          <MilkdownEditor
+            editorKey={task.id}
+            defaultValue={task.notes ?? ""}
+            onChange={(value) => updateTaskNotes(task.id, value)}
+            className="h-full"
+          />
+        </div>
       </div>
 
       {/* Footer - Metadata */}
-      <div className="border-t px-4 py-2 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+      <div className="px-4 py-2 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
         <span>Created {formatShortDate(task.createdAt)}</span>
         <span>Updated {formatShortDate(task.updatedAt)}</span>
         {task.completedAt && <span>Completed {formatShortDate(task.completedAt)}</span>}
