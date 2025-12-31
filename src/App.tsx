@@ -24,7 +24,7 @@ function getViewModeKey(selection: Selection | null): ViewModeKey | null {
 }
 
 function AppContent() {
-  const [selection, setSelection] = useState<Selection | null>(null)
+  const [selection, setSelection] = useState<Selection | null>({ type: "nav", id: "today" })
   const { getAreaById, getProjectById, getProjectsByAreaId, updateProjectStatus } = useAppData()
 
   // Get view mode for current selection (if applicable)
