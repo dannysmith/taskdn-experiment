@@ -1,20 +1,31 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { AppSidebar } from "@/components/sidebar/left-sidebar"
 import { MainContent } from "@/components/main-content"
-import { Separator } from "@/components/ui/separator"
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { AppDataProvider, useAppData } from "@/context/app-data-context"
 import { TaskDetailProvider, useTaskDetail } from "@/context/task-detail-context"
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel"
+import { ProjectStatusBadges } from "@/components/projects/project-status-badges"
 import type { Selection } from "@/types/selection"
 
 function AppContent() {
   const [selection, setSelection] = useState<Selection | null>(null)
-  const { getAreaById, getProjectById } = useAppData()
+  const { getAreaById, getProjectById, getProjectsByAreaId } = useAppData()
+
+  // Get project status counts for the current area (if viewing an area)
+  const projectStatusCounts = useMemo(() => {
+    if (selection?.type !== "area") return null
+    const projects = getProjectsByAreaId(selection.id)
+    const counts: Record<string, number> = {}
+    for (const project of projects) {
+      const status = project.status ?? "planning"
+      counts[status] = (counts[status] ?? 0) + 1
+    }
+    return counts
+  }, [selection, getProjectsByAreaId])
 
   function getHeaderTitle(selection: Selection | null): string {
     if (!selection) return "Dashboard"
@@ -42,10 +53,11 @@ function AppContent() {
     <SidebarProvider>
       <AppSidebar selection={selection} onSelectionChange={setSelection} />
       <SidebarInset className="flex flex-col overflow-hidden min-w-0">
-        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <h1 className="text-sm font-medium">{getHeaderTitle(selection)}</h1>
+        <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
+          <h1 className="text-xl font-semibold">{getHeaderTitle(selection)}</h1>
+          {projectStatusCounts && (
+            <ProjectStatusBadges counts={projectStatusCounts} />
+          )}
         </header>
         <div className="flex flex-1 min-h-0">
           <main className="flex-1 overflow-y-auto p-6">

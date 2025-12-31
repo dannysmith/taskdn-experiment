@@ -4,7 +4,11 @@ import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
 import { ProjectTaskGroup } from "@/components/tasks/project-task-group"
 import { TaskDndContext } from "@/components/tasks/task-dnd-context"
-import type { Task } from "@/types/data"
+import { ProjectCard } from "@/components/cards/project-card"
+import type { Task, Project } from "@/types/data"
+
+/** Active statuses for project cards grid */
+const ACTIVE_STATUSES: Project["status"][] = ["in-progress", "ready", "planning", "blocked"]
 
 interface AreaViewProps {
   areaId: string
@@ -37,6 +41,11 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
 
   const projects = getProjectsByAreaId(areaId)
 
+  // Split projects into active (for grid) and all (for task groups)
+  const activeProjects = React.useMemo(() => {
+    return projects.filter((p) => ACTIVE_STATUSES.includes(p.status))
+  }, [projects])
+
   // Build tasksByProject map for TaskDndContext
   const tasksByProject = React.useMemo(() => {
     const map = new Map<string, Task[]>()
@@ -45,6 +54,18 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     }
     return map
   }, [projects, getTasksByProjectId])
+
+  // Get task counts for ProjectCard
+  const getTaskCounts = React.useCallback(
+    (projectId: string) => {
+      const tasks = tasksByProject.get(projectId) ?? []
+      const completedTaskCount = tasks.filter(
+        (t) => t.status === "done" || t.status === "dropped"
+      ).length
+      return { taskCount: tasks.length, completedTaskCount }
+    },
+    [tasksByProject]
+  )
 
   const handleTasksReorder = (projectId: string, reorderedTasks: Task[]) => {
     reorderProjectTasks(projectId, reorderedTasks.map((t) => t.id))
@@ -55,14 +76,31 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold">{area.title}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {projects.length} project{projects.length !== 1 ? "s" : ""}
-        </p>
-      </div>
+    <div className="space-y-8">
+      {/* Active Projects Grid */}
+      {activeProjects.length > 0 && (
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            Active Projects
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {activeProjects.map((project) => {
+              const completion = getProjectCompletion(project.id)
+              const { taskCount, completedTaskCount } = getTaskCounts(project.id)
+              return (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  completion={completion}
+                  taskCount={taskCount}
+                  completedTaskCount={completedTaskCount}
+                  onClick={() => onNavigateToProject(project.id)}
+                />
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       {/* Projects with their tasks - wrapped in shared DndContext */}
       <TaskDndContext
@@ -71,34 +109,39 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
         onTasksReorder={handleTasksReorder}
         getTaskById={getTaskById}
       >
-        <div className="space-y-4">
-          {projects.map((project) => {
-            const tasks = tasksByProject.get(project.id) ?? []
-            const completion = getProjectCompletion(project.id)
+        <section>
+          <h2 className="text-sm font-medium text-muted-foreground mb-3">
+            All Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((project) => {
+              const tasks = tasksByProject.get(project.id) ?? []
+              const completion = getProjectCompletion(project.id)
 
-            return (
-              <ProjectTaskGroup
-                key={project.id}
-                project={project}
-                tasks={tasks}
-                completion={completion}
-                onOpenProject={() => onNavigateToProject(project.id)}
-                onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
-                onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
-                onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
-                onTaskOpenDetail={openTask}
-                showScheduled={true}
-                showDue={true}
-              />
-            )
-          })}
+              return (
+                <ProjectTaskGroup
+                  key={project.id}
+                  project={project}
+                  tasks={tasks}
+                  completion={completion}
+                  onOpenProject={() => onNavigateToProject(project.id)}
+                  onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
+                  onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
+                  onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
+                  onTaskOpenDetail={openTask}
+                  showScheduled={true}
+                  showDue={true}
+                />
+              )
+            })}
 
-          {projects.length === 0 && (
-            <p className="text-muted-foreground text-sm">
-              No projects in this area yet.
-            </p>
-          )}
-        </div>
+            {projects.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                No projects in this area yet.
+              </p>
+            )}
+          </div>
+        </section>
       </TaskDndContext>
     </div>
   )

@@ -1,7 +1,6 @@
 import { ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
 import { ProjectStatusIndicator, getProjectTitleClass } from "@/components/sidebar/draggable-project"
 import type { Project, ProjectStatus } from "@/types/data"
 
@@ -14,44 +13,21 @@ interface ProjectHeaderProps {
 }
 
 /**
- * Get a human-readable label for project status
+ * Status badge configuration following design conventions
+ * - planning: Blue
+ * - ready: Grey
+ * - in-progress: Amber
+ * - paused: Light amber
+ * - blocked: Dark red
+ * - done: Green
  */
-function getStatusLabel(status: ProjectStatus | undefined): string {
-  switch (status) {
-    case "planning":
-      return "Planning"
-    case "ready":
-      return "Ready"
-    case "in-progress":
-      return "In Progress"
-    case "blocked":
-      return "Blocked"
-    case "paused":
-      return "Paused"
-    case "done":
-      return "Done"
-    default:
-      return "In Progress"
-  }
-}
-
-/**
- * Get badge variant based on project status
- */
-function getStatusBadgeVariant(status: ProjectStatus | undefined): "default" | "secondary" | "destructive" | "outline" {
-  switch (status) {
-    case "blocked":
-      return "destructive"
-    case "done":
-    case "paused":
-      return "secondary"
-    case "planning":
-    case "ready":
-      return "outline"
-    case "in-progress":
-    default:
-      return "default"
-  }
+const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
+  planning: { label: "Planning", color: "bg-status-planning/15 text-status-planning" },
+  ready: { label: "Ready", color: "bg-status-ready/15 text-status-ready" },
+  "in-progress": { label: "Active", color: "bg-status-in-progress/15 text-status-in-progress" },
+  blocked: { label: "Blocked", color: "bg-status-blocked/15 text-status-blocked" },
+  paused: { label: "Paused", color: "bg-status-paused/15 text-status-paused" },
+  done: { label: "Done", color: "bg-status-done/15 text-status-done" },
 }
 
 /**
@@ -74,8 +50,8 @@ export function ProjectHeader({
     onOpenProject()
   }
 
-  const statusLabel = getStatusLabel(project.status)
-  const badgeVariant = getStatusBadgeVariant(project.status)
+  const status = project.status ?? "planning"
+  const config = statusConfig[status]
 
   return (
     <div
@@ -109,9 +85,14 @@ export function ProjectHeader({
       </span>
 
       {/* Status badge */}
-      <Badge variant={badgeVariant} className="text-[10px] h-4 px-1.5">
-        {statusLabel}
-      </Badge>
+      <span
+        className={cn(
+          "shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center",
+          config.color
+        )}
+      >
+        {config.label}
+      </span>
     </div>
   )
 }

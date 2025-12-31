@@ -27,6 +27,7 @@ import {
   ChevronRight,
   FolderIcon,
   InboxIcon,
+  PanelLeftIcon,
   SunIcon,
 } from "lucide-react"
 
@@ -79,7 +80,7 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
 }
 
 export function AppSidebar({ selection, onSelectionChange, ...props }: AppSidebarProps) {
-  const { state } = useSidebar()
+  const { state, toggleSidebar } = useSidebar()
   const isCollapsed = state === "collapsed"
 
   const { getProjectCompletion } = useAppData()
@@ -198,10 +199,17 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
 
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="h-14 justify-center border-b border-sidebar-border px-4">
+      <SidebarHeader className="h-14 flex-row items-center justify-between border-b border-sidebar-border px-4">
         <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">
           Taskdn
         </span>
+        <button
+          onClick={toggleSidebar}
+          className="size-8 flex items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <PanelLeftIcon className="size-4" />
+        </button>
       </SidebarHeader>
 
       <DndContext

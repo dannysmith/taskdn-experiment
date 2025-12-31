@@ -15,8 +15,7 @@ interface TaskDetailContextValue {
 const TaskDetailContext = createContext<TaskDetailContextValue | null>(null)
 
 export function TaskDetailProvider({ children }: { children: React.ReactNode }) {
-  // Start with a task open for design exploration
-  const [openTaskId, setOpenTaskId] = useState<string | null>("coding-2-task-3")
+  const [openTaskId, setOpenTaskId] = useState<string | null>(null)
 
   const openTask = useCallback((taskId: string) => {
     setOpenTaskId(taskId)
