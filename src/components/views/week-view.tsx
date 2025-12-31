@@ -1,8 +1,11 @@
 import * as React from "react"
+import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns"
 
 import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
 import { WeekCalendar } from "@/components/calendar/week-calendar"
+import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
+import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
 import type { Task, TaskStatus } from "@/types/data"
 
 interface WeekViewProps {
@@ -14,6 +17,9 @@ export function WeekView({
   onNavigateToProject,
   onNavigateToArea,
 }: WeekViewProps) {
+  const [viewMode, setViewMode] = React.useState<ViewMode>("calendar")
+  const { collapsedColumns, toggleColumn } = useCollapsedColumns()
+
   const {
     data,
     getTaskById,
@@ -25,6 +31,47 @@ export function WeekView({
     updateTaskDue,
   } = useAppData()
   const { openTask } = useTaskDetail()
+
+  // Filter tasks for this week (scheduled or due within the week)
+  const thisWeekTasks = React.useMemo(() => {
+    const now = new Date()
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 }) // Monday
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 })
+    const interval = { start: weekStart, end: weekEnd }
+
+    return data.tasks.filter((task) => {
+      // Exclude done and dropped tasks from Kanban (but calendar may still show them)
+      if (viewMode === "kanban" && (task.status === "done" || task.status === "dropped")) {
+        return false
+      }
+
+      // Check if scheduled date is within this week
+      if (task.scheduled) {
+        try {
+          const scheduledDate = parseISO(task.scheduled)
+          if (isWithinInterval(scheduledDate, interval)) {
+            return true
+          }
+        } catch {
+          // Invalid date, skip
+        }
+      }
+
+      // Check if due date is within this week
+      if (task.due) {
+        try {
+          const dueDate = parseISO(task.due)
+          if (isWithinInterval(dueDate, interval)) {
+            return true
+          }
+        } catch {
+          // Invalid date, skip
+        }
+      }
+
+      return false
+    })
+  }, [data.tasks, viewMode])
 
   // Get context (project/area names and IDs) for a task
   const getTaskContext = React.useCallback(
@@ -101,19 +148,46 @@ export function WeekView({
 
   return (
     <div className="h-full flex flex-col">
-      <WeekCalendar
-        tasks={data.tasks}
-        getTaskById={getTaskById}
-        getTaskContext={getTaskContext}
-        onTaskScheduleChange={handleScheduleChange}
-        onTaskStatusChange={handleStatusChange}
-        onTaskTitleChange={handleTitleChange}
-        onTaskDueChange={handleDueChange}
-        onTaskOpenDetail={handleOpenDetail}
-        onNavigateToProject={onNavigateToProject}
-        onNavigateToArea={onNavigateToArea}
-        className="flex-1"
-      />
+      {/* View Toggle Header */}
+      <div className="flex items-center justify-end mb-4">
+        <ViewToggle
+          value={viewMode}
+          onChange={setViewMode}
+          availableModes={["calendar", "kanban"]}
+        />
+      </div>
+
+      {viewMode === "calendar" ? (
+        <WeekCalendar
+          tasks={data.tasks}
+          getTaskById={getTaskById}
+          getTaskContext={getTaskContext}
+          onTaskScheduleChange={handleScheduleChange}
+          onTaskStatusChange={handleStatusChange}
+          onTaskTitleChange={handleTitleChange}
+          onTaskDueChange={handleDueChange}
+          onTaskOpenDetail={handleOpenDetail}
+          onNavigateToProject={onNavigateToProject}
+          onNavigateToArea={onNavigateToArea}
+          className="flex-1"
+        />
+      ) : (
+        <KanbanBoard
+          tasks={thisWeekTasks}
+          collapsedColumns={collapsedColumns}
+          onColumnCollapseChange={toggleColumn}
+          onTaskStatusChange={handleStatusChange}
+          getTaskById={getTaskById}
+          getProjectName={(projectId) => getProjectById(projectId)?.title}
+          getAreaName={(areaId) => getAreaById(areaId)?.title}
+          onTaskTitleChange={handleTitleChange}
+          onTaskScheduledChange={handleScheduleChange}
+          onTaskDueChange={handleDueChange}
+          onTaskEditClick={handleOpenDetail}
+          onProjectClick={onNavigateToProject}
+          onAreaClick={onNavigateToArea}
+        />
+      )}
     </div>
   )
 }

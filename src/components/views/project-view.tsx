@@ -6,6 +6,8 @@ import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
 import { DraggableTaskList } from "@/components/tasks/task-list"
 import { MarkdownPreview } from "@/components/ui/markdown-preview"
+import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
+import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
 import type { Task } from "@/types/data"
 
 interface ProjectViewProps {
@@ -14,11 +16,18 @@ interface ProjectViewProps {
 
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
+  const { collapsedColumns, toggleColumn } = useCollapsedColumns()
 
   const {
     getProjectById,
+    getTaskById,
+    getAreaById,
     getTasksByProjectId,
     updateTaskTitle,
+    updateTaskStatus,
+    updateTaskScheduled,
+    updateTaskDue,
     toggleTaskStatus,
     reorderProjectTasks,
   } = useAppData()
@@ -91,23 +100,52 @@ export function ProjectView({ projectId }: ProjectViewProps) {
         </section>
       )}
 
-      {/* Task List */}
+      {/* Tasks Section */}
       <section>
-        <h2 className="text-sm font-medium text-muted-foreground mb-3">
-          Tasks
-        </h2>
-        <DraggableTaskList
-          tasks={tasks}
-          projectId={projectId}
-          onTasksReorder={handleTasksReorder}
-          onTaskTitleChange={handleTaskTitleChange}
-          onTaskStatusToggle={handleTaskStatusToggle}
-          onTaskOpenDetail={openTask}
-        />
-        {tasks.length === 0 && (
-          <p className="text-muted-foreground text-sm">
-            No tasks in this project yet.
-          </p>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            Tasks
+          </h2>
+          <ViewToggle
+            value={viewMode}
+            onChange={setViewMode}
+            availableModes={["list", "kanban"]}
+          />
+        </div>
+
+        {viewMode === "list" ? (
+          <>
+            <DraggableTaskList
+              tasks={tasks}
+              projectId={projectId}
+              onTasksReorder={handleTasksReorder}
+              onTaskTitleChange={handleTaskTitleChange}
+              onTaskStatusToggle={handleTaskStatusToggle}
+              onTaskOpenDetail={openTask}
+            />
+            {tasks.length === 0 && (
+              <p className="text-muted-foreground text-sm">
+                No tasks in this project yet.
+              </p>
+            )}
+          </>
+        ) : (
+          <KanbanBoard
+            tasks={tasks}
+            collapsedColumns={collapsedColumns}
+            onColumnCollapseChange={toggleColumn}
+            onTaskStatusChange={updateTaskStatus}
+            onTasksReorder={(_status, reorderedTasks) => {
+              // For project view, we reorder by project
+              reorderProjectTasks(projectId, reorderedTasks.map((t) => t.id))
+            }}
+            getTaskById={getTaskById}
+            getAreaName={(areaId) => getAreaById(areaId)?.title}
+            onTaskTitleChange={updateTaskTitle}
+            onTaskScheduledChange={updateTaskScheduled}
+            onTaskDueChange={updateTaskDue}
+            onTaskEditClick={openTask}
+          />
         )}
       </section>
     </div>

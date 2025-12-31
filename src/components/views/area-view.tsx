@@ -8,6 +8,8 @@ import { ProjectTaskGroup } from "@/components/tasks/project-task-group"
 import { TaskDndContext } from "@/components/tasks/task-dnd-context"
 import { ProjectCard } from "@/components/cards/project-card"
 import { MarkdownPreview } from "@/components/ui/markdown-preview"
+import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
+import { AreaKanbanBoard, useAreaCollapsedColumns } from "@/components/kanban"
 import type { Task, Project } from "@/types/data"
 
 /** Active statuses for project cards grid */
@@ -20,6 +22,8 @@ interface AreaViewProps {
 
 export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
+  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
+  const { collapsedColumns, toggleColumn } = useAreaCollapsedColumns()
 
   const {
     getAreaById,
@@ -28,6 +32,10 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     getProjectCompletion,
     getTaskById,
     updateTaskTitle,
+    updateTaskStatus,
+    updateTaskScheduled,
+    updateTaskDue,
+    updateTaskProject,
     toggleTaskStatus,
     reorderProjectTasks,
     moveTaskToProject,
@@ -123,8 +131,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
         </section>
       )}
 
-      {/* Active Projects Grid */}
-      {activeProjects.length > 0 && (
+      {/* Active Projects Grid - only show in list view */}
+      {viewMode === "list" && activeProjects.length > 0 && (
         <section>
           <h2 className="text-sm font-medium text-muted-foreground mb-3">
             Active Projects
@@ -148,47 +156,72 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
         </section>
       )}
 
-      {/* Projects with their tasks - wrapped in shared DndContext */}
-      <TaskDndContext
-        tasksByProject={tasksByProject}
-        onTaskMove={handleTaskMove}
-        onTasksReorder={handleTasksReorder}
-        getTaskById={getTaskById}
-      >
-        <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            All Projects
+      {/* View Toggle and Content */}
+      <section>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-medium text-muted-foreground">
+            {viewMode === "list" ? "All Projects" : "Tasks by Status"}
           </h2>
-          <div className="space-y-4">
-            {projects.map((project) => {
-              const tasks = tasksByProject.get(project.id) ?? []
-              const completion = getProjectCompletion(project.id)
+          <ViewToggle
+            value={viewMode}
+            onChange={setViewMode}
+            availableModes={["list", "kanban"]}
+          />
+        </div>
 
-              return (
-                <ProjectTaskGroup
-                  key={project.id}
-                  project={project}
-                  tasks={tasks}
-                  completion={completion}
-                  onOpenProject={() => onNavigateToProject(project.id)}
-                  onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
-                  onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
-                  onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
-                  onTaskOpenDetail={openTask}
-                  showScheduled={true}
-                  showDue={true}
-                />
-              )
-            })}
+        {viewMode === "list" ? (
+          <TaskDndContext
+            tasksByProject={tasksByProject}
+            onTaskMove={handleTaskMove}
+            onTasksReorder={handleTasksReorder}
+            getTaskById={getTaskById}
+          >
+            <div className="space-y-4">
+              {projects.map((project) => {
+                const tasks = tasksByProject.get(project.id) ?? []
+                const completion = getProjectCompletion(project.id)
 
-            {projects.length === 0 && (
-              <p className="text-muted-foreground text-sm">
-                No projects in this area yet.
-              </p>
-            )}
-          </div>
-        </section>
-      </TaskDndContext>
+                return (
+                  <ProjectTaskGroup
+                    key={project.id}
+                    project={project}
+                    tasks={tasks}
+                    completion={completion}
+                    onOpenProject={() => onNavigateToProject(project.id)}
+                    onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
+                    onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
+                    onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
+                    onTaskOpenDetail={openTask}
+                    showScheduled={true}
+                    showDue={true}
+                  />
+                )
+              })}
+
+              {projects.length === 0 && (
+                <p className="text-muted-foreground text-sm">
+                  No projects in this area yet.
+                </p>
+              )}
+            </div>
+          </TaskDndContext>
+        ) : (
+          <AreaKanbanBoard
+            projects={projects}
+            tasksByProject={tasksByProject}
+            collapsedColumns={collapsedColumns}
+            onColumnCollapseChange={toggleColumn}
+            onTaskStatusChange={updateTaskStatus}
+            onTaskProjectChange={updateTaskProject}
+            getTaskById={getTaskById}
+            onTaskTitleChange={updateTaskTitle}
+            onTaskScheduledChange={updateTaskScheduled}
+            onTaskDueChange={updateTaskDue}
+            onTaskEditClick={openTask}
+            onProjectClick={onNavigateToProject}
+          />
+        )}
+      </section>
     </div>
   )
 }
