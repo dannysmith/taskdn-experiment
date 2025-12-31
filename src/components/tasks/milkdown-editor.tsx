@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Editor, rootCtx, defaultValueCtx } from '@milkdown/kit/core'
+import { Editor, rootCtx, defaultValueCtx, editorViewOptionsCtx } from '@milkdown/kit/core'
 import { commonmark } from '@milkdown/kit/preset/commonmark'
 import { gfm } from '@milkdown/kit/preset/gfm'
 import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
@@ -191,7 +191,7 @@ function EditorCore({ defaultValue, onChange }: EditorCoreProps) {
 // Main Component
 // -----------------------------------------------------------------------------
 
-export function MilkdownEditor({
+function MilkdownEditor({
   editorKey,
   defaultValue,
   onChange,
@@ -240,3 +240,41 @@ export function MilkdownEditor({
     </div>
   )
 }
+
+// -----------------------------------------------------------------------------
+// Read-Only Preview Component
+// -----------------------------------------------------------------------------
+
+interface MilkdownPreviewProps {
+  content: string
+  className?: string
+}
+
+function PreviewCore({ content }: { content: string }) {
+  useEditor(
+    (root) =>
+      Editor.make()
+        .config((ctx) => {
+          ctx.set(rootCtx, root)
+          ctx.set(defaultValueCtx, content)
+          ctx.set(editorViewOptionsCtx, { editable: () => false })
+        })
+        .use(commonmark)
+        .use(gfm),
+    []
+  )
+
+  return <Milkdown />
+}
+
+export function MilkdownPreview({ content, className }: MilkdownPreviewProps) {
+  return (
+    <div className={cn('milkdown-preview', className)}>
+      <MilkdownProvider key={content}>
+        <PreviewCore content={content} />
+      </MilkdownProvider>
+    </div>
+  )
+}
+
+export default MilkdownEditor

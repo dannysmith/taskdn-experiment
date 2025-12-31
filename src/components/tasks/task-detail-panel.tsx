@@ -33,7 +33,7 @@ import {
 } from '@/components/ui/command'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 import { TaskStatusPill } from './task-status-pill'
-import { MilkdownEditor } from './milkdown-editor'
+import { LazyMilkdownEditor } from './lazy-milkdown-editor'
 
 // -----------------------------------------------------------------------------
 // Main Component
@@ -180,7 +180,7 @@ export function TaskDetailPanel() {
       {/* Notes - fills remaining space with card background */}
       <div className="flex-1 min-h-0 overflow-hidden p-3 pt-0">
         <div className="h-full bg-card rounded-lg border overflow-hidden">
-          <MilkdownEditor
+          <LazyMilkdownEditor
             editorKey={task.id}
             defaultValue={task.notes ?? ''}
             onChange={(value) => updateTaskNotes(task.id, value)}

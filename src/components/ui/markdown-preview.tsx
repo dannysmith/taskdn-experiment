@@ -1,5 +1,5 @@
-import Markdown from 'react-markdown'
 import { cn } from '@/lib/utils'
+import { LazyMilkdownPreview } from '@/components/tasks/lazy-milkdown-editor'
 
 interface MarkdownPreviewProps {
   content: string
@@ -7,13 +7,14 @@ interface MarkdownPreviewProps {
 }
 
 /**
- * Read-only markdown renderer using react-markdown.
- * Styled to match the Milkdown editor appearance.
+ * Read-only markdown renderer using Milkdown in read-only mode.
+ * Shares the same lazy-loaded chunk as the editor.
  */
 export function MarkdownPreview({ content, className }: MarkdownPreviewProps) {
   return (
-    <div className={cn('markdown-preview text-sm', className)}>
-      <Markdown>{content}</Markdown>
-    </div>
+    <LazyMilkdownPreview
+      content={content}
+      className={cn('markdown-preview text-sm', className)}
+    />
   )
 }

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useMemo } from 'react'
 import type { AppData, Area, Project, Task } from '@/types/data'
 import { appData as initialAppData } from '@/data/app-data'
 
@@ -45,6 +45,7 @@ interface AppDataContextValue {
   getOrphanProjects: () => Project[]
   getTasksByProjectId: (projectId: string) => Task[]
   getProjectCompletion: (projectId: string) => number
+  getTaskCounts: (projectId: string) => { taskCount: number; completedTaskCount: number }
   getActiveProjects: () => Project[]
   getActiveAreas: () => Area[]
   getAreaDirectTasks: (areaId: string) => Task[]
@@ -405,16 +406,43 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     [data.tasks]
   )
 
+  // Pre-computed project stats - O(T) once when tasks change, O(1) per lookup
+  const projectStats = useMemo(() => {
+    const stats = new Map<string, { total: number; completed: number }>()
+
+    for (const task of data.tasks) {
+      if (!task.projectId) continue
+
+      const existing = stats.get(task.projectId) ?? { total: 0, completed: 0 }
+      existing.total++
+      if (task.status === 'done' || task.status === 'dropped') {
+        existing.completed++
+      }
+      stats.set(task.projectId, existing)
+    }
+
+    return stats
+  }, [data.tasks])
+
+  // O(1) lookup instead of O(T)
   const getProjectCompletion = useCallback(
     (projectId: string): number => {
-      const tasks = data.tasks.filter((t) => t.projectId === projectId)
-      if (tasks.length === 0) return 0
-      const completedCount = tasks.filter(
-        (t) => t.status === 'done' || t.status === 'dropped'
-      ).length
-      return Math.round((completedCount / tasks.length) * 100)
+      const stats = projectStats.get(projectId)
+      if (!stats || stats.total === 0) return 0
+      return Math.round((stats.completed / stats.total) * 100)
     },
-    [data.tasks]
+    [projectStats]
+  )
+
+  const getTaskCounts = useCallback(
+    (projectId: string): { taskCount: number; completedTaskCount: number } => {
+      const stats = projectStats.get(projectId)
+      return {
+        taskCount: stats?.total ?? 0,
+        completedTaskCount: stats?.completed ?? 0,
+      }
+    },
+    [projectStats]
   )
 
   const getActiveProjects = useCallback((): Project[] => {
@@ -476,6 +504,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     getOrphanProjects,
     getTasksByProjectId,
     getProjectCompletion,
+    getTaskCounts,
     getActiveProjects,
     getActiveAreas,
     getAreaDirectTasks,
