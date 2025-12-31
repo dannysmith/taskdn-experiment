@@ -4,11 +4,11 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
+import { useViewMode } from "@/context/view-mode-context"
 import { ProjectTaskGroup } from "@/components/tasks/project-task-group"
 import { TaskDndContext } from "@/components/tasks/task-dnd-context"
 import { ProjectCard } from "@/components/cards/project-card"
 import { MarkdownPreview } from "@/components/ui/markdown-preview"
-import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
 import { AreaKanbanBoard, useAreaCollapsedColumns } from "@/components/kanban"
 import type { Task, Project } from "@/types/data"
 
@@ -22,7 +22,7 @@ interface AreaViewProps {
 
 export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
-  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
+  const { viewMode } = useViewMode("area")
   const { collapsedColumns, toggleColumn } = useAreaCollapsedColumns()
 
   const {
@@ -131,8 +131,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
         </section>
       )}
 
-      {/* Active Projects Grid - only show in list view */}
-      {viewMode === "list" && activeProjects.length > 0 && (
+      {/* Active Projects Grid */}
+      {activeProjects.length > 0 && (
         <section>
           <h2 className="text-sm font-medium text-muted-foreground mb-3">
             Active Projects
@@ -156,18 +156,11 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
         </section>
       )}
 
-      {/* View Toggle and Content */}
+      {/* Projects/Tasks Content */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            {viewMode === "list" ? "All Projects" : "Tasks by Status"}
-          </h2>
-          <ViewToggle
-            value={viewMode}
-            onChange={setViewMode}
-            availableModes={["list", "kanban"]}
-          />
-        </div>
+        <h2 className="text-sm font-medium text-muted-foreground mb-3">
+          {viewMode === "list" ? "All Projects" : "Tasks by Status"}
+        </h2>
 
         {viewMode === "list" ? (
           <TaskDndContext

@@ -7,14 +7,28 @@ import {
 } from "@/components/ui/sidebar"
 import { AppDataProvider, useAppData } from "@/context/app-data-context"
 import { TaskDetailProvider, useTaskDetail } from "@/context/task-detail-context"
+import { ViewModeProvider, useViewMode, type ViewModeKey } from "@/context/view-mode-context"
 import { TaskDetailPanel } from "@/components/tasks/task-detail-panel"
 import { ProjectStatusBadges } from "@/components/projects/project-status-badges"
 import { ProjectStatusPill } from "@/components/projects/project-status-pill"
+import { ViewToggle } from "@/components/ui/view-toggle"
 import type { Selection } from "@/types/selection"
+
+/** Get the view mode key for a selection (if it supports view toggling) */
+function getViewModeKey(selection: Selection | null): ViewModeKey | null {
+  if (!selection) return null
+  if (selection.type === "nav" && selection.id === "this-week") return "this-week"
+  if (selection.type === "project") return "project"
+  if (selection.type === "area") return "area"
+  return null
+}
 
 function AppContent() {
   const [selection, setSelection] = useState<Selection | null>(null)
   const { getAreaById, getProjectById, getProjectsByAreaId, updateProjectStatus } = useAppData()
+
+  // Get view mode for current selection (if applicable)
+  const viewModeKey = getViewModeKey(selection)
 
   // Get project status counts for the current area (if viewing an area)
   const projectStatusCounts = useMemo(() => {
@@ -71,6 +85,12 @@ function AppContent() {
               onStatusChange={(newStatus) => updateProjectStatus(currentProject.id, newStatus)}
             />
           )}
+          {/* View mode toggle - pushed to right */}
+          {viewModeKey && (
+            <div className="ml-auto">
+              <HeaderViewToggle viewModeKey={viewModeKey} />
+            </div>
+          )}
         </header>
         <main className="flex-1 overflow-y-auto p-6">
           <MainContent selection={selection} onSelectionChange={setSelection} />
@@ -92,11 +112,25 @@ function AppContent() {
   )
 }
 
+/** Small component to use the view mode hook (can't use hooks conditionally in AppContent) */
+function HeaderViewToggle({ viewModeKey }: { viewModeKey: ViewModeKey }) {
+  const { viewMode, setViewMode, availableModes } = useViewMode(viewModeKey)
+  return (
+    <ViewToggle
+      value={viewMode}
+      onChange={setViewMode}
+      availableModes={availableModes}
+    />
+  )
+}
+
 export function App() {
   return (
     <AppDataProvider>
       <TaskDetailProvider>
-        <AppContent />
+        <ViewModeProvider>
+          <AppContent />
+        </ViewModeProvider>
       </TaskDetailProvider>
     </AppDataProvider>
   )

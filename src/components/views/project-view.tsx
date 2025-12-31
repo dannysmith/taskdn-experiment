@@ -4,9 +4,9 @@ import { ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
+import { useViewMode } from "@/context/view-mode-context"
 import { DraggableTaskList } from "@/components/tasks/task-list"
 import { MarkdownPreview } from "@/components/ui/markdown-preview"
-import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
 import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
 import type { Task } from "@/types/data"
 
@@ -16,7 +16,7 @@ interface ProjectViewProps {
 
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
-  const [viewMode, setViewMode] = React.useState<ViewMode>("list")
+  const { viewMode } = useViewMode("project")
   const { collapsedColumns, toggleColumn } = useCollapsedColumns()
 
   const {
@@ -102,16 +102,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
 
       {/* Tasks Section */}
       <section>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-medium text-muted-foreground">
-            Tasks
-          </h2>
-          <ViewToggle
-            value={viewMode}
-            onChange={setViewMode}
-            availableModes={["list", "kanban"]}
-          />
-        </div>
+        <h2 className="text-sm font-medium text-muted-foreground mb-3">
+          Tasks
+        </h2>
 
         {viewMode === "list" ? (
           <>

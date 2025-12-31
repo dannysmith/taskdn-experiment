@@ -52,7 +52,7 @@ export function ViewToggle({
             key={mode}
             value={mode}
             aria-label={config.label}
-            className="data-[pressed]:bg-background data-[pressed]:shadow-sm"
+            className="data-[pressed]:bg-muted data-[pressed]:shadow-inner"
           >
             <Icon className="size-4" />
           </ToggleGroupItem>

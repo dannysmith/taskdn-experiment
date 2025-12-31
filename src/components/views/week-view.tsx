@@ -3,8 +3,8 @@ import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns"
 
 import { useAppData } from "@/context/app-data-context"
 import { useTaskDetail } from "@/context/task-detail-context"
+import { useViewMode } from "@/context/view-mode-context"
 import { WeekCalendar } from "@/components/calendar/week-calendar"
-import { ViewToggle, type ViewMode } from "@/components/ui/view-toggle"
 import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
 import type { Task, TaskStatus } from "@/types/data"
 
@@ -17,7 +17,7 @@ export function WeekView({
   onNavigateToProject,
   onNavigateToArea,
 }: WeekViewProps) {
-  const [viewMode, setViewMode] = React.useState<ViewMode>("calendar")
+  const { viewMode } = useViewMode("this-week")
   const { collapsedColumns, toggleColumn } = useCollapsedColumns()
 
   const {
@@ -148,15 +148,6 @@ export function WeekView({
 
   return (
     <div className="h-full flex flex-col">
-      {/* View Toggle Header */}
-      <div className="flex items-center justify-end mb-4">
-        <ViewToggle
-          value={viewMode}
-          onChange={setViewMode}
-          availableModes={["calendar", "kanban"]}
-        />
-      </div>
-
       {viewMode === "calendar" ? (
         <WeekCalendar
           tasks={data.tasks}
