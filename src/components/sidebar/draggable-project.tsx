@@ -1,14 +1,14 @@
-import * as React from "react"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { Ban, CircleCheck, CirclePause } from "lucide-react"
+import * as React from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { Ban, CircleCheck, CirclePause } from 'lucide-react'
 
-import { ProgressCircle } from "@/components/ui/progress-circle"
-import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
-import type { Project, ProjectStatus } from "@/types/data"
-import { getDragId } from "@/types/sidebar-order"
-import type { DragItem } from "@/types/sidebar-order"
+import { ProgressCircle } from '@/components/ui/progress-circle'
+import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar'
+import { cn } from '@/lib/utils'
+import type { Project, ProjectStatus } from '@/types/data'
+import { getDragId } from '@/types/sidebar-order'
+import type { DragItem } from '@/types/sidebar-order'
 
 // -----------------------------------------------------------------------------
 // Status Indicator
@@ -19,17 +19,20 @@ interface ProjectStatusIndicatorProps {
   completion: number
 }
 
-export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndicatorProps) {
-  const iconClass = "size-4 shrink-0"
+export function ProjectStatusIndicator({
+  status,
+  completion,
+}: ProjectStatusIndicatorProps) {
+  const iconClass = 'size-4 shrink-0'
 
   switch (status) {
-    case "blocked":
+    case 'blocked':
       return <Ban className={`${iconClass} text-status-blocked`} />
-    case "paused":
+    case 'paused':
       return <CirclePause className={`${iconClass} text-status-paused`} />
-    case "done":
+    case 'done':
       return <CircleCheck className={`${iconClass} text-status-done`} />
-    case "planning":
+    case 'planning':
       return (
         <ProgressCircle
           value={completion}
@@ -38,7 +41,7 @@ export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndi
           className={`${iconClass} text-status-planning`}
         />
       )
-    case "ready":
+    case 'ready':
       return (
         <ProgressCircle
           value={completion}
@@ -47,7 +50,7 @@ export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndi
           className={`${iconClass} text-status-ready`}
         />
       )
-    case "in-progress":
+    case 'in-progress':
     default:
       return (
         <ProgressCircle
@@ -60,11 +63,13 @@ export function ProjectStatusIndicator({ status, completion }: ProjectStatusIndi
   }
 }
 
-export function getProjectTitleClass(status: ProjectStatus | undefined): string {
-  if (status === "done" || status === "paused") {
-    return "text-muted-foreground"
+export function getProjectTitleClass(
+  status: ProjectStatus | undefined
+): string {
+  if (status === 'done' || status === 'paused') {
+    return 'text-muted-foreground'
   }
-  return ""
+  return ''
 }
 
 // -----------------------------------------------------------------------------
@@ -86,7 +91,7 @@ export function DraggableProject({
   onSelect,
   completion,
 }: DraggableProjectProps) {
-  const dragId = getDragId("project", project.id)
+  const dragId = getDragId('project', project.id)
 
   const {
     attributes,
@@ -98,7 +103,7 @@ export function DraggableProject({
   } = useSortable({
     id: dragId,
     data: {
-      type: "project",
+      type: 'project',
       id: project.id,
       containerId,
     } satisfies DragItem,
@@ -113,7 +118,7 @@ export function DraggableProject({
     <SidebarMenuItem
       ref={setNodeRef}
       style={style}
-      className={cn(isDragging && "opacity-50 z-50")}
+      className={cn(isDragging && 'opacity-50 z-50')}
       {...attributes}
       {...listeners}
     >
@@ -123,8 +128,11 @@ export function DraggableProject({
         isActive={isSelected}
         onClick={onSelect}
       >
-        <ProjectStatusIndicator status={project.status} completion={completion} />
-        <span className={cn("truncate", getProjectTitleClass(project.status))}>
+        <ProjectStatusIndicator
+          status={project.status}
+          completion={completion}
+        />
+        <span className={cn('truncate', getProjectTitleClass(project.status))}>
           {project.title}
         </span>
       </SidebarMenuButton>

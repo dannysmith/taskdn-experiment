@@ -1,14 +1,14 @@
-import * as React from "react"
-import { ChevronDown } from "lucide-react"
+import * as React from 'react'
+import { ChevronDown } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { useViewMode } from "@/context/view-mode-context"
-import { DraggableTaskList } from "@/components/tasks/task-list"
-import { MarkdownPreview } from "@/components/ui/markdown-preview"
-import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
-import type { Task } from "@/types/data"
+import { cn } from '@/lib/utils'
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { useViewMode } from '@/context/view-mode-context'
+import { DraggableTaskList } from '@/components/tasks/task-list'
+import { MarkdownPreview } from '@/components/ui/markdown-preview'
+import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
+import type { Task } from '@/types/data'
 
 interface ProjectViewProps {
   projectId: string
@@ -16,7 +16,7 @@ interface ProjectViewProps {
 
 export function ProjectView({ projectId }: ProjectViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
-  const { viewMode } = useViewMode("project")
+  const { viewMode } = useViewMode('project')
   const { collapsedColumns, toggleColumn } = useCollapsedColumns()
 
   const {
@@ -35,28 +35,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   const { openTask } = useTaskDetail()
 
   const project = getProjectById(projectId)
-
-  if (!project) {
-    return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">Project not found.</p>
-      </div>
-    )
-  }
-
   const tasks = getTasksByProjectId(projectId)
-
-  const handleTasksReorder = (reorderedTasks: Task[]) => {
-    reorderProjectTasks(projectId, reorderedTasks.map(t => t.id))
-  }
-
-  const handleTaskTitleChange = (taskId: string, newTitle: string) => {
-    updateTaskTitle(taskId, newTitle)
-  }
-
-  const handleTaskStatusToggle = (taskId: string) => {
-    toggleTaskStatus(taskId)
-  }
 
   const handleCreateTask = React.useCallback(
     (afterTaskId: string | null) => {
@@ -67,6 +46,29 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     },
     [createTask, projectId]
   )
+
+  if (!project) {
+    return (
+      <div className="space-y-4">
+        <p className="text-muted-foreground">Project not found.</p>
+      </div>
+    )
+  }
+
+  const handleTasksReorder = (reorderedTasks: Task[]) => {
+    reorderProjectTasks(
+      projectId,
+      reorderedTasks.map((t) => t.id)
+    )
+  }
+
+  const handleTaskTitleChange = (taskId: string, newTitle: string) => {
+    updateTaskTitle(taskId, newTitle)
+  }
+
+  const handleTaskStatusToggle = (taskId: string) => {
+    toggleTaskStatus(taskId)
+  }
 
   return (
     <div className="space-y-6">
@@ -79,8 +81,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           >
             <ChevronDown
               className={cn(
-                "size-4 text-muted-foreground shrink-0 transition-transform duration-200",
-                !notesExpanded && "-rotate-90"
+                'size-4 text-muted-foreground shrink-0 transition-transform duration-200',
+                !notesExpanded && '-rotate-90'
               )}
             />
             <span className="text-sm font-medium text-muted-foreground">
@@ -89,8 +91,8 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           </button>
           <div
             className={cn(
-              "overflow-hidden transition-all duration-200",
-              notesExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+              'overflow-hidden transition-all duration-200',
+              notesExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
             )}
           >
             <div className="px-4 pb-4">
@@ -104,7 +106,11 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           {!notesExpanded && (
             <div className="px-4 pb-3 -mt-1">
               <p className="text-sm text-muted-foreground/70 line-clamp-2">
-                {project.notes.split('\n').filter(line => line.trim() && !line.startsWith('#')).slice(0, 2).join(' ')}
+                {project.notes
+                  .split('\n')
+                  .filter((line) => line.trim() && !line.startsWith('#'))
+                  .slice(0, 2)
+                  .join(' ')}
               </p>
             </div>
           )}
@@ -117,7 +123,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
           Tasks
         </h2>
 
-        {viewMode === "list" ? (
+        {viewMode === 'list' ? (
           <>
             <DraggableTaskList
               tasks={tasks}
@@ -142,7 +148,10 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             onTaskStatusChange={updateTaskStatus}
             onTasksReorder={(_status, reorderedTasks) => {
               // For project view, we reorder by project
-              reorderProjectTasks(projectId, reorderedTasks.map((t) => t.id))
+              reorderProjectTasks(
+                projectId,
+                reorderedTasks.map((t) => t.id)
+              )
             }}
             getTaskById={getTaskById}
             getAreaName={(areaId) => getAreaById(areaId)?.title}

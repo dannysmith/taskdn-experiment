@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,7 +11,7 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
+} from '@dnd-kit/core'
 import {
   startOfMonth,
   endOfMonth,
@@ -25,21 +25,21 @@ import {
   isBefore,
   startOfDay,
   isSameMonth,
-} from "date-fns"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+} from 'date-fns'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
 import {
   parseCalendarTaskDragId,
   type CalendarTaskDragData,
   type DayDropData,
-} from "@/types/calendar-order"
-import { useCalendarOrder } from "@/hooks/use-calendar-order"
-import { Button } from "@/components/ui/button"
-import type { TaskCardVariant } from "@/components/cards/task-card"
-import { MonthDayCell } from "./month-day-cell"
-import { TaskCardDragPreview } from "./draggable-task-card"
+} from '@/types/calendar-order'
+import { useCalendarOrder } from '@/hooks/use-calendar-order'
+import { Button } from '@/components/ui/button'
+import type { TaskCardVariant } from '@/components/cards/task-card'
+import { MonthDayCell } from './month-day-cell'
+import { TaskCardDragPreview } from './draggable-task-card'
 
 interface DragState {
   taskId: string
@@ -119,7 +119,7 @@ export function MonthCalendar({
 
   // Date strings for all displayed days
   const dateStrings = React.useMemo(
-    () => calendarDays.map((d) => format(d, "yyyy-MM-dd")),
+    () => calendarDays.map((d) => format(d, 'yyyy-MM-dd')),
     [calendarDays]
   )
 
@@ -134,7 +134,7 @@ export function MonthCalendar({
 
     for (const task of tasks) {
       // Skip dropped tasks, but keep done tasks
-      if (task.status === "dropped") continue
+      if (task.status === 'dropped') continue
 
       // Determine which date to show this task on
       let displayDate: Date | null = null
@@ -147,7 +147,7 @@ export function MonthCalendar({
 
       if (!displayDate) continue
 
-      const dateKey = format(displayDate, "yyyy-MM-dd")
+      const dateKey = format(displayDate, 'yyyy-MM-dd')
       if (map.has(dateKey)) {
         const existing = map.get(dateKey) ?? []
         map.set(dateKey, [...existing, task])
@@ -159,23 +159,23 @@ export function MonthCalendar({
 
   // Determine task card variant based on task state
   const getTaskVariant = React.useCallback((task: Task): TaskCardVariant => {
-    if (task.status === "done") {
-      return "done"
+    if (task.status === 'done') {
+      return 'done'
     }
 
     if (task.deferUntil && !task.scheduled) {
-      return "deferred"
+      return 'deferred'
     }
 
     if (task.scheduled && task.due) {
       const dueDate = startOfDay(new Date(task.due))
       const today = startOfDay(new Date())
       if (isBefore(dueDate, today) || isToday(dueDate)) {
-        return "overdue"
+        return 'overdue'
       }
     }
 
-    return "default"
+    return 'default'
   }, [])
 
   // Get tasks for a specific date (callback for order hook)
@@ -217,14 +217,14 @@ export function MonthCalendar({
   // Drop animation
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
   // DnD Handlers
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current as CalendarTaskDragData | undefined
-    if (data?.type === "calendar-task") {
+    if (data?.type === 'calendar-task') {
       const task = getTaskById(data.taskId)
       if (task) {
         setDragState({
@@ -253,14 +253,16 @@ export function MonthCalendar({
     if (!overData) return
 
     let overDate: string | null = null
-    if (overData.type === "day") {
+    if (overData.type === 'day') {
       overDate = overData.date
-    } else if (overData.type === "calendar-task") {
+    } else if (overData.type === 'calendar-task') {
       overDate = overData.sourceDate
     }
 
     if (overDate !== dragState.currentOverDate) {
-      setDragState((prev) => (prev ? { ...prev, currentOverDate: overDate } : null))
+      setDragState((prev) =>
+        prev ? { ...prev, currentOverDate: overDate } : null
+      )
     }
   }
 
@@ -292,14 +294,14 @@ export function MonthCalendar({
     const { taskId: activeTaskId } = parsedActive
     const sourceDate = dragState.sourceDate
 
-    if (overData.type === "day") {
+    if (overData.type === 'day') {
       const targetDate = overData.date
 
       if (targetDate !== sourceDate) {
         moveTaskToDay(activeTaskId, sourceDate, targetDate)
         onTaskScheduleChange(activeTaskId, targetDate)
       }
-    } else if (overData.type === "calendar-task") {
+    } else if (overData.type === 'calendar-task') {
       const targetDate = overData.sourceDate
       const overTaskId = overData.taskId
 
@@ -322,7 +324,7 @@ export function MonthCalendar({
   }
 
   // Month/year display
-  const monthYear = format(currentMonth, "MMMM yyyy")
+  const monthYear = format(currentMonth, 'MMMM yyyy')
 
   // Group days into weeks for grid
   const weeks: Date[][] = []
@@ -331,7 +333,7 @@ export function MonthCalendar({
   }
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn('flex flex-col h-full', className)}>
       {/* Header with navigation */}
       <div className="flex items-center justify-between pb-4">
         <h2 className="text-lg font-semibold">{monthYear}</h2>
@@ -360,7 +362,7 @@ export function MonthCalendar({
         <div className="flex-1 border border-border rounded-lg overflow-hidden flex flex-col">
           {/* Day headers */}
           <div className="grid grid-cols-7 border-b border-border/50 bg-muted/30">
-            {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
               <div
                 key={day}
                 className="px-2 py-2 text-xs font-medium text-muted-foreground uppercase text-center"
@@ -378,7 +380,7 @@ export function MonthCalendar({
                 className="grid grid-cols-7 border-b border-border/30 last:border-b-0"
               >
                 {week.map((day) => {
-                  const dateKey = format(day, "yyyy-MM-dd")
+                  const dateKey = format(day, 'yyyy-MM-dd')
                   const rawTasks = tasksByDate.get(dateKey) ?? []
                   const orderedTasks = getOrderedTasks(dateKey, rawTasks)
                   const isCurrentMonth = isSameMonth(day, currentMonth)
@@ -393,7 +395,11 @@ export function MonthCalendar({
                       getTaskVariant={getTaskVariant}
                       onTaskStatusChange={handleStatusChange}
                       onTaskOpenDetail={onTaskOpenDetail}
-                      onCreateTask={onCreateTask ? () => handleCreateTask(dateKey) : undefined}
+                      onCreateTask={
+                        onCreateTask
+                          ? () => handleCreateTask(dateKey)
+                          : undefined
+                      }
                       editingTaskId={editingTaskId}
                       isDropTarget={isDropTarget}
                     />
@@ -406,7 +412,9 @@ export function MonthCalendar({
 
         {/* Drag overlay */}
         <DragOverlay dropAnimation={dropAnimation}>
-          {dragState && <TaskCardDragPreview task={dragState.task} size="compact" />}
+          {dragState && (
+            <TaskCardDragPreview task={dragState.task} size="compact" />
+          )}
         </DragOverlay>
       </DndContext>
     </div>

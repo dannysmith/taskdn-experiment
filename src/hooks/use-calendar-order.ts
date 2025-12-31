@@ -1,7 +1,7 @@
-import { useState, useCallback, useEffect } from "react"
-import { arrayMove } from "@dnd-kit/sortable"
-import type { Task } from "@/types/data"
-import type { CalendarOrder } from "@/types/calendar-order"
+import { useState, useCallback, useEffect } from 'react'
+import { arrayMove } from '@dnd-kit/sortable'
+import type { Task } from '@/types/data'
+import type { CalendarOrder } from '@/types/calendar-order'
 
 interface UseCalendarOrderOptions {
   /** Tasks to derive initial order from */
@@ -42,7 +42,7 @@ export function useCalendarOrder({
   useEffect(() => {
     setOrder(initializeOrderFromData())
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dates.join(",")])
+  }, [dates.join(',')])
 
   // Sync order when tasks change (e.g., task added/removed)
   // Add new tasks to end, remove deleted tasks from order

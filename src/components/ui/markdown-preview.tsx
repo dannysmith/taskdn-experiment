@@ -1,5 +1,5 @@
-import Markdown from "react-markdown"
-import { cn } from "@/lib/utils"
+import Markdown from 'react-markdown'
+import { cn } from '@/lib/utils'
 
 interface MarkdownPreviewProps {
   content: string
@@ -12,7 +12,7 @@ interface MarkdownPreviewProps {
  */
 export function MarkdownPreview({ content, className }: MarkdownPreviewProps) {
   return (
-    <div className={cn("markdown-preview text-sm", className)}>
+    <div className={cn('markdown-preview text-sm', className)}>
       <Markdown>{content}</Markdown>
     </div>
   )

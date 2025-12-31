@@ -7,7 +7,7 @@
 // Area
 // -----------------------------------------------------------------------------
 
-export type AreaStatus = "active" | "archived"
+export type AreaStatus = 'active' | 'archived'
 
 export interface Area {
   id: string
@@ -26,12 +26,12 @@ export interface Area {
 // -----------------------------------------------------------------------------
 
 export type ProjectStatus =
-  | "planning"
-  | "ready"
-  | "blocked"
-  | "in-progress"
-  | "paused"
-  | "done"
+  | 'planning'
+  | 'ready'
+  | 'blocked'
+  | 'in-progress'
+  | 'paused'
+  | 'done'
 
 export interface Project {
   id: string
@@ -50,13 +50,13 @@ export interface Project {
 // -----------------------------------------------------------------------------
 
 export type TaskStatus =
-  | "inbox"
-  | "icebox"
-  | "ready"
-  | "in-progress"
-  | "blocked"
-  | "dropped"
-  | "done"
+  | 'inbox'
+  | 'icebox'
+  | 'ready'
+  | 'in-progress'
+  | 'blocked'
+  | 'dropped'
+  | 'done'
 
 export interface Task {
   id: string

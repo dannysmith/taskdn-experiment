@@ -10,17 +10,21 @@ export function formatRelativeDate(dateString: string): string {
 
   // Normalize to start of day for comparison
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const todayDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  )
 
   const diffTime = dateDay.getTime() - todayDay.getTime()
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24))
 
   // Today, yesterday, tomorrow
-  if (diffDays === 0) return "Today"
-  if (diffDays === 1) return "Tomorrow"
-  if (diffDays === -1) return "Yesterday"
+  if (diffDays === 0) return 'Today'
+  if (diffDays === 1) return 'Tomorrow'
+  if (diffDays === -1) return 'Yesterday'
 
-  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const dayName = dayNames[date.getDay()]
 
   // Within the past week
@@ -34,8 +38,20 @@ export function formatRelativeDate(dateString: string): string {
   }
 
   // Further out - use short month format
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
   return `${months[date.getMonth()]} ${date.getDate()}`
 }
 
@@ -47,7 +63,11 @@ export function isOverdue(dateString: string): boolean {
   const today = new Date()
 
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const todayDay = new Date(today.getFullYear(), today.getMonth(), today.getDate())
+  const todayDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  )
 
   return dateDay < todayDay
 }
@@ -59,7 +79,9 @@ export function isToday(dateString: string): boolean {
   const date = new Date(dateString)
   const today = new Date()
 
-  return date.getFullYear() === today.getFullYear() &&
-         date.getMonth() === today.getMonth() &&
-         date.getDate() === today.getDate()
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  )
 }

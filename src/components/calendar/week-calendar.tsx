@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,7 +11,7 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
+} from '@dnd-kit/core'
 import {
   startOfWeek,
   endOfWeek,
@@ -23,21 +23,21 @@ import {
   isToday,
   isBefore,
   startOfDay,
-} from "date-fns"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+} from 'date-fns'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
 import {
   parseCalendarTaskDragId,
   type CalendarTaskDragData,
   type DayDropData,
-} from "@/types/calendar-order"
-import { useCalendarOrder } from "@/hooks/use-calendar-order"
-import { Button } from "@/components/ui/button"
-import type { TaskCardVariant } from "@/components/cards/task-card"
-import { DayColumn } from "./day-column"
-import { TaskCardDragPreview } from "./draggable-task-card"
+} from '@/types/calendar-order'
+import { useCalendarOrder } from '@/hooks/use-calendar-order'
+import { Button } from '@/components/ui/button'
+import type { TaskCardVariant } from '@/components/cards/task-card'
+import { DayColumn } from './day-column'
+import { TaskCardDragPreview } from './draggable-task-card'
 
 interface DragState {
   taskId: string
@@ -100,8 +100,8 @@ export function WeekCalendar({
   onCreateTask,
   className,
 }: WeekCalendarProps) {
-  const [currentWeekStart, setCurrentWeekStart] = React.useState(() =>
-    startOfWeek(new Date(), { weekStartsOn: 1 }) // Monday
+  const [currentWeekStart, setCurrentWeekStart] = React.useState(
+    () => startOfWeek(new Date(), { weekStartsOn: 1 }) // Monday
   )
   const [dragState, setDragState] = React.useState<DragState | null>(null)
   const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
@@ -139,7 +139,7 @@ export function WeekCalendar({
 
   // Date strings for the week (used by order hook)
   const weekDateStrings = React.useMemo(
-    () => weekDays.map((d) => format(d, "yyyy-MM-dd")),
+    () => weekDays.map((d) => format(d, 'yyyy-MM-dd')),
     [weekDays]
   )
 
@@ -149,12 +149,12 @@ export function WeekCalendar({
 
     // Initialize all days of the week
     for (const day of weekDays) {
-      map.set(format(day, "yyyy-MM-dd"), [])
+      map.set(format(day, 'yyyy-MM-dd'), [])
     }
 
     for (const task of tasks) {
       // Skip dropped tasks, but keep done tasks
-      if (task.status === "dropped") continue
+      if (task.status === 'dropped') continue
 
       // Determine which date to show this task on
       let displayDate: Date | null = null
@@ -171,7 +171,7 @@ export function WeekCalendar({
 
       const matchingDay = weekDays.find((day) => isSameDay(day, displayDate!))
       if (matchingDay) {
-        const dateKey = format(matchingDay, "yyyy-MM-dd")
+        const dateKey = format(matchingDay, 'yyyy-MM-dd')
         const existing = map.get(dateKey) ?? []
         map.set(dateKey, [...existing, task])
       }
@@ -186,17 +186,17 @@ export function WeekCalendar({
 
     // Initialize all days of the week
     for (const day of weekDays) {
-      map.set(format(day, "yyyy-MM-dd"), [])
+      map.set(format(day, 'yyyy-MM-dd'), [])
     }
 
     for (const task of tasks) {
-      if (task.status === "done" || task.status === "dropped") continue
+      if (task.status === 'done' || task.status === 'dropped') continue
       if (!task.due) continue
 
       const dueDate = new Date(task.due)
       const matchingDay = weekDays.find((day) => isSameDay(day, dueDate))
       if (matchingDay) {
-        const dateKey = format(matchingDay, "yyyy-MM-dd")
+        const dateKey = format(matchingDay, 'yyyy-MM-dd')
         const existing = map.get(dateKey) ?? []
         map.set(dateKey, [...existing, task])
       }
@@ -208,13 +208,13 @@ export function WeekCalendar({
   // Determine task card variant based on task state
   const getTaskVariant = React.useCallback((task: Task): TaskCardVariant => {
     // Done tasks get green styling
-    if (task.status === "done") {
-      return "done"
+    if (task.status === 'done') {
+      return 'done'
     }
 
     // Deferred tasks (has deferUntil but no scheduled)
     if (task.deferUntil && !task.scheduled) {
-      return "deferred"
+      return 'deferred'
     }
 
     // Overdue tasks (has scheduled AND due date is today or in past)
@@ -222,11 +222,11 @@ export function WeekCalendar({
       const dueDate = startOfDay(new Date(task.due))
       const today = startOfDay(new Date())
       if (isBefore(dueDate, today) || isToday(dueDate)) {
-        return "overdue"
+        return 'overdue'
       }
     }
 
-    return "default"
+    return 'default'
   }, [])
 
   // Get tasks for a specific date (callback for order hook)
@@ -268,14 +268,14 @@ export function WeekCalendar({
   // Drop animation
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
   // DnD Handlers
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current as CalendarTaskDragData | undefined
-    if (data?.type === "calendar-task") {
+    if (data?.type === 'calendar-task') {
       const task = getTaskById(data.taskId)
       if (task) {
         setDragState({
@@ -293,24 +293,29 @@ export function WeekCalendar({
 
     const { over } = event
     if (!over) {
-      setDragState((prev) => prev ? { ...prev, currentOverDate: null } : null)
+      setDragState((prev) => (prev ? { ...prev, currentOverDate: null } : null))
       return
     }
 
-    const overData = over.data.current as DayDropData | CalendarTaskDragData | undefined
+    const overData = over.data.current as
+      | DayDropData
+      | CalendarTaskDragData
+      | undefined
     if (!overData) return
 
     // Determine which date we're over
     let overDate: string | null = null
-    if (overData.type === "day") {
+    if (overData.type === 'day') {
       overDate = overData.date
-    } else if (overData.type === "calendar-task") {
+    } else if (overData.type === 'calendar-task') {
       // If hovering over another task, use its date
       overDate = overData.sourceDate
     }
 
     if (overDate !== dragState.currentOverDate) {
-      setDragState((prev) => prev ? { ...prev, currentOverDate: overDate } : null)
+      setDragState((prev) =>
+        prev ? { ...prev, currentOverDate: overDate } : null
+      )
     }
   }
 
@@ -344,7 +349,7 @@ export function WeekCalendar({
     const sourceDate = dragState.sourceDate
 
     // Determine target date and handling based on drop target type
-    if (overData.type === "day") {
+    if (overData.type === 'day') {
       // Dropped on a day container (not on a specific task)
       const targetDate = overData.date
 
@@ -354,7 +359,7 @@ export function WeekCalendar({
         onTaskScheduleChange(activeTaskId, targetDate)
       }
       // If same day and dropped on container, no reorder needed
-    } else if (overData.type === "calendar-task") {
+    } else if (overData.type === 'calendar-task') {
       // Dropped on another task
       const targetDate = overData.sourceDate
       const overTaskId = overData.taskId
@@ -380,10 +385,10 @@ export function WeekCalendar({
   }
 
   // Month/year display
-  const monthYear = format(currentWeekStart, "MMMM yyyy")
+  const monthYear = format(currentWeekStart, 'MMMM yyyy')
 
   return (
-    <div className={cn("flex flex-col h-full", className)}>
+    <div className={cn('flex flex-col h-full', className)}>
       {/* Header with navigation */}
       <div className="flex items-center justify-between pb-4">
         <h2 className="text-lg font-semibold">{monthYear}</h2>
@@ -412,7 +417,7 @@ export function WeekCalendar({
         <div className="flex-1 border border-border rounded-lg overflow-hidden">
           <div className="grid grid-cols-7 h-full">
             {weekDays.map((day) => {
-              const dateKey = format(day, "yyyy-MM-dd")
+              const dateKey = format(day, 'yyyy-MM-dd')
               const rawTasks = tasksByDate.get(dateKey) ?? []
               const orderedTasks = getOrderedTasks(dateKey, rawTasks)
               const dueOnDay = tasksDueByDate.get(dateKey) ?? []
@@ -433,7 +438,9 @@ export function WeekCalendar({
                   onTaskOpenDetail={onTaskOpenDetail}
                   onNavigateToProject={onNavigateToProject}
                   onNavigateToArea={onNavigateToArea}
-                  onCreateTask={onCreateTask ? () => handleCreateTask(dateKey) : undefined}
+                  onCreateTask={
+                    onCreateTask ? () => handleCreateTask(dateKey) : undefined
+                  }
                   editingTaskId={editingTaskId}
                   isDropTarget={isDropTarget}
                 />

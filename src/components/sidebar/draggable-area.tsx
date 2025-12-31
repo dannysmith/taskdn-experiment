@@ -1,22 +1,22 @@
-import * as React from "react"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
-import { ChevronRight, FolderIcon } from "lucide-react"
+import * as React from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { ChevronRight, FolderIcon } from 'lucide-react'
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from '@/components/ui/collapsible'
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-} from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
-import type { Area } from "@/types/data"
-import { getDragId } from "@/types/sidebar-order"
-import type { DragItem } from "@/types/sidebar-order"
+} from '@/components/ui/sidebar'
+import { cn } from '@/lib/utils'
+import type { Area } from '@/types/data'
+import { getDragId } from '@/types/sidebar-order'
+import type { DragItem } from '@/types/sidebar-order'
 
 interface DraggableAreaProps {
   area: Area
@@ -31,7 +31,7 @@ export function DraggableArea({
   onSelect,
   children,
 }: DraggableAreaProps) {
-  const dragId = getDragId("area", area.id)
+  const dragId = getDragId('area', area.id)
 
   const {
     attributes,
@@ -44,7 +44,7 @@ export function DraggableArea({
   } = useSortable({
     id: dragId,
     data: {
-      type: "area",
+      type: 'area',
       id: area.id,
       containerId: null,
     } satisfies DragItem,
@@ -60,8 +60,8 @@ export function DraggableArea({
       ref={setNodeRef}
       style={style}
       className={cn(
-        isDragging && "opacity-50 z-50",
-        isOver && "ring-2 ring-primary/20 ring-inset rounded-md"
+        isDragging && 'opacity-50 z-50',
+        isOver && 'ring-2 ring-primary/20 ring-inset rounded-md'
       )}
     >
       <Collapsible
@@ -72,8 +72,8 @@ export function DraggableArea({
           <SidebarGroupLabel
             render={<CollapsibleTrigger />}
             className={cn(
-              "group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer select-none",
-              isSelected && "bg-sidebar-accent text-sidebar-accent-foreground"
+              'group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer select-none',
+              isSelected && 'bg-sidebar-accent text-sidebar-accent-foreground'
             )}
             onClick={onSelect}
             {...attributes}

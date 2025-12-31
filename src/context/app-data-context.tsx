@@ -1,7 +1,7 @@
-import * as React from "react"
-import { createContext, useContext, useState, useCallback } from "react"
-import type { AppData, Area, Project, Task } from "@/types/data"
-import { appData as initialAppData } from "@/data/app-data"
+import * as React from 'react'
+import { createContext, useContext, useState, useCallback } from 'react'
+import type { AppData, Area, Project, Task } from '@/types/data'
+import { appData as initialAppData } from '@/data/app-data'
 
 // -----------------------------------------------------------------------------
 // Context Types
@@ -10,7 +10,7 @@ import { appData as initialAppData } from "@/data/app-data"
 /** Options for creating a new task */
 export interface CreateTaskOptions {
   title?: string
-  status?: Task["status"]
+  status?: Task['status']
   projectId?: string
   areaId?: string
   scheduled?: string
@@ -25,12 +25,12 @@ interface AppDataContextValue {
   // Mutations
   createTask: (options?: CreateTaskOptions) => string // returns new task ID
   updateProjectArea: (projectId: string, newAreaId: string | null) => void
-  updateProjectStatus: (projectId: string, newStatus: Project["status"]) => void
+  updateProjectStatus: (projectId: string, newStatus: Project['status']) => void
   updateTaskTitle: (taskId: string, newTitle: string) => void
   updateTaskScheduled: (taskId: string, date: string | undefined) => void
   updateTaskDue: (taskId: string, date: string | undefined) => void
   updateTaskDeferUntil: (taskId: string, date: string | undefined) => void
-  updateTaskStatus: (taskId: string, newStatus: Task["status"]) => void
+  updateTaskStatus: (taskId: string, newStatus: Task['status']) => void
   updateTaskNotes: (taskId: string, notes: string | undefined) => void
   updateTaskProject: (taskId: string, projectId: string | undefined) => void
   updateTaskArea: (taskId: string, areaId: string | undefined) => void
@@ -62,7 +62,9 @@ function generateTaskId(): string {
 }
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
-  const [data, setData] = useState<AppData>(() => structuredClone(initialAppData))
+  const [data, setData] = useState<AppData>(() =>
+    structuredClone(initialAppData)
+  )
 
   // Mutations
   const createTask = useCallback((options: CreateTaskOptions = {}): string => {
@@ -71,8 +73,8 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
     const newTask: Task = {
       id: newId,
-      title: options.title ?? "",
-      status: options.status ?? "ready",
+      title: options.title ?? '',
+      status: options.status ?? 'ready',
       createdAt: now,
       updatedAt: now,
       projectId: options.projectId,
@@ -82,12 +84,14 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
       deferUntil: options.deferUntil,
     }
 
-    setData(prev => {
+    setData((prev) => {
       let newTasks: Task[]
 
       if (options.insertAfterId) {
         // Insert after specific task
-        const insertIndex = prev.tasks.findIndex(t => t.id === options.insertAfterId)
+        const insertIndex = prev.tasks.findIndex(
+          (t) => t.id === options.insertAfterId
+        )
         if (insertIndex !== -1) {
           newTasks = [
             ...prev.tasks.slice(0, insertIndex + 1),
@@ -108,243 +112,316 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     return newId
   }, [])
 
-  const updateProjectArea = useCallback((projectId: string, newAreaId: string | null) => {
-    setData(prev => ({
-      ...prev,
-      projects: prev.projects.map(p =>
-        p.id === projectId ? { ...p, areaId: newAreaId ?? undefined } : p
-      )
-    }))
-  }, [])
+  const updateProjectArea = useCallback(
+    (projectId: string, newAreaId: string | null) => {
+      setData((prev) => ({
+        ...prev,
+        projects: prev.projects.map((p) =>
+          p.id === projectId ? { ...p, areaId: newAreaId ?? undefined } : p
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateProjectStatus = useCallback((projectId: string, newStatus: Project["status"]) => {
-    setData(prev => ({
-      ...prev,
-      projects: prev.projects.map(p =>
-        p.id === projectId ? { ...p, status: newStatus } : p
-      )
-    }))
-  }, [])
+  const updateProjectStatus = useCallback(
+    (projectId: string, newStatus: Project['status']) => {
+      setData((prev) => ({
+        ...prev,
+        projects: prev.projects.map((p) =>
+          p.id === projectId ? { ...p, status: newStatus } : p
+        ),
+      }))
+    },
+    []
+  )
 
   const updateTaskTitle = useCallback((taskId: string, newTitle: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      tasks: prev.tasks.map(t =>
+      tasks: prev.tasks.map((t) =>
         t.id === taskId
           ? { ...t, title: newTitle, updatedAt: new Date().toISOString() }
           : t
-      )
+      ),
     }))
   }, [])
 
-  const updateTaskScheduled = useCallback((taskId: string, date: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, scheduled: date, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskScheduled = useCallback(
+    (taskId: string, date: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? { ...t, scheduled: date, updatedAt: new Date().toISOString() }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskDue = useCallback((taskId: string, date: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, due: date, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskDue = useCallback(
+    (taskId: string, date: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? { ...t, due: date, updatedAt: new Date().toISOString() }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskDeferUntil = useCallback((taskId: string, date: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, deferUntil: date, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskDeferUntil = useCallback(
+    (taskId: string, date: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? { ...t, deferUntil: date, updatedAt: new Date().toISOString() }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskNotes = useCallback((taskId: string, notes: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, notes: notes || undefined, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskNotes = useCallback(
+    (taskId: string, notes: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                notes: notes || undefined,
+                updatedAt: new Date().toISOString(),
+              }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskProject = useCallback((taskId: string, projectId: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, projectId: projectId || undefined, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskProject = useCallback(
+    (taskId: string, projectId: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                projectId: projectId || undefined,
+                updatedAt: new Date().toISOString(),
+              }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskArea = useCallback((taskId: string, areaId: string | undefined) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t =>
-        t.id === taskId
-          ? { ...t, areaId: areaId || undefined, updatedAt: new Date().toISOString() }
-          : t
-      )
-    }))
-  }, [])
+  const updateTaskArea = useCallback(
+    (taskId: string, areaId: string | undefined) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) =>
+          t.id === taskId
+            ? {
+                ...t,
+                areaId: areaId || undefined,
+                updatedAt: new Date().toISOString(),
+              }
+            : t
+        ),
+      }))
+    },
+    []
+  )
 
-  const updateTaskStatus = useCallback((taskId: string, newStatus: Task["status"]) => {
-    setData(prev => ({
-      ...prev,
-      tasks: prev.tasks.map(t => {
-        if (t.id !== taskId) return t
-        const now = new Date().toISOString()
-        const completedAt = (newStatus === "done" || newStatus === "dropped")
-          ? now
-          : undefined
-        return { ...t, status: newStatus, updatedAt: now, completedAt }
-      })
-    }))
-  }, [])
+  const updateTaskStatus = useCallback(
+    (taskId: string, newStatus: Task['status']) => {
+      setData((prev) => ({
+        ...prev,
+        tasks: prev.tasks.map((t) => {
+          if (t.id !== taskId) return t
+          const now = new Date().toISOString()
+          const completedAt =
+            newStatus === 'done' || newStatus === 'dropped' ? now : undefined
+          return { ...t, status: newStatus, updatedAt: now, completedAt }
+        }),
+      }))
+    },
+    []
+  )
 
   const toggleTaskStatus = useCallback((taskId: string) => {
-    setData(prev => ({
+    setData((prev) => ({
       ...prev,
-      tasks: prev.tasks.map(t => {
+      tasks: prev.tasks.map((t) => {
         if (t.id !== taskId) return t
         const now = new Date().toISOString()
         // Toggle between ready and done
-        if (t.status === "done") {
-          return { ...t, status: "ready" as const, updatedAt: now, completedAt: undefined }
+        if (t.status === 'done') {
+          return {
+            ...t,
+            status: 'ready' as const,
+            updatedAt: now,
+            completedAt: undefined,
+          }
         } else {
-          return { ...t, status: "done" as const, updatedAt: now, completedAt: now }
+          return {
+            ...t,
+            status: 'done' as const,
+            updatedAt: now,
+            completedAt: now,
+          }
         }
-      })
+      }),
     }))
   }, [])
 
-  const reorderProjectTasks = useCallback((projectId: string, reorderedTaskIds: string[]) => {
-    setData(prev => {
-      // Get tasks for this project
-      const projectTasks = prev.tasks.filter(t => t.projectId === projectId)
+  const reorderProjectTasks = useCallback(
+    (projectId: string, reorderedTaskIds: string[]) => {
+      setData((prev) => {
+        // Get tasks for this project
+        const projectTasks = prev.tasks.filter((t) => t.projectId === projectId)
 
-      // Reorder the project tasks according to the new order
-      const reorderedProjectTasks = reorderedTaskIds
-        .map(id => projectTasks.find(t => t.id === id))
-        .filter((t): t is Task => t !== undefined)
+        // Reorder the project tasks according to the new order
+        const reorderedProjectTasks = reorderedTaskIds
+          .map((id) => projectTasks.find((t) => t.id === id))
+          .filter((t): t is Task => t !== undefined)
 
-      // Combine: keep order of other tasks, insert reordered tasks in their original position
-      // Simple approach: put other tasks first, then reordered tasks
-      // Better: maintain relative positions
-      const result: Task[] = []
-      let projectTaskIndex = 0
+        // Combine: keep order of other tasks, insert reordered tasks in their original position
+        // Simple approach: put other tasks first, then reordered tasks
+        // Better: maintain relative positions
+        const result: Task[] = []
+        let projectTaskIndex = 0
 
-      for (const task of prev.tasks) {
-        if (task.projectId === projectId) {
-          if (projectTaskIndex < reorderedProjectTasks.length) {
-            result.push(reorderedProjectTasks[projectTaskIndex])
-            projectTaskIndex++
+        for (const task of prev.tasks) {
+          if (task.projectId === projectId) {
+            if (projectTaskIndex < reorderedProjectTasks.length) {
+              result.push(reorderedProjectTasks[projectTaskIndex])
+              projectTaskIndex++
+            }
+          } else {
+            result.push(task)
           }
-        } else {
-          result.push(task)
         }
-      }
 
-      return { ...prev, tasks: result }
-    })
-  }, [])
+        return { ...prev, tasks: result }
+      })
+    },
+    []
+  )
 
-  const moveTaskToProject = useCallback((taskId: string, newProjectId: string) => {
-    setData(prev => {
-      const task = prev.tasks.find(t => t.id === taskId)
-      if (!task || task.projectId === newProjectId) return prev
+  const moveTaskToProject = useCallback(
+    (taskId: string, newProjectId: string) => {
+      setData((prev) => {
+        const task = prev.tasks.find((t) => t.id === taskId)
+        if (!task || task.projectId === newProjectId) return prev
 
-      // Remove task from its current position
-      const tasksWithoutMoved = prev.tasks.filter(t => t.id !== taskId)
+        // Remove task from its current position
+        const tasksWithoutMoved = prev.tasks.filter((t) => t.id !== taskId)
 
-      // Find where to insert: after the last task of the target project
-      let lastTargetTaskIndex = -1
-      for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
-        if (tasksWithoutMoved[i].projectId === newProjectId) {
-          lastTargetTaskIndex = i
-          break
+        // Find where to insert: after the last task of the target project
+        let lastTargetTaskIndex = -1
+        for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
+          if (tasksWithoutMoved[i].projectId === newProjectId) {
+            lastTargetTaskIndex = i
+            break
+          }
         }
-      }
 
-      // Update the task with new projectId
-      const updatedTask: Task = {
-        ...task,
-        projectId: newProjectId,
-        updatedAt: new Date().toISOString(),
-      }
+        // Update the task with new projectId
+        const updatedTask: Task = {
+          ...task,
+          projectId: newProjectId,
+          updatedAt: new Date().toISOString(),
+        }
 
-      // Insert after last task of target project, or at end if no tasks in target
-      const insertIndex = lastTargetTaskIndex === -1
-        ? tasksWithoutMoved.length
-        : lastTargetTaskIndex + 1
+        // Insert after last task of target project, or at end if no tasks in target
+        const insertIndex =
+          lastTargetTaskIndex === -1
+            ? tasksWithoutMoved.length
+            : lastTargetTaskIndex + 1
 
-      const newTasks = [
-        ...tasksWithoutMoved.slice(0, insertIndex),
-        updatedTask,
-        ...tasksWithoutMoved.slice(insertIndex),
-      ]
+        const newTasks = [
+          ...tasksWithoutMoved.slice(0, insertIndex),
+          updatedTask,
+          ...tasksWithoutMoved.slice(insertIndex),
+        ]
 
-      return { ...prev, tasks: newTasks }
-    })
-  }, [])
+        return { ...prev, tasks: newTasks }
+      })
+    },
+    []
+  )
 
   // Lookups
-  const getAreaById = useCallback((id: string): Area | undefined => {
-    return data.areas.find(a => a.id === id)
-  }, [data.areas])
+  const getAreaById = useCallback(
+    (id: string): Area | undefined => {
+      return data.areas.find((a) => a.id === id)
+    },
+    [data.areas]
+  )
 
-  const getProjectById = useCallback((id: string): Project | undefined => {
-    return data.projects.find(p => p.id === id)
-  }, [data.projects])
+  const getProjectById = useCallback(
+    (id: string): Project | undefined => {
+      return data.projects.find((p) => p.id === id)
+    },
+    [data.projects]
+  )
 
-  const getTaskById = useCallback((id: string): Task | undefined => {
-    return data.tasks.find(t => t.id === id)
-  }, [data.tasks])
+  const getTaskById = useCallback(
+    (id: string): Task | undefined => {
+      return data.tasks.find((t) => t.id === id)
+    },
+    [data.tasks]
+  )
 
-  const getProjectsByAreaId = useCallback((areaId: string): Project[] => {
-    return data.projects.filter(p => p.areaId === areaId)
-  }, [data.projects])
+  const getProjectsByAreaId = useCallback(
+    (areaId: string): Project[] => {
+      return data.projects.filter((p) => p.areaId === areaId)
+    },
+    [data.projects]
+  )
 
   const getOrphanProjects = useCallback((): Project[] => {
-    return data.projects.filter(p => !p.areaId)
+    return data.projects.filter((p) => !p.areaId)
   }, [data.projects])
 
-  const getTasksByProjectId = useCallback((projectId: string): Task[] => {
-    return data.tasks.filter(t => t.projectId === projectId)
-  }, [data.tasks])
+  const getTasksByProjectId = useCallback(
+    (projectId: string): Task[] => {
+      return data.tasks.filter((t) => t.projectId === projectId)
+    },
+    [data.tasks]
+  )
 
-  const getProjectCompletion = useCallback((projectId: string): number => {
-    const tasks = data.tasks.filter(t => t.projectId === projectId)
-    if (tasks.length === 0) return 0
-    const completedCount = tasks.filter(
-      t => t.status === "done" || t.status === "dropped"
-    ).length
-    return Math.round((completedCount / tasks.length) * 100)
-  }, [data.tasks])
+  const getProjectCompletion = useCallback(
+    (projectId: string): number => {
+      const tasks = data.tasks.filter((t) => t.projectId === projectId)
+      if (tasks.length === 0) return 0
+      const completedCount = tasks.filter(
+        (t) => t.status === 'done' || t.status === 'dropped'
+      ).length
+      return Math.round((completedCount / tasks.length) * 100)
+    },
+    [data.tasks]
+  )
 
   const getActiveProjects = useCallback((): Project[] => {
     return data.projects.filter(
-      p => p.status !== "done" && p.status !== "paused"
+      (p) => p.status !== 'done' && p.status !== 'paused'
     )
   }, [data.projects])
 
   const getActiveAreas = useCallback((): Area[] => {
-    return data.areas.filter(a => a.status !== "archived")
+    return data.areas.filter((a) => a.status !== 'archived')
   }, [data.areas])
 
   const value: AppDataContextValue = {
@@ -375,9 +452,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AppDataContext.Provider value={value}>
-      {children}
-    </AppDataContext.Provider>
+    <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>
   )
 }
 
@@ -388,7 +463,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 export function useAppData(): AppDataContextValue {
   const context = useContext(AppDataContext)
   if (!context) {
-    throw new Error("useAppData must be used within an AppDataProvider")
+    throw new Error('useAppData must be used within an AppDataProvider')
   }
   return context
 }

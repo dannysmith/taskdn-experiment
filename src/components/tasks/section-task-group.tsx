@@ -1,9 +1,9 @@
-import * as React from "react"
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
-import type { Task } from "@/types/data"
-import { SectionHeader } from "./section-header"
-import { DraggableTaskList } from "./task-list"
+import { cn } from '@/lib/utils'
+import type { Task } from '@/types/data'
+import { SectionHeader } from './section-header'
+import { DraggableTaskList } from './task-list'
 
 interface SectionTaskGroupProps {
   /** Unique identifier for this section (used for drag IDs) */
@@ -58,7 +58,7 @@ export function SectionTaskGroup({
   }
 
   return (
-    <div className={cn("", className)}>
+    <div className={cn('', className)}>
       <SectionHeader
         title={title}
         icon={icon}

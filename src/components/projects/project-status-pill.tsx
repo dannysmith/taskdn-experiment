@@ -1,15 +1,15 @@
-import * as React from "react"
-import { ChevronDown } from "lucide-react"
+import * as React from 'react'
+import { ChevronDown } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { ProjectStatus } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { ProjectStatus } from '@/types/data'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 
 /**
  * Status configuration following design conventions:
@@ -20,18 +20,35 @@ import {
  * - blocked: Dark red
  * - done: Green
  */
-export const projectStatusConfig: Record<ProjectStatus, { label: string; color: string }> = {
-  planning: { label: "Planning", color: "bg-status-planning/15 text-status-planning" },
-  ready: { label: "Ready", color: "bg-status-ready/15 text-status-ready" },
-  "in-progress": { label: "Active", color: "bg-status-in-progress/15 text-status-in-progress" },
-  blocked: { label: "Blocked", color: "bg-status-blocked/15 text-status-blocked" },
-  paused: { label: "Paused", color: "bg-status-paused/15 text-status-paused" },
-  done: { label: "Done", color: "bg-status-done/15 text-status-done" },
+export const projectStatusConfig: Record<
+  ProjectStatus,
+  { label: string; color: string }
+> = {
+  planning: {
+    label: 'Planning',
+    color: 'bg-status-planning/15 text-status-planning',
+  },
+  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
+  'in-progress': {
+    label: 'Active',
+    color: 'bg-status-in-progress/15 text-status-in-progress',
+  },
+  blocked: {
+    label: 'Blocked',
+    color: 'bg-status-blocked/15 text-status-blocked',
+  },
+  paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
+  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
 }
 
 // Primary statuses shown first, then secondary statuses after separator
-const primaryStatuses: ProjectStatus[] = ["planning", "ready", "in-progress", "blocked"]
-const secondaryStatuses: ProjectStatus[] = ["paused", "done"]
+const primaryStatuses: ProjectStatus[] = [
+  'planning',
+  'ready',
+  'in-progress',
+  'blocked',
+]
+const secondaryStatuses: ProjectStatus[] = ['paused', 'done']
 
 export interface ProjectStatusPillProps {
   status: ProjectStatus
@@ -39,7 +56,11 @@ export interface ProjectStatusPillProps {
   className?: string
 }
 
-export function ProjectStatusPill({ status, onStatusChange, className }: ProjectStatusPillProps) {
+export function ProjectStatusPill({
+  status,
+  onStatusChange,
+  className,
+}: ProjectStatusPillProps) {
   const config = projectStatusConfig[status]
 
   const handleClick = (e: React.MouseEvent) => {
@@ -50,7 +71,7 @@ export function ProjectStatusPill({ status, onStatusChange, className }: Project
     return (
       <span
         className={cn(
-          "px-2 py-0.5 rounded-full text-xs font-medium shrink-0",
+          'px-2 py-0.5 rounded-full text-xs font-medium shrink-0',
           config.color,
           className
         )}
@@ -65,7 +86,7 @@ export function ProjectStatusPill({ status, onStatusChange, className }: Project
       <DropdownMenuTrigger
         onClick={handleClick}
         className={cn(
-          "px-2.5 py-1 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1 transition-opacity hover:opacity-80",
+          'px-2.5 py-1 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1 transition-opacity hover:opacity-80',
           config.color,
           className
         )}
@@ -81,14 +102,11 @@ export function ProjectStatusPill({ status, onStatusChange, className }: Project
               e.stopPropagation()
               onStatusChange(s)
             }}
-            className={cn(
-              "cursor-pointer",
-              s === status && "bg-accent"
-            )}
+            className={cn('cursor-pointer', s === status && 'bg-accent')}
           >
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded text-xs font-medium",
+                'px-1.5 py-0.5 rounded text-xs font-medium',
                 projectStatusConfig[s].color
               )}
             >
@@ -104,14 +122,11 @@ export function ProjectStatusPill({ status, onStatusChange, className }: Project
               e.stopPropagation()
               onStatusChange(s)
             }}
-            className={cn(
-              "cursor-pointer",
-              s === status && "bg-accent"
-            )}
+            className={cn('cursor-pointer', s === status && 'bg-accent')}
           >
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded text-xs font-medium",
+                'px-1.5 py-0.5 rounded text-xs font-medium',
                 projectStatusConfig[s].color
               )}
             >

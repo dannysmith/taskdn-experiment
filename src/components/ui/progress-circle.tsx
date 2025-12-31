@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 interface ProgressCircleProps {
   value: number // 0-100
@@ -22,7 +22,7 @@ export function ProgressCircle({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      className={cn("shrink-0 -rotate-90", className)}
+      className={cn('shrink-0 -rotate-90', className)}
     >
       {/* Background circle */}
       <circle

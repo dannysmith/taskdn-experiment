@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -10,19 +10,19 @@ import {
   type DragStartEvent,
   type DragEndEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+} from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
   SortableContext,
   verticalListSortingStrategy,
   arrayMove,
-} from "@dnd-kit/sortable"
+} from '@dnd-kit/sortable'
 
-import { cn } from "@/lib/utils"
-import type { Task } from "@/types/data"
-import { TaskListItem } from "./task-list-item"
-import { TaskStatusCheckbox } from "./task-status-checkbox"
-import { useTaskDragPreview } from "./task-dnd-context"
+import { cn } from '@/lib/utils'
+import type { Task } from '@/types/data'
+import { TaskListItem } from './task-list-item'
+import { TaskStatusCheckbox } from './task-status-checkbox'
+import { useTaskDragPreview } from './task-dnd-context'
 
 // -----------------------------------------------------------------------------
 // Shared Props
@@ -91,13 +91,23 @@ export function TaskList({
   const containerRef = React.useRef<HTMLDivElement>(null)
 
   // Internal state (used when not controlled externally)
-  const [internalSelectedIndex, setInternalSelectedIndex] = React.useState<number | null>(null)
-  const [internalEditingTaskId, setInternalEditingTaskId] = React.useState<string | null>(null)
+  const [internalSelectedIndex, setInternalSelectedIndex] = React.useState<
+    number | null
+  >(null)
+  const [internalEditingTaskId, setInternalEditingTaskId] = React.useState<
+    string | null
+  >(null)
 
   // Use external state if provided, otherwise internal
-  const selectedIndex = externalSelectedIndex !== undefined ? externalSelectedIndex : internalSelectedIndex
+  const selectedIndex =
+    externalSelectedIndex !== undefined
+      ? externalSelectedIndex
+      : internalSelectedIndex
   const setSelectedIndex = onSelectedIndexChange ?? setInternalSelectedIndex
-  const editingTaskId = externalEditingTaskId !== undefined ? externalEditingTaskId : internalEditingTaskId
+  const editingTaskId =
+    externalEditingTaskId !== undefined
+      ? externalEditingTaskId
+      : internalEditingTaskId
   const setEditingTaskId = onEditingTaskIdChange ?? setInternalEditingTaskId
 
   // Get drag context to check for dropped task
@@ -106,7 +116,7 @@ export function TaskList({
   // Select the dropped task after a drag ends, or clear selection if task went to another list
   React.useEffect(() => {
     if (lastDroppedTaskId) {
-      const droppedIndex = tasks.findIndex(t => t.id === lastDroppedTaskId)
+      const droppedIndex = tasks.findIndex((t) => t.id === lastDroppedTaskId)
       if (droppedIndex !== -1) {
         // This list contains the dropped task - select it
         setSelectedIndex(droppedIndex)
@@ -140,7 +150,7 @@ export function TaskList({
     const isMeta = e.metaKey || e.ctrlKey
 
     switch (e.key) {
-      case "ArrowDown":
+      case 'ArrowDown':
         e.preventDefault()
         if (isMeta && selectedIndex !== null) {
           // Reorder: move task down
@@ -159,7 +169,7 @@ export function TaskList({
         }
         break
 
-      case "ArrowUp":
+      case 'ArrowUp':
         e.preventDefault()
         if (isMeta && selectedIndex !== null) {
           // Reorder: move task up
@@ -178,34 +188,35 @@ export function TaskList({
         }
         break
 
-      case "Enter":
+      case 'Enter':
         e.preventDefault()
         if (selectedIndex !== null && tasks[selectedIndex]) {
           setEditingTaskId(tasks[selectedIndex].id)
         }
         break
 
-      case "Escape":
+      case 'Escape':
         e.preventDefault()
         if (selectedIndex !== null) {
           setSelectedIndex(null)
         }
         break
 
-      case " ":
+      case ' ':
         e.preventDefault()
         if (selectedIndex !== null && tasks[selectedIndex]) {
           onTaskStatusToggle(tasks[selectedIndex].id)
         }
         break
 
-      case "n":
-      case "N":
+      case 'n':
+      case 'N':
         if (isMeta && onCreateTask) {
           e.preventDefault()
-          const afterTaskId = selectedIndex !== null && tasks[selectedIndex]
-            ? tasks[selectedIndex].id
-            : null
+          const afterTaskId =
+            selectedIndex !== null && tasks[selectedIndex]
+              ? tasks[selectedIndex].id
+              : null
           const newTaskId = onCreateTask(afterTaskId)
           // If a new task ID was returned, start editing it
           if (newTaskId) {
@@ -246,7 +257,12 @@ export function TaskList({
 
   if (tasks.length === 0) {
     return (
-      <div className={cn("py-4 text-center text-muted-foreground text-sm", className)}>
+      <div
+        className={cn(
+          'py-4 text-center text-muted-foreground text-sm',
+          className
+        )}
+      >
         No tasks
       </div>
     )
@@ -263,7 +279,7 @@ export function TaskList({
   return (
     <div
       ref={containerRef}
-      className={cn("outline-none", className)}
+      className={cn('outline-none', className)}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onBlur={handleBlur}
@@ -283,7 +299,9 @@ export function TaskList({
               onEndEdit={handleEndEdit}
               onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
               onStatusToggle={() => onTaskStatusToggle(task.id)}
-              onOpenDetail={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+              onOpenDetail={
+                onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
+              }
               contextName={getContextName?.(task)}
               showScheduled={showScheduled}
               showDue={showDue}
@@ -299,7 +317,7 @@ export function TaskList({
 // DraggableTaskList - Standalone component with its own DndContext
 // -----------------------------------------------------------------------------
 
-interface DraggableTaskListProps extends BaseTaskListProps {}
+type DraggableTaskListProps = BaseTaskListProps
 
 /**
  * A standalone task list with its own DndContext for drag-and-drop.
@@ -334,7 +352,7 @@ export function DraggableTaskList({
   // Drop animation
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
@@ -373,11 +391,18 @@ export function DraggableTaskList({
   }
 
   // Find active task for drag overlay
-  const activeTask = activeTaskId ? tasks.find((t) => t.id === activeTaskId) : null
+  const activeTask = activeTaskId
+    ? tasks.find((t) => t.id === activeTaskId)
+    : null
 
   if (tasks.length === 0) {
     return (
-      <div className={cn("py-8 text-center text-muted-foreground text-sm", className)}>
+      <div
+        className={cn(
+          'py-8 text-center text-muted-foreground text-sm',
+          className
+        )}
+      >
         No tasks yet
       </div>
     )
@@ -424,14 +449,12 @@ export function DraggableTaskList({
 export function TaskDragPreview({ task }: { task: Task }) {
   return (
     <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-card shadow-xl border border-border/50">
-      <TaskStatusCheckbox
-        status={task.status}
-        onToggle={() => {}}
-      />
+      <TaskStatusCheckbox status={task.status} onToggle={() => {}} />
       <span
         className={cn(
-          "flex-1 text-sm truncate",
-          (task.status === "done" || task.status === "dropped") && "line-through text-muted-foreground"
+          'flex-1 text-sm truncate',
+          (task.status === 'done' || task.status === 'dropped') &&
+            'line-through text-muted-foreground'
         )}
       >
         {task.title}

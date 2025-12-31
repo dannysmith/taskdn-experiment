@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,25 +11,25 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
-import { arrayMove } from "@dnd-kit/sortable"
+} from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
+import { arrayMove } from '@dnd-kit/sortable'
 
-import type { Task } from "@/types/data"
-import { TaskDragPreview } from "./task-list"
+import type { Task } from '@/types/data'
+import { TaskDragPreview } from './task-list'
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 interface TaskDragData {
-  type: "task"
+  type: 'task'
   taskId: string
   projectId: string
 }
 
 interface EmptyProjectData {
-  type: "empty-project"
+  type: 'empty-project'
   projectId: string
 }
 
@@ -64,7 +64,11 @@ interface TaskDndContextProps {
   /** All tasks organized by projectId */
   tasksByProject: Map<string, Task[]>
   /** Called when a task is moved to a different project */
-  onTaskMove: (taskId: string, fromProjectId: string, toProjectId: string) => void
+  onTaskMove: (
+    taskId: string,
+    fromProjectId: string,
+    toProjectId: string
+  ) => void
   /** Called when tasks are reordered within the same project */
   onTasksReorder: (projectId: string, reorderedTasks: Task[]) => void
   /** Get a task by its ID */
@@ -87,8 +91,12 @@ export function TaskDndContext({
   onTasksReorder,
   getTaskById,
 }: TaskDndContextProps) {
-  const [dragPreview, setDragPreview] = React.useState<DragPreviewState | null>(null)
-  const [lastDroppedTaskId, setLastDroppedTaskId] = React.useState<string | null>(null)
+  const [dragPreview, setDragPreview] = React.useState<DragPreviewState | null>(
+    null
+  )
+  const [lastDroppedTaskId, setLastDroppedTaskId] = React.useState<
+    string | null
+  >(null)
 
   const clearLastDroppedTaskId = React.useCallback(() => {
     setLastDroppedTaskId(null)
@@ -106,13 +114,13 @@ export function TaskDndContext({
   // Drop animation
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current as TaskDragData | undefined
-    if (data?.type === "task") {
+    if (data?.type === 'task') {
       const task = getTaskById(data.taskId)
       if (task) {
         setDragPreview({
@@ -137,16 +145,23 @@ export function TaskDndContext({
 
     // Handle both task and empty-project targets
     const newProjectId = overData.projectId
-    const newOverTaskId = overData.type === "task" ? overData.taskId : null
+    const newOverTaskId = overData.type === 'task' ? overData.taskId : null
 
     // Update preview to show which project/task we're hovering over
     // Only update if something actually changed to avoid unnecessary re-renders
-    if (newProjectId !== dragPreview.currentProjectId || newOverTaskId !== dragPreview.overTaskId) {
-      setDragPreview(prev => prev ? {
-        ...prev,
-        currentProjectId: newProjectId,
-        overTaskId: newOverTaskId,
-      } : null)
+    if (
+      newProjectId !== dragPreview.currentProjectId ||
+      newOverTaskId !== dragPreview.overTaskId
+    ) {
+      setDragPreview((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentProjectId: newProjectId,
+              overTaskId: newOverTaskId,
+            }
+          : null
+      )
     }
   }
 
@@ -163,7 +178,7 @@ export function TaskDndContext({
     const activeData = active.data.current as TaskDragData | undefined
     const overData = over.data.current as DropTargetData | undefined
 
-    if (!activeData || activeData.type !== "task") {
+    if (!activeData || activeData.type !== 'task') {
       setDragPreview(null)
       return
     }
@@ -173,9 +188,13 @@ export function TaskDndContext({
 
     if (targetProjectId !== dragPreview.sourceProjectId) {
       // Cross-project move (including drops on empty projects)
-      onTaskMove(dragPreview.taskId, dragPreview.sourceProjectId, targetProjectId)
+      onTaskMove(
+        dragPreview.taskId,
+        dragPreview.sourceProjectId,
+        targetProjectId
+      )
       setLastDroppedTaskId(dragPreview.taskId)
-    } else if (overData?.type === "task" && active.id !== over.id) {
+    } else if (overData?.type === 'task' && active.id !== over.id) {
       // Same-project reorder (only when dropping on another task)
       const projectTasks = tasksByProject.get(targetProjectId) ?? []
       const oldIndex = projectTasks.findIndex((t) => t.id === activeData.taskId)

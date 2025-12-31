@@ -4,7 +4,7 @@
  */
 
 // Special container ID for projects with no area
-export const ORPHAN_CONTAINER_ID = "__orphan__"
+export const ORPHAN_CONTAINER_ID = '__orphan__'
 
 // -----------------------------------------------------------------------------
 // Order State
@@ -23,7 +23,7 @@ export interface SidebarOrder {
 // Drag Item Types
 // -----------------------------------------------------------------------------
 
-export type DragItemType = "area" | "project"
+export type DragItemType = 'area' | 'project'
 
 export interface DragItem {
   type: DragItemType
@@ -36,7 +36,9 @@ export function getDragId(type: DragItemType, id: string): string {
   return `${type}-${id}`
 }
 
-export function parseDragId(dragId: string): { type: DragItemType; id: string } | null {
+export function parseDragId(
+  dragId: string
+): { type: DragItemType; id: string } | null {
   const match = dragId.match(/^(area|project)-(.+)$/)
   if (!match) return null
   return { type: match[1] as DragItemType, id: match[2] }

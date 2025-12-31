@@ -1,16 +1,13 @@
-import { useDroppable } from "@dnd-kit/core"
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { format, isToday, isWeekend } from "date-fns"
-import { Plus } from "lucide-react"
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { format, isToday, isWeekend } from 'date-fns'
+import { Plus } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
-import { getCalendarTaskDragId } from "@/types/calendar-order"
-import { SortableTaskCard } from "./draggable-task-card"
-import type { TaskCardVariant } from "@/components/cards/task-card"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
+import { getCalendarTaskDragId } from '@/types/calendar-order'
+import { SortableTaskCard } from './draggable-task-card'
+import type { TaskCardVariant } from '@/components/cards/task-card'
 
 interface MonthDayCellProps {
   date: Date
@@ -44,14 +41,14 @@ export function MonthDayCell({
   editingTaskId,
   isDropTarget = false,
 }: MonthDayCellProps) {
-  const dateString = format(date, "yyyy-MM-dd")
+  const dateString = format(date, 'yyyy-MM-dd')
   const isCurrentDay = isToday(date)
   const isWeekendDay = isWeekend(date)
 
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${dateString}`,
     data: {
-      type: "day",
+      type: 'day',
       date: dateString,
     },
   })
@@ -60,10 +57,10 @@ export function MonthDayCell({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col min-h-[120px] border-r border-border/30 last:border-r-0",
-        !isCurrentMonth && "bg-muted/30 opacity-50",
-        isWeekendDay && isCurrentMonth && "bg-muted/10",
-        (isOver || isDropTarget) && "bg-primary/5"
+        'flex flex-col min-h-[120px] border-r border-border/30 last:border-r-0',
+        !isCurrentMonth && 'bg-muted/30 opacity-50',
+        isWeekendDay && isCurrentMonth && 'bg-muted/10',
+        (isOver || isDropTarget) && 'bg-primary/5'
       )}
     >
       {/* Day header */}
@@ -81,15 +78,15 @@ export function MonthDayCell({
         {!onCreateTask && <div />}
         <span
           className={cn(
-            "text-xs tabular-nums",
+            'text-xs tabular-nums',
             isCurrentDay
-              ? "bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center font-semibold"
+              ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center font-semibold'
               : isCurrentMonth
-                ? "text-foreground font-medium"
-                : "text-muted-foreground"
+                ? 'text-foreground font-medium'
+                : 'text-muted-foreground'
           )}
         >
-          {format(date, "d")}
+          {format(date, 'd')}
         </span>
       </div>
 
@@ -108,8 +105,12 @@ export function MonthDayCell({
                 date={dateString}
                 variant={variant}
                 size="compact"
-                onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
-                onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+                onStatusChange={(newStatus) =>
+                  onTaskStatusChange(task.id, newStatus)
+                }
+                onEditClick={
+                  onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
+                }
                 autoFocusEdit={task.id === editingTaskId}
               />
             )
@@ -120,8 +121,8 @@ export function MonthDayCell({
         {tasks.length === 0 && (
           <div
             className={cn(
-              "h-full min-h-[40px] rounded border border-dashed border-transparent transition-colors",
-              (isOver || isDropTarget) && "border-primary/30"
+              'h-full min-h-[40px] rounded border border-dashed border-transparent transition-colors',
+              (isOver || isDropTarget) && 'border-primary/30'
             )}
           />
         )}

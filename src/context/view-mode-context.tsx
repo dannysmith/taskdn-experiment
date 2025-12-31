@@ -1,12 +1,12 @@
-import * as React from "react"
-import type { ViewMode } from "@/components/ui/view-toggle"
+import * as React from 'react'
+import type { ViewMode } from '@/components/ui/view-toggle'
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 /** Keys for storing view mode by view type */
-type ViewModeKey = "this-week" | "project" | "area"
+type ViewModeKey = 'this-week' | 'project' | 'area'
 
 interface ViewModeContextValue {
   /** Get the current view mode for a specific view */
@@ -24,15 +24,15 @@ const ViewModeContext = React.createContext<ViewModeContextValue | null>(null)
 // -----------------------------------------------------------------------------
 
 const defaultModes: Record<ViewModeKey, ViewMode> = {
-  "this-week": "calendar",
-  "project": "list",
-  "area": "list",
+  'this-week': 'calendar',
+  project: 'list',
+  area: 'list',
 }
 
 const availableModes: Record<ViewModeKey, ViewMode[]> = {
-  "this-week": ["calendar", "kanban"],
-  "project": ["list", "kanban"],
-  "area": ["list", "kanban"],
+  'this-week': ['calendar', 'kanban'],
+  project: ['list', 'kanban'],
+  area: ['list', 'kanban'],
 }
 
 // -----------------------------------------------------------------------------
@@ -40,7 +40,8 @@ const availableModes: Record<ViewModeKey, ViewMode[]> = {
 // -----------------------------------------------------------------------------
 
 export function ViewModeProvider({ children }: { children: React.ReactNode }) {
-  const [modes, setModes] = React.useState<Record<ViewModeKey, ViewMode>>(defaultModes)
+  const [modes, setModes] =
+    React.useState<Record<ViewModeKey, ViewMode>>(defaultModes)
 
   const getViewMode = React.useCallback(
     (key: ViewModeKey): ViewMode => {
@@ -53,9 +54,12 @@ export function ViewModeProvider({ children }: { children: React.ReactNode }) {
     setModes((prev) => ({ ...prev, [key]: mode }))
   }, [])
 
-  const getAvailableModes = React.useCallback((key: ViewModeKey): ViewMode[] => {
-    return availableModes[key]
-  }, [])
+  const getAvailableModes = React.useCallback(
+    (key: ViewModeKey): ViewMode[] => {
+      return availableModes[key]
+    },
+    []
+  )
 
   const value: ViewModeContextValue = {
     getViewMode,
@@ -77,7 +81,7 @@ export function ViewModeProvider({ children }: { children: React.ReactNode }) {
 export function useViewMode(key: ViewModeKey) {
   const context = React.useContext(ViewModeContext)
   if (!context) {
-    throw new Error("useViewMode must be used within a ViewModeProvider")
+    throw new Error('useViewMode must be used within a ViewModeProvider')
   }
 
   const viewMode = context.getViewMode(key)

@@ -1,9 +1,9 @@
-import * as React from "react"
+import * as React from 'react'
 
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { DraggableTaskList } from "@/components/tasks/task-list"
-import type { Task } from "@/types/data"
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { DraggableTaskList } from '@/components/tasks/task-list'
+import type { Task } from '@/types/data'
 
 export function InboxView() {
   const {
@@ -18,7 +18,7 @@ export function InboxView() {
 
   // Get all tasks with inbox status
   const inboxTasks = React.useMemo(() => {
-    return data.tasks.filter((t) => t.status === "inbox")
+    return data.tasks.filter((t) => t.status === 'inbox')
   }, [data.tasks])
 
   // Get context name (project or area) for a task
@@ -37,7 +37,7 @@ export function InboxView() {
     [getProjectById, getAreaById]
   )
 
-  const handleReorder = React.useCallback((_reorderedTasks: Task[]) => {
+  const handleReorder = React.useCallback(() => {
     // Visual reorder only - not persisted
   }, [])
 
@@ -65,7 +65,7 @@ export function InboxView() {
   const handleCreateTask = React.useCallback(
     (afterTaskId: string | null) => {
       return createTask({
-        status: "inbox",
+        status: 'inbox',
         insertAfterId: afterTaskId ?? undefined,
       })
     },

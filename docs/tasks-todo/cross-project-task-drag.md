@@ -48,6 +48,7 @@ AreaView
 ## Data Flow
 
 ### Same-Project Reorder
+
 ```
 User drags task within Project A
   → onDragEnd detects same containerId
@@ -56,6 +57,7 @@ User drags task within Project A
 ```
 
 ### Cross-Project Move
+
 ```
 User drags task from Project A to Project B
   → onDragOver detects different containerId
@@ -73,11 +75,11 @@ User drags task from Project A to Project B
 // src/context/app-data-context.tsx
 
 moveTaskToProject: (taskId: string, newProjectId: string) => {
-  setData(prev => ({
+  setData((prev) => ({
     ...prev,
-    tasks: prev.tasks.map(t =>
+    tasks: prev.tasks.map((t) =>
       t.id === taskId ? { ...t, projectId: newProjectId } : t
-    )
+    ),
   }))
 }
 ```
@@ -164,6 +166,7 @@ export function TaskDndContext({ children, onTaskMove, onTasksReorder }: TaskDnd
 ### Step 3: Modify TaskList to Accept External DndContext
 
 The `TaskList` needs two modes:
+
 1. **Standalone** - Has its own DndContext (for use in ProjectView)
 2. **Nested** - Just renders SortableContext, expects parent DndContext (for AreaView)
 
@@ -201,6 +204,7 @@ export function DraggableTaskList({ tasks, ... }: TaskListProps) {
 ### Step 4: Create DroppableTaskContainer
 
 Wrapper for each project's task list that:
+
 - Provides the SortableContext with project-specific items
 - Marks the container with projectId for collision detection
 - Handles empty project drop zones
@@ -303,7 +307,7 @@ function getInsertIndex(overData: DragData, tasks: Task[]): number {
 
   if (overData.type === 'task') {
     // Dropped on another task - insert at that position
-    return tasks.findIndex(t => t.id === overData.taskId)
+    return tasks.findIndex((t) => t.id === overData.taskId)
   }
 
   return tasks.length
@@ -324,15 +328,18 @@ This ensures unique IDs across all projects in the DndContext.
 ## Visual Feedback
 
 ### During Drag
+
 - Source task shows `opacity-50`
 - Valid drop zones highlight with subtle border
 - Insert position shown with horizontal line
 
 ### On Hover Over Different Project
+
 - Project header could subtly highlight
 - If project is collapsed, expand it (or show tooltip)
 
 ### Drop Animation
+
 - Task slides into new position
 - Smooth transition for reorder
 

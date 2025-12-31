@@ -1,9 +1,9 @@
-import * as React from "react"
+import * as React from 'react'
 
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { MonthCalendar } from "@/components/calendar/month-calendar"
-import type { TaskStatus } from "@/types/data"
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { MonthCalendar } from '@/components/calendar/month-calendar'
+import type { TaskStatus } from '@/types/data'
 
 export function CalendarView() {
   const {
@@ -44,7 +44,9 @@ export function CalendarView() {
         onTaskScheduleChange={handleScheduleChange}
         onTaskStatusChange={handleStatusChange}
         onTaskOpenDetail={handleOpenDetail}
-        onCreateTask={(scheduledDate) => createTask({ scheduled: scheduledDate })}
+        onCreateTask={(scheduledDate) =>
+          createTask({ scheduled: scheduledDate })
+        }
         className="flex-1"
       />
     </div>

@@ -1,16 +1,13 @@
-import { useDroppable } from "@dnd-kit/core"
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { format, isToday, isWeekend } from "date-fns"
-import { Flag, Plus } from "lucide-react"
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
+import { format, isToday, isWeekend } from 'date-fns'
+import { Flag, Plus } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
-import { getCalendarTaskDragId } from "@/types/calendar-order"
-import { SortableTaskCard } from "./draggable-task-card"
-import type { TaskCardVariant } from "@/components/cards/task-card"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
+import { getCalendarTaskDragId } from '@/types/calendar-order'
+import { SortableTaskCard } from './draggable-task-card'
+import type { TaskCardVariant } from '@/components/cards/task-card'
 
 interface TaskContext {
   projectName?: string
@@ -64,14 +61,14 @@ export function DayColumn({
   editingTaskId,
   isDropTarget = false,
 }: DayColumnProps) {
-  const dateString = format(date, "yyyy-MM-dd")
+  const dateString = format(date, 'yyyy-MM-dd')
   const isCurrentDay = isToday(date)
   const isWeekendDay = isWeekend(date)
 
   const { setNodeRef, isOver } = useDroppable({
     id: `day-${dateString}`,
     data: {
-      type: "day",
+      type: 'day',
       date: dateString,
     },
   })
@@ -80,29 +77,30 @@ export function DayColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        "flex flex-col min-h-[400px] border-r border-border/50 last:border-r-0",
-        isWeekendDay && "bg-muted/20",
-        (isOver || isDropTarget) && "bg-primary/5"
+        'flex flex-col min-h-[400px] border-r border-border/50 last:border-r-0',
+        isWeekendDay && 'bg-muted/20',
+        (isOver || isDropTarget) && 'bg-primary/5'
       )}
     >
       {/* Day header */}
       <div
         className={cn(
-          "sticky top-0 z-10 px-2 py-2 border-b border-border/50 bg-background",
-          isWeekendDay && "bg-muted/20"
+          'sticky top-0 z-10 px-2 py-2 border-b border-border/50 bg-background',
+          isWeekendDay && 'bg-muted/20'
         )}
       >
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-muted-foreground uppercase">
-            {format(date, "EEE")}
+            {format(date, 'EEE')}
           </span>
           <span
             className={cn(
-              "text-sm font-semibold tabular-nums",
-              isCurrentDay && "bg-primary text-primary-foreground rounded-full w-7 h-7 flex items-center justify-center"
+              'text-sm font-semibold tabular-nums',
+              isCurrentDay &&
+                'bg-primary text-primary-foreground rounded-full w-7 h-7 flex items-center justify-center'
             )}
           >
-            {format(date, "d")}
+            {format(date, 'd')}
           </span>
         </div>
       </div>
@@ -124,11 +122,19 @@ export function DayColumn({
                 variant={variant}
                 projectName={context.projectName}
                 areaName={context.areaName}
-                onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
-                onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
-                onScheduledChange={(date) => onTaskScheduledChange(task.id, date)}
+                onStatusChange={(newStatus) =>
+                  onTaskStatusChange(task.id, newStatus)
+                }
+                onTitleChange={(newTitle) =>
+                  onTaskTitleChange(task.id, newTitle)
+                }
+                onScheduledChange={(date) =>
+                  onTaskScheduledChange(task.id, date)
+                }
                 onDueChange={(date) => onTaskDueChange(task.id, date)}
-                onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+                onEditClick={
+                  onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
+                }
                 onProjectClick={
                   context.projectId && onNavigateToProject
                     ? () => onNavigateToProject(context.projectId!)
@@ -149,8 +155,8 @@ export function DayColumn({
         {tasks.length === 0 && (
           <div
             className={cn(
-              "h-full min-h-[100px] rounded-lg border-2 border-dashed border-transparent transition-colors",
-              (isOver || isDropTarget) && "border-primary/30"
+              'h-full min-h-[100px] rounded-lg border-2 border-dashed border-transparent transition-colors',
+              (isOver || isDropTarget) && 'border-primary/30'
             )}
           />
         )}

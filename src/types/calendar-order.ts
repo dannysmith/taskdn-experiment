@@ -18,13 +18,13 @@ export interface CalendarOrder {
 // -----------------------------------------------------------------------------
 
 export interface CalendarTaskDragData {
-  type: "calendar-task"
+  type: 'calendar-task'
   taskId: string
   sourceDate: string
 }
 
 export interface DayDropData {
-  type: "day"
+  type: 'day'
   date: string
 }
 

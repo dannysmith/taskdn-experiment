@@ -1,6 +1,6 @@
-import { ChevronRight } from "lucide-react"
+import { ChevronRight } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 interface SectionHeaderProps {
   title: string
@@ -28,9 +28,9 @@ export function SectionHeader({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 py-2 px-1 cursor-pointer select-none",
-        "border-b border-border/60",
-        "hover:bg-muted/30 transition-colors",
+        'flex items-center gap-2 py-2 px-1 cursor-pointer select-none',
+        'border-b border-border/60',
+        'hover:bg-muted/30 transition-colors',
         className
       )}
       onClick={onToggleExpand}
@@ -38,22 +38,16 @@ export function SectionHeader({
       {/* Expand/collapse chevron */}
       <ChevronRight
         className={cn(
-          "size-4 text-muted-foreground shrink-0 transition-transform duration-200",
-          isExpanded && "rotate-90"
+          'size-4 text-muted-foreground shrink-0 transition-transform duration-200',
+          isExpanded && 'rotate-90'
         )}
       />
 
       {/* Optional icon */}
-      {icon && (
-        <span className="text-muted-foreground shrink-0">
-          {icon}
-        </span>
-      )}
+      {icon && <span className="text-muted-foreground shrink-0">{icon}</span>}
 
       {/* Section title */}
-      <span className="font-semibold text-sm truncate flex-1">
-        {title}
-      </span>
+      <span className="font-semibold text-sm truncate flex-1">{title}</span>
 
       {/* Task count badge */}
       {taskCount !== undefined && taskCount > 0 && (

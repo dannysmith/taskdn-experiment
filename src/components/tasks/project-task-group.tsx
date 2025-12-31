@@ -1,11 +1,11 @@
-import * as React from "react"
-import { useDroppable } from "@dnd-kit/core"
+import * as React from 'react'
+import { useDroppable } from '@dnd-kit/core'
 
-import { cn } from "@/lib/utils"
-import type { Project, Task } from "@/types/data"
-import { ProjectHeader } from "./project-header"
-import { TaskList } from "./task-list"
-import { useTaskDragPreview } from "./task-dnd-context"
+import { cn } from '@/lib/utils'
+import type { Project, Task } from '@/types/data'
+import { ProjectHeader } from './project-header'
+import { TaskList } from './task-list'
+import { useTaskDragPreview } from './task-dnd-context'
 
 interface ProjectTaskGroupProps {
   project: Project
@@ -57,7 +57,7 @@ export function ProjectTaskGroup({
   }
 
   return (
-    <div className={cn("", className)}>
+    <div className={cn('', className)}>
       <ProjectHeader
         project={project}
         completion={completion}
@@ -101,23 +101,26 @@ function EmptyProjectDropZone({ projectId }: { projectId: string }) {
   const { setNodeRef, isOver } = useDroppable({
     id: `empty-project-${projectId}`,
     data: {
-      type: "empty-project",
+      type: 'empty-project',
       projectId: projectId,
     },
   })
 
   // Check if we're dragging from a different project
-  const isDraggingFromOtherProject = dragPreview && dragPreview.sourceProjectId !== projectId
+  const isDraggingFromOtherProject =
+    dragPreview && dragPreview.sourceProjectId !== projectId
 
   return (
     <div
       ref={setNodeRef}
       className={cn(
-        "text-sm text-muted-foreground py-2 px-2 rounded-lg transition-colors",
-        isOver && isDraggingFromOtherProject && "bg-primary/10 text-primary"
+        'text-sm text-muted-foreground py-2 px-2 rounded-lg transition-colors',
+        isOver && isDraggingFromOtherProject && 'bg-primary/10 text-primary'
       )}
     >
-      {isOver && isDraggingFromOtherProject ? "Drop here" : "No tasks in this project"}
+      {isOver && isDraggingFromOtherProject
+        ? 'Drop here'
+        : 'No tasks in this project'}
     </div>
   )
 }

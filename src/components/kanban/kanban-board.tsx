@@ -1,9 +1,9 @@
-import * as React from "react"
+import * as React from 'react'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
-import { KanbanColumn } from "./kanban-column"
-import { KanbanDndContext } from "./kanban-dnd-context"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
+import { KanbanColumn } from './kanban-column'
+import { KanbanDndContext } from './kanban-dnd-context'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -11,20 +11,20 @@ import { KanbanDndContext } from "./kanban-dnd-context"
 
 /** Default column order for task status Kanban boards */
 export const DEFAULT_STATUS_ORDER: TaskStatus[] = [
-  "inbox",
-  "icebox",
-  "ready",
-  "in-progress",
-  "blocked",
-  "done",
-  "dropped",
+  'inbox',
+  'icebox',
+  'ready',
+  'in-progress',
+  'blocked',
+  'done',
+  'dropped',
 ]
 
 /** Columns to show expanded by default */
 export const DEFAULT_EXPANDED_STATUSES: TaskStatus[] = [
-  "ready",
-  "in-progress",
-  "blocked",
+  'ready',
+  'in-progress',
+  'blocked',
 ]
 
 interface KanbanBoardProps {
@@ -146,7 +146,7 @@ export function KanbanBoard({
     >
       <div
         className={cn(
-          "flex gap-3 overflow-x-auto pb-4 min-h-[400px]",
+          'flex gap-3 overflow-x-auto pb-4 min-h-[400px]',
           className
         )}
       >
@@ -172,7 +172,9 @@ export function KanbanBoard({
               onTaskEditClick={onTaskEditClick}
               onProjectClick={onProjectClick}
               onAreaClick={onAreaClick}
-              onCreateTask={onCreateTask ? () => handleCreateTask(status) : undefined}
+              onCreateTask={
+                onCreateTask ? () => handleCreateTask(status) : undefined
+              }
               editingTaskId={editingTaskId}
             />
           )
@@ -193,7 +195,9 @@ export function KanbanBoard({
 export function useCollapsedColumns(
   initialExpanded: TaskStatus[] = DEFAULT_EXPANDED_STATUSES
 ) {
-  const [collapsedColumns, setCollapsedColumns] = React.useState<Set<TaskStatus>>(() => {
+  const [collapsedColumns, setCollapsedColumns] = React.useState<
+    Set<TaskStatus>
+  >(() => {
     // Start with all columns collapsed except the initial expanded ones
     const collapsed = new Set<TaskStatus>(DEFAULT_STATUS_ORDER)
     for (const status of initialExpanded) {
@@ -202,17 +206,20 @@ export function useCollapsedColumns(
     return collapsed
   })
 
-  const toggleColumn = React.useCallback((status: TaskStatus, collapsed: boolean) => {
-    setCollapsedColumns((prev) => {
-      const next = new Set(prev)
-      if (collapsed) {
-        next.add(status)
-      } else {
-        next.delete(status)
-      }
-      return next
-    })
-  }, [])
+  const toggleColumn = React.useCallback(
+    (status: TaskStatus, collapsed: boolean) => {
+      setCollapsedColumns((prev) => {
+        const next = new Set(prev)
+        if (collapsed) {
+          next.add(status)
+        } else {
+          next.delete(status)
+        }
+        return next
+      })
+    },
+    []
+  )
 
   return { collapsedColumns, toggleColumn }
 }

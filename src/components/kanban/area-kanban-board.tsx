@@ -1,21 +1,18 @@
-import * as React from "react"
-import { ChevronRight, ExternalLink } from "lucide-react"
-import { useDroppable } from "@dnd-kit/core"
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
+import * as React from 'react'
+import { ChevronRight, ExternalLink } from 'lucide-react'
+import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus, Project } from "@/types/data"
-import { statusConfig } from "@/components/tasks/task-status-pill"
-import { SortableKanbanCard } from "./kanban-column"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus, Project } from '@/types/data'
+import { statusConfig } from '@/components/tasks/task-status-pill'
+import { SortableKanbanCard } from './kanban-column'
 import {
   KanbanDndContext,
   createEmptySwimlaneData,
   useKanbanDragPreview,
-} from "./kanban-dnd-context"
-import { DEFAULT_STATUS_ORDER } from "./kanban-board"
+} from './kanban-dnd-context'
+import { DEFAULT_STATUS_ORDER } from './kanban-board'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -103,7 +100,7 @@ export function AreaKanbanBoard({
 
   // Filter out done/dropped statuses from display but keep them in the model
   const displayStatuses = DEFAULT_STATUS_ORDER.filter(
-    (s) => s !== "done" && s !== "dropped"
+    (s) => s !== 'done' && s !== 'dropped'
   )
 
   return (
@@ -118,7 +115,7 @@ export function AreaKanbanBoard({
     >
       <div
         className={cn(
-          "flex gap-3 overflow-x-auto pb-4 min-h-[400px]",
+          'flex gap-3 overflow-x-auto pb-4 min-h-[400px]',
           className
         )}
       >
@@ -207,14 +204,14 @@ function AreaKanbanColumn({
         <ChevronRight className="size-4 text-muted-foreground mb-2" />
         <span
           className="text-xs font-medium writing-mode-vertical"
-          style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
         >
           {config.label}
         </span>
         {totalTasks > 0 && (
           <span
             className={cn(
-              "mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+              'mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium',
               config.color
             )}
           >
@@ -228,8 +225,8 @@ function AreaKanbanColumn({
   return (
     <div
       className={cn(
-        "flex flex-col w-80 shrink-0 rounded-lg border bg-muted/30",
-        isDragTarget && "ring-2 ring-primary/30"
+        'flex flex-col w-80 shrink-0 rounded-lg border bg-muted/30',
+        isDragTarget && 'ring-2 ring-primary/30'
       )}
     >
       {/* Column Header */}
@@ -240,7 +237,7 @@ function AreaKanbanColumn({
       >
         <span
           className={cn(
-            "px-2 py-0.5 rounded-full text-xs font-medium",
+            'px-2 py-0.5 rounded-full text-xs font-medium',
             config.color
           )}
         >
@@ -324,10 +321,7 @@ function ProjectSwimlane({
 
   return (
     <div
-      className={cn(
-        "border-b last:border-b-0",
-        isDragTarget && "bg-primary/5"
-      )}
+      className={cn('border-b last:border-b-0', isDragTarget && 'bg-primary/5')}
     >
       {/* Swimlane Header */}
       <div className="flex items-center gap-2 px-3 py-2 bg-muted/20">
@@ -358,8 +352,8 @@ function ProjectSwimlane({
       <div
         ref={setDroppableRef}
         className={cn(
-          "p-2 space-y-2 min-h-[48px]",
-          isOver && tasks.length === 0 && "bg-primary/5"
+          'p-2 space-y-2 min-h-[48px]',
+          isOver && tasks.length === 0 && 'bg-primary/5'
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -400,11 +394,11 @@ function ProjectSwimlane({
         {tasks.length === 0 && (
           <div
             className={cn(
-              "flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-[10px] text-muted-foreground/50",
-              isOver && "border-primary/30"
+              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-[10px] text-muted-foreground/50',
+              isOver && 'border-primary/30'
             )}
           >
-            {isOver ? "Drop here" : ""}
+            {isOver ? 'Drop here' : ''}
           </div>
         )}
       </div>
@@ -417,22 +411,27 @@ function ProjectSwimlane({
 // -----------------------------------------------------------------------------
 
 export function useAreaCollapsedColumns() {
-  const [collapsedColumns, setCollapsedColumns] = React.useState<Set<TaskStatus>>(() => {
+  const [collapsedColumns, setCollapsedColumns] = React.useState<
+    Set<TaskStatus>
+  >(() => {
     // Start with inbox and icebox collapsed for area view
-    return new Set<TaskStatus>(["inbox", "icebox"])
+    return new Set<TaskStatus>(['inbox', 'icebox'])
   })
 
-  const toggleColumn = React.useCallback((status: TaskStatus, collapsed: boolean) => {
-    setCollapsedColumns((prev) => {
-      const next = new Set(prev)
-      if (collapsed) {
-        next.add(status)
-      } else {
-        next.delete(status)
-      }
-      return next
-    })
-  }, [])
+  const toggleColumn = React.useCallback(
+    (status: TaskStatus, collapsed: boolean) => {
+      setCollapsedColumns((prev) => {
+        const next = new Set(prev)
+        if (collapsed) {
+          next.add(status)
+        } else {
+          next.delete(status)
+        }
+        return next
+      })
+    },
+    []
+  )
 
   return { collapsedColumns, toggleColumn }
 }

@@ -1,21 +1,21 @@
-import * as React from "react"
-import { Flag, Calendar, X, Pencil, Hourglass } from "lucide-react"
+import * as React from 'react'
+import { Flag, Calendar, X, Pencil, Hourglass } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { formatRelativeDate, isOverdue } from "@/lib/date-utils"
-import type { Task, TaskStatus } from "@/types/data"
-import { Calendar as CalendarPicker } from "@/components/ui/calendar"
+import { cn } from '@/lib/utils'
+import { formatRelativeDate, isOverdue } from '@/lib/date-utils'
+import type { Task, TaskStatus } from '@/types/data'
+import { Calendar as CalendarPicker } from '@/components/ui/calendar'
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
-} from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { TaskStatusPill } from "@/components/tasks/task-status-pill"
-import { TaskStatusCheckbox } from "@/components/tasks/task-status-checkbox"
+} from '@/components/ui/popover'
+import { Button } from '@/components/ui/button'
+import { TaskStatusPill } from '@/components/tasks/task-status-pill'
+import { TaskStatusCheckbox } from '@/components/tasks/task-status-checkbox'
 
-export type TaskCardVariant = "default" | "overdue" | "deferred" | "done"
-export type TaskCardSize = "default" | "compact"
+export type TaskCardVariant = 'default' | 'overdue' | 'deferred' | 'done'
+export type TaskCardSize = 'default' | 'compact'
 
 export interface TaskCardProps {
   task: Task
@@ -56,8 +56,8 @@ export interface TaskCardProps {
  */
 export function TaskCard({
   task,
-  variant = "default",
-  size = "default",
+  variant = 'default',
+  size = 'default',
   projectName,
   areaName,
   onClick,
@@ -78,8 +78,8 @@ export function TaskCard({
   const [dueOpen, setDueOpen] = React.useState(false)
   const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
-  const isDone = task.status === "done"
-  const isDropped = task.status === "dropped"
+  const isDone = task.status === 'done'
+  const isDropped = task.status === 'dropped'
   const isCompleted = isDone || isDropped
 
   // Sync edit value when task changes
@@ -95,7 +95,7 @@ export function TaskCard({
       textareaRef.current.focus()
       textareaRef.current.select()
       // Auto-size the textarea
-      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = 'auto'
       textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [isEditing])
@@ -117,7 +117,7 @@ export function TaskCard({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && isSelected && !isEditing && onTitleChange) {
+    if (e.key === 'Enter' && isSelected && !isEditing && onTitleChange) {
       e.preventDefault()
       setIsEditing(true)
     }
@@ -130,16 +130,18 @@ export function TaskCard({
     setIsEditing(false)
   }
 
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleTextareaKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
     e.stopPropagation()
     // Enter without shift submits, Shift+Enter creates newline
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       if (editValue.trim() && editValue.trim() !== task.title) {
         onTitleChange?.(editValue.trim())
       }
       setIsEditing(false)
-    } else if (e.key === "Escape") {
+    } else if (e.key === 'Escape') {
       e.preventDefault()
       setEditValue(task.title)
       setIsEditing(false)
@@ -149,22 +151,23 @@ export function TaskCard({
   const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditValue(e.target.value)
     // Auto-resize textarea
-    e.target.style.height = "auto"
+    e.target.style.height = 'auto'
     e.target.style.height = `${e.target.scrollHeight}px`
   }
 
   const handleScheduledSelect = (date: Date | undefined) => {
-    onScheduledChange?.(date ? date.toISOString().split("T")[0] : undefined)
+    onScheduledChange?.(date ? date.toISOString().split('T')[0] : undefined)
     setScheduledOpen(false)
   }
 
   const handleDueSelect = (date: Date | undefined) => {
-    onDueChange?.(date ? date.toISOString().split("T")[0] : undefined)
+    onDueChange?.(date ? date.toISOString().split('T')[0] : undefined)
     setDueOpen(false)
   }
 
   const contextName = projectName || areaName
-  const hasContextClick = (projectName && onProjectClick) || (areaName && onAreaClick)
+  const hasContextClick =
+    (projectName && onProjectClick) || (areaName && onAreaClick)
 
   // Parse dates for calendar
   const scheduledDate = task.scheduled ? new Date(task.scheduled) : undefined
@@ -172,29 +175,30 @@ export function TaskCard({
 
   // Toggle status between done and ready
   const handleStatusToggle = () => {
-    if (task.status === "done") {
-      onStatusChange?.("ready")
+    if (task.status === 'done') {
+      onStatusChange?.('ready')
     } else {
-      onStatusChange?.("done")
+      onStatusChange?.('done')
     }
   }
 
   // Compact variant - just checkbox + title, click opens detail
-  if (size === "compact") {
+  if (size === 'compact') {
     return (
       <div
         onClick={onEditClick}
         className={cn(
-          "group flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-all cursor-pointer",
-          "hover:shadow-sm hover:shadow-black/5",
+          'group flex items-center gap-2 rounded-lg border px-2 py-1.5 transition-all cursor-pointer',
+          'hover:shadow-sm hover:shadow-black/5',
           // Variant styles (same as default)
-          variant === "default" && "bg-card border-border/50 hover:border-border",
-          variant === "overdue" &&
-            "bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800",
-          variant === "deferred" &&
-            "bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50",
-          variant === "done" &&
-            "bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50",
+          variant === 'default' &&
+            'bg-card border-border/50 hover:border-border',
+          variant === 'overdue' &&
+            'bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800',
+          variant === 'deferred' &&
+            'bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50',
+          variant === 'done' &&
+            'bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50',
           className
         )}
       >
@@ -204,8 +208,8 @@ export function TaskCard({
         />
         <span
           className={cn(
-            "flex-1 text-xs font-medium truncate",
-            isCompleted && "line-through text-muted-foreground"
+            'flex-1 text-xs font-medium truncate',
+            isCompleted && 'line-through text-muted-foreground'
           )}
         >
           {task.title}
@@ -222,27 +226,27 @@ export function TaskCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       className={cn(
-        "group rounded-xl border p-3.5 transition-all outline-none",
-        "hover:shadow-md hover:shadow-black/5",
-        "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+        'group rounded-xl border p-3.5 transition-all outline-none',
+        'hover:shadow-md hover:shadow-black/5',
+        'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         // Variant styles
-        variant === "default" && "bg-card border-border/50 hover:border-border",
-        variant === "overdue" &&
-          "bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800",
-        variant === "deferred" &&
-          "bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50",
-        variant === "done" &&
-          "bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50",
-        onClick && "cursor-pointer",
-        isSelected && "ring-2 ring-primary border-primary",
-        isEditing && "ring-2 ring-primary",
+        variant === 'default' && 'bg-card border-border/50 hover:border-border',
+        variant === 'overdue' &&
+          'bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800',
+        variant === 'deferred' &&
+          'bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50',
+        variant === 'done' &&
+          'bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50',
+        onClick && 'cursor-pointer',
+        isSelected && 'ring-2 ring-primary border-primary',
+        isEditing && 'ring-2 ring-primary',
         className
       )}
     >
       {/* Title row */}
       <div className="flex items-start gap-2">
         {/* Deferred indicator */}
-        {variant === "deferred" && !isEditing && (
+        {variant === 'deferred' && !isEditing && (
           <Hourglass className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         )}
         {isEditing ? (
@@ -260,8 +264,8 @@ export function TaskCard({
           <>
             <span
               className={cn(
-                "flex-1 text-sm font-medium leading-snug",
-                isCompleted && "line-through text-muted-foreground"
+                'flex-1 text-sm font-medium leading-snug',
+                isCompleted && 'line-through text-muted-foreground'
               )}
             >
               {task.title}
@@ -274,10 +278,10 @@ export function TaskCard({
                   onEditClick()
                 }}
                 className={cn(
-                  "shrink-0 p-1 -m-1 rounded text-muted-foreground/50",
-                  "opacity-0 group-hover:opacity-100 transition-opacity",
-                  "hover:text-muted-foreground hover:bg-muted/50",
-                  isSelected && "opacity-100"
+                  'shrink-0 p-1 -m-1 rounded text-muted-foreground/50',
+                  'opacity-0 group-hover:opacity-100 transition-opacity',
+                  'hover:text-muted-foreground hover:bg-muted/50',
+                  isSelected && 'opacity-100'
                 )}
                 title="Edit task"
               >
@@ -291,15 +295,12 @@ export function TaskCard({
       {/* Footer: status pill + dates + context */}
       <div
         className={cn(
-          "mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs",
-          isCompleted && "opacity-60"
+          'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs',
+          isCompleted && 'opacity-60'
         )}
       >
         {/* Status pill dropdown */}
-        <TaskStatusPill
-          status={task.status}
-          onStatusChange={onStatusChange}
-        />
+        <TaskStatusPill status={task.status} onStatusChange={onStatusChange} />
 
         {/* Dates - placed early so they're visible on narrow cards */}
         <div className="flex items-center gap-2">
@@ -331,8 +332,8 @@ export function TaskCard({
             type="button"
             onClick={handleContextClick}
             className={cn(
-              "truncate max-w-full text-muted-foreground",
-              hasContextClick && "hover:text-foreground hover:underline"
+              'truncate max-w-full text-muted-foreground',
+              hasContextClick && 'hover:text-foreground hover:underline'
             )}
           >
             {contextName}
@@ -405,13 +406,13 @@ function DatePickerButton({
       <PopoverTrigger
         onClick={handleClick}
         className={cn(
-          "flex items-center gap-1 transition-colors",
-          canEdit && "hover:text-foreground",
+          'flex items-center gap-1 transition-colors',
+          canEdit && 'hover:text-foreground',
           isOverdue
-            ? "text-red-500 dark:text-red-400"
-            : label === "Due"
-              ? "text-red-400/70 dark:text-red-400/60"
-              : "text-muted-foreground"
+            ? 'text-red-500 dark:text-red-400'
+            : label === 'Due'
+              ? 'text-red-400/70 dark:text-red-400/60'
+              : 'text-muted-foreground'
         )}
       >
         {icon}

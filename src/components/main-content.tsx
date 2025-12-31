@@ -1,17 +1,20 @@
-import type { Selection } from "@/types/selection"
-import { TodayView } from "@/components/views/today-view"
-import { WeekView } from "@/components/views/week-view"
-import { InboxView } from "@/components/views/inbox-view"
-import { CalendarView } from "@/components/views/calendar-view"
-import { AreaView } from "@/components/views/area-view"
-import { ProjectView } from "@/components/views/project-view"
+import type { Selection } from '@/types/selection'
+import { TodayView } from '@/components/views/today-view'
+import { WeekView } from '@/components/views/week-view'
+import { InboxView } from '@/components/views/inbox-view'
+import { CalendarView } from '@/components/views/calendar-view'
+import { AreaView } from '@/components/views/area-view'
+import { ProjectView } from '@/components/views/project-view'
 
 interface MainContentProps {
   selection: Selection | null
   onSelectionChange: (selection: Selection) => void
 }
 
-export function MainContent({ selection, onSelectionChange }: MainContentProps) {
+export function MainContent({
+  selection,
+  onSelectionChange,
+}: MainContentProps) {
   if (!selection) {
     return (
       <div className="text-muted-foreground text-sm">
@@ -21,46 +24,46 @@ export function MainContent({ selection, onSelectionChange }: MainContentProps) 
   }
 
   switch (selection.type) {
-    case "nav":
+    case 'nav':
       switch (selection.id) {
-        case "today":
+        case 'today':
           return (
             <TodayView
               onNavigateToProject={(projectId) =>
-                onSelectionChange({ type: "project", id: projectId })
+                onSelectionChange({ type: 'project', id: projectId })
               }
               onNavigateToArea={(areaId) =>
-                onSelectionChange({ type: "area", id: areaId })
+                onSelectionChange({ type: 'area', id: areaId })
               }
             />
           )
-        case "this-week":
+        case 'this-week':
           return (
             <WeekView
               onNavigateToProject={(projectId) =>
-                onSelectionChange({ type: "project", id: projectId })
+                onSelectionChange({ type: 'project', id: projectId })
               }
               onNavigateToArea={(areaId) =>
-                onSelectionChange({ type: "area", id: areaId })
+                onSelectionChange({ type: 'area', id: areaId })
               }
             />
           )
-        case "inbox":
+        case 'inbox':
           return <InboxView />
-        case "calendar":
+        case 'calendar':
           return <CalendarView />
       }
       break
-    case "area":
+    case 'area':
       return (
         <AreaView
           areaId={selection.id}
           onNavigateToProject={(projectId) =>
-            onSelectionChange({ type: "project", id: projectId })
+            onSelectionChange({ type: 'project', id: projectId })
           }
         />
       )
-    case "project":
+    case 'project':
       return <ProjectView projectId={selection.id} />
   }
 }

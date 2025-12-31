@@ -1,19 +1,24 @@
-import * as React from "react"
-import { ChevronDown } from "lucide-react"
+import * as React from 'react'
+import { ChevronDown } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { useViewMode } from "@/context/view-mode-context"
-import { ProjectTaskGroup } from "@/components/tasks/project-task-group"
-import { TaskDndContext } from "@/components/tasks/task-dnd-context"
-import { ProjectCard } from "@/components/cards/project-card"
-import { MarkdownPreview } from "@/components/ui/markdown-preview"
-import { AreaKanbanBoard, useAreaCollapsedColumns } from "@/components/kanban"
-import type { Task, Project } from "@/types/data"
+import { cn } from '@/lib/utils'
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { useViewMode } from '@/context/view-mode-context'
+import { ProjectTaskGroup } from '@/components/tasks/project-task-group'
+import { TaskDndContext } from '@/components/tasks/task-dnd-context'
+import { ProjectCard } from '@/components/cards/project-card'
+import { MarkdownPreview } from '@/components/ui/markdown-preview'
+import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
+import type { Task, Project } from '@/types/data'
 
 /** Active statuses for project cards grid */
-const ACTIVE_STATUSES: Project["status"][] = ["in-progress", "ready", "planning", "blocked"]
+const ACTIVE_STATUSES: Project['status'][] = [
+  'in-progress',
+  'ready',
+  'planning',
+  'blocked',
+]
 
 interface AreaViewProps {
   areaId: string
@@ -22,7 +27,7 @@ interface AreaViewProps {
 
 export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const [notesExpanded, setNotesExpanded] = React.useState(false)
-  const { viewMode } = useViewMode("area")
+  const { viewMode } = useViewMode('area')
   const { collapsedColumns, toggleColumn } = useAreaCollapsedColumns()
 
   const {
@@ -44,15 +49,6 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const { openTask } = useTaskDetail()
 
   const area = getAreaById(areaId)
-
-  if (!area) {
-    return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">Area not found.</p>
-      </div>
-    )
-  }
-
   const projects = getProjectsByAreaId(areaId)
 
   // Split projects into active (for grid) and all (for task groups)
@@ -74,20 +70,12 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     (projectId: string) => {
       const tasks = tasksByProject.get(projectId) ?? []
       const completedTaskCount = tasks.filter(
-        (t) => t.status === "done" || t.status === "dropped"
+        (t) => t.status === 'done' || t.status === 'dropped'
       ).length
       return { taskCount: tasks.length, completedTaskCount }
     },
     [tasksByProject]
   )
-
-  const handleTasksReorder = (projectId: string, reorderedTasks: Task[]) => {
-    reorderProjectTasks(projectId, reorderedTasks.map((t) => t.id))
-  }
-
-  const handleTaskMove = (taskId: string, _fromProjectId: string, toProjectId: string) => {
-    moveTaskToProject(taskId, toProjectId)
-  }
 
   // Factory function to create task creation handlers for each project
   const makeCreateTaskHandler = React.useCallback(
@@ -100,6 +88,29 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     [createTask]
   )
 
+  if (!area) {
+    return (
+      <div className="space-y-4">
+        <p className="text-muted-foreground">Area not found.</p>
+      </div>
+    )
+  }
+
+  const handleTasksReorder = (projectId: string, reorderedTasks: Task[]) => {
+    reorderProjectTasks(
+      projectId,
+      reorderedTasks.map((t) => t.id)
+    )
+  }
+
+  const handleTaskMove = (
+    taskId: string,
+    _fromProjectId: string,
+    toProjectId: string
+  ) => {
+    moveTaskToProject(taskId, toProjectId)
+  }
+
   return (
     <div className="space-y-8">
       {/* Area Notes (collapsible) */}
@@ -111,8 +122,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           >
             <ChevronDown
               className={cn(
-                "size-4 text-muted-foreground shrink-0 transition-transform duration-200",
-                !notesExpanded && "-rotate-90"
+                'size-4 text-muted-foreground shrink-0 transition-transform duration-200',
+                !notesExpanded && '-rotate-90'
               )}
             />
             <span className="text-sm font-medium text-muted-foreground">
@@ -121,8 +132,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           </button>
           <div
             className={cn(
-              "overflow-hidden transition-all duration-200",
-              notesExpanded ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"
+              'overflow-hidden transition-all duration-200',
+              notesExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
             )}
           >
             <div className="px-4 pb-4">
@@ -136,7 +147,11 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           {!notesExpanded && (
             <div className="px-4 pb-3 -mt-1">
               <p className="text-sm text-muted-foreground/70 line-clamp-2">
-                {area.notes.split('\n').filter(line => line.trim() && !line.startsWith('#')).slice(0, 2).join(' ')}
+                {area.notes
+                  .split('\n')
+                  .filter((line) => line.trim() && !line.startsWith('#'))
+                  .slice(0, 2)
+                  .join(' ')}
               </p>
             </div>
           )}
@@ -152,7 +167,9 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeProjects.map((project) => {
               const completion = getProjectCompletion(project.id)
-              const { taskCount, completedTaskCount } = getTaskCounts(project.id)
+              const { taskCount, completedTaskCount } = getTaskCounts(
+                project.id
+              )
               return (
                 <ProjectCard
                   key={project.id}
@@ -171,10 +188,10 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
       {/* Projects/Tasks Content */}
       <section>
         <h2 className="text-sm font-medium text-muted-foreground mb-3">
-          {viewMode === "list" ? "All Projects" : "Tasks by Status"}
+          {viewMode === 'list' ? 'All Projects' : 'Tasks by Status'}
         </h2>
 
-        {viewMode === "list" ? (
+        {viewMode === 'list' ? (
           <TaskDndContext
             tasksByProject={tasksByProject}
             onTaskMove={handleTaskMove}
@@ -193,8 +210,12 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
                     tasks={tasks}
                     completion={completion}
                     onOpenProject={() => onNavigateToProject(project.id)}
-                    onTasksReorder={(reordered) => handleTasksReorder(project.id, reordered)}
-                    onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
+                    onTasksReorder={(reordered) =>
+                      handleTasksReorder(project.id, reordered)
+                    }
+                    onTaskTitleChange={(taskId, newTitle) =>
+                      updateTaskTitle(taskId, newTitle)
+                    }
                     onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
                     onTaskOpenDetail={openTask}
                     onCreateTask={makeCreateTaskHandler(project.id)}

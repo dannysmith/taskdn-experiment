@@ -1,14 +1,18 @@
-import * as React from "react"
-import { useSortable } from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+import * as React from 'react'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
 import {
   getCalendarTaskDragId,
   type CalendarTaskDragData,
-} from "@/types/calendar-order"
-import { TaskCard, type TaskCardVariant, type TaskCardSize } from "@/components/cards/task-card"
+} from '@/types/calendar-order'
+import {
+  TaskCard,
+  type TaskCardVariant,
+  type TaskCardSize,
+} from '@/components/cards/task-card'
 
 interface SortableTaskCardProps {
   task: Task
@@ -53,7 +57,7 @@ export function SortableTaskCard({
   autoFocusEdit,
 }: SortableTaskCardProps) {
   const dragData: CalendarTaskDragData = {
-    type: "calendar-task",
+    type: 'calendar-task',
     taskId: task.id,
     sourceDate: date,
   }
@@ -82,8 +86,8 @@ export function SortableTaskCard({
       {...attributes}
       {...listeners}
       className={cn(
-        "cursor-grab active:cursor-grabbing touch-none",
-        isDragging && "opacity-50 z-50"
+        'cursor-grab active:cursor-grabbing touch-none',
+        isDragging && 'opacity-50 z-50'
       )}
     >
       <TaskCard
@@ -119,7 +123,12 @@ interface TaskCardDragPreviewProps {
  */
 export function TaskCardDragPreview({ task, size }: TaskCardDragPreviewProps) {
   return (
-    <div className={cn("shadow-xl", size === "compact" ? "max-w-[200px]" : "max-w-[280px]")}>
+    <div
+      className={cn(
+        'shadow-xl',
+        size === 'compact' ? 'max-w-[200px]' : 'max-w-[280px]'
+      )}
+    >
       <TaskCard task={task} size={size} />
     </div>
   )

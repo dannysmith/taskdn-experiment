@@ -1,10 +1,10 @@
-import * as React from "react"
-import { Calendar } from "lucide-react"
+import * as React from 'react'
+import { Calendar } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { formatRelativeDate } from "@/lib/date-utils"
-import type { Project, ProjectStatus } from "@/types/data"
-import { ProgressCircle } from "@/components/ui/progress-circle"
+import { cn } from '@/lib/utils'
+import { formatRelativeDate } from '@/lib/date-utils'
+import type { Project, ProjectStatus } from '@/types/data'
+import { ProgressCircle } from '@/components/ui/progress-circle'
 
 export interface ProjectCardProps {
   project: Project
@@ -40,8 +40,8 @@ export function ProjectCard({
   isSelected,
   className,
 }: ProjectCardProps) {
-  const status = project.status ?? "planning"
-  const isDone = status === "done"
+  const status = project.status ?? 'planning'
+  const isDone = status === 'done'
 
   const handleAreaClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -52,11 +52,11 @@ export function ProjectCard({
     <div
       onClick={onClick}
       className={cn(
-        "group bg-card rounded-xl border border-border/60 p-4 transition-all",
-        "hover:border-border hover:shadow-sm",
-        onClick && "cursor-pointer",
-        isSelected && "ring-2 ring-primary border-primary",
-        isDone && "opacity-60",
+        'group bg-card rounded-xl border border-border/60 p-4 transition-all',
+        'hover:border-border hover:shadow-sm',
+        onClick && 'cursor-pointer',
+        isSelected && 'ring-2 ring-primary border-primary',
+        isDone && 'opacity-60',
         className
       )}
     >
@@ -64,8 +64,8 @@ export function ProjectCard({
       <div className="flex items-start justify-between gap-2 mb-2">
         <h3
           className={cn(
-            "font-medium text-sm leading-snug",
-            isDone && "line-through text-muted-foreground"
+            'font-medium text-sm leading-snug',
+            isDone && 'line-through text-muted-foreground'
           )}
         >
           {project.title}
@@ -118,8 +118,8 @@ export function ProjectCard({
             type="button"
             onClick={handleAreaClick}
             className={cn(
-              "truncate max-w-[100px] transition-colors",
-              onAreaClick && "hover:text-foreground hover:underline"
+              'truncate max-w-[100px] transition-colors',
+              onAreaClick && 'hover:text-foreground hover:underline'
             )}
           >
             {areaName}
@@ -135,12 +135,21 @@ export function ProjectCard({
 // -----------------------------------------------------------------------------
 
 const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
-  planning: { label: "Planning", color: "bg-status-planning/15 text-status-planning" },
-  ready: { label: "Ready", color: "bg-status-ready/15 text-status-ready" },
-  "in-progress": { label: "Active", color: "bg-status-in-progress/15 text-status-in-progress" },
-  blocked: { label: "Blocked", color: "bg-status-blocked/15 text-status-blocked" },
-  paused: { label: "Paused", color: "bg-status-paused/15 text-status-paused" },
-  done: { label: "Done", color: "bg-status-done/15 text-status-done" },
+  planning: {
+    label: 'Planning',
+    color: 'bg-status-planning/15 text-status-planning',
+  },
+  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
+  'in-progress': {
+    label: 'Active',
+    color: 'bg-status-in-progress/15 text-status-in-progress',
+  },
+  blocked: {
+    label: 'Blocked',
+    color: 'bg-status-blocked/15 text-status-blocked',
+  },
+  paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
+  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
 }
 
 function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
@@ -149,7 +158,7 @@ function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   return (
     <span
       className={cn(
-        "shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center",
+        'shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center',
         config.color
       )}
     >

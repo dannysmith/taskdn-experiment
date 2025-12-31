@@ -1,12 +1,12 @@
-import * as React from "react"
-import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from "date-fns"
+import * as React from 'react'
+import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns'
 
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { useViewMode } from "@/context/view-mode-context"
-import { WeekCalendar } from "@/components/calendar/week-calendar"
-import { KanbanBoard, useCollapsedColumns } from "@/components/kanban"
-import type { Task, TaskStatus } from "@/types/data"
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { useViewMode } from '@/context/view-mode-context'
+import { WeekCalendar } from '@/components/calendar/week-calendar'
+import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
+import type { Task, TaskStatus } from '@/types/data'
 
 interface WeekViewProps {
   onNavigateToProject?: (projectId: string) => void
@@ -17,7 +17,7 @@ export function WeekView({
   onNavigateToProject,
   onNavigateToArea,
 }: WeekViewProps) {
-  const { viewMode } = useViewMode("this-week")
+  const { viewMode } = useViewMode('this-week')
   const { collapsedColumns, toggleColumn } = useCollapsedColumns()
 
   const {
@@ -42,7 +42,10 @@ export function WeekView({
 
     return data.tasks.filter((task) => {
       // Exclude done and dropped tasks from Kanban (but calendar may still show them)
-      if (viewMode === "kanban" && (task.status === "done" || task.status === "dropped")) {
+      if (
+        viewMode === 'kanban' &&
+        (task.status === 'done' || task.status === 'dropped')
+      ) {
         return false
       }
 
@@ -149,7 +152,7 @@ export function WeekView({
 
   return (
     <div className="h-full flex flex-col">
-      {viewMode === "calendar" ? (
+      {viewMode === 'calendar' ? (
         <WeekCalendar
           tasks={data.tasks}
           getTaskById={getTaskById}
@@ -161,7 +164,9 @@ export function WeekView({
           onTaskOpenDetail={handleOpenDetail}
           onNavigateToProject={onNavigateToProject}
           onNavigateToArea={onNavigateToArea}
-          onCreateTask={(scheduledDate) => createTask({ scheduled: scheduledDate })}
+          onCreateTask={(scheduledDate) =>
+            createTask({ scheduled: scheduledDate })
+          }
           className="flex-1"
         />
       ) : (

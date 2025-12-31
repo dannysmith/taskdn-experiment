@@ -1,5 +1,5 @@
-import * as React from "react"
-import { useState, useCallback } from "react"
+import * as React from 'react'
+import { useState, useCallback } from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -14,13 +14,13 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+} from '@dnd-kit/core'
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
+} from '@dnd-kit/sortable'
 import {
   CalendarIcon,
   CalendarDaysIcon,
@@ -29,13 +29,13 @@ import {
   InboxIcon,
   PanelLeftIcon,
   SunIcon,
-} from "lucide-react"
+} from 'lucide-react'
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from '@/components/ui/collapsible'
 import {
   Sidebar,
   SidebarContent,
@@ -49,25 +49,44 @@ import {
   SidebarRail,
   SidebarSeparator,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { useAppData } from "@/context/app-data-context"
-import { cn } from "@/lib/utils"
-import { useSidebarOrder } from "@/hooks/use-sidebar-order"
-import { DraggableArea } from "./draggable-area"
-import { DraggableProject, ProjectStatusIndicator, getProjectTitleClass } from "./draggable-project"
-import type { Selection, NavId } from "@/types/selection"
-import { getDragId, ORPHAN_CONTAINER_ID } from "@/types/sidebar-order"
-import type { DragItem } from "@/types/sidebar-order"
+} from '@/components/ui/sidebar'
+import { useAppData } from '@/context/app-data-context'
+import { cn } from '@/lib/utils'
+import { useSidebarOrder } from '@/hooks/use-sidebar-order'
+import { DraggableArea } from './draggable-area'
+import {
+  DraggableProject,
+  ProjectStatusIndicator,
+  getProjectTitleClass,
+} from './draggable-project'
+import type { Selection, NavId } from '@/types/selection'
+import { getDragId, ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
+import type { DragItem } from '@/types/sidebar-order'
 
 // -----------------------------------------------------------------------------
 // Nav Items
 // -----------------------------------------------------------------------------
 
-const navItems: { id: NavId; name: string; icon: typeof SunIcon; iconClass: string }[] = [
-  { id: "today", name: "Today", icon: SunIcon, iconClass: "text-icon-today" },
-  { id: "this-week", name: "This Week", icon: CalendarDaysIcon, iconClass: "text-icon-week" },
-  { id: "inbox", name: "Inbox", icon: InboxIcon, iconClass: "text-icon-inbox" },
-  { id: "calendar", name: "Calendar", icon: CalendarIcon, iconClass: "text-icon-calendar" },
+const navItems: {
+  id: NavId
+  name: string
+  icon: typeof SunIcon
+  iconClass: string
+}[] = [
+  { id: 'today', name: 'Today', icon: SunIcon, iconClass: 'text-icon-today' },
+  {
+    id: 'this-week',
+    name: 'This Week',
+    icon: CalendarDaysIcon,
+    iconClass: 'text-icon-week',
+  },
+  { id: 'inbox', name: 'Inbox', icon: InboxIcon, iconClass: 'text-icon-inbox' },
+  {
+    id: 'calendar',
+    name: 'Calendar',
+    icon: CalendarIcon,
+    iconClass: 'text-icon-calendar',
+  },
 ]
 
 // -----------------------------------------------------------------------------
@@ -79,9 +98,13 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   onSelectionChange: (selection: Selection) => void
 }
 
-export function AppSidebar({ selection, onSelectionChange, ...props }: AppSidebarProps) {
+export function AppSidebar({
+  selection,
+  onSelectionChange,
+  ...props
+}: AppSidebarProps) {
   const { state, toggleSidebar } = useSidebar()
-  const isCollapsed = state === "collapsed"
+  const isCollapsed = state === 'collapsed'
 
   const { getProjectCompletion } = useAppData()
   const {
@@ -111,7 +134,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
   // Drop animation config
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
@@ -134,18 +157,18 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
       if (!activeData) return
 
       // Handle area reordering during drag (for immediate visual feedback)
-      if (activeData.type === "area" && overData?.type === "area") {
+      if (activeData.type === 'area' && overData?.type === 'area') {
         reorderAreas(activeData.id, overData.id)
         return
       }
 
       // Handle project cross-container moves
-      if (activeData.type === "project") {
+      if (activeData.type === 'project') {
         let overContainerId: string | null = null
 
-        if (overData?.type === "project") {
+        if (overData?.type === 'project') {
           overContainerId = overData.containerId
-        } else if (overData?.type === "area") {
+        } else if (overData?.type === 'area') {
           // Dropping on an area header - use that area as container
           overContainerId = overData.id
         } else {
@@ -183,8 +206,8 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
 
       // Reorder projects within same container (areas handled in dragOver)
       if (
-        activeData.type === "project" &&
-        overData.type === "project" &&
+        activeData.type === 'project' &&
+        overData.type === 'project' &&
         activeData.containerId === overData.containerId
       ) {
         const containerId = activeData.containerId ?? ORPHAN_CONTAINER_ID
@@ -195,7 +218,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
   )
 
   // Get drag item IDs for SortableContext
-  const areaIds = orderedAreas.map((a) => getDragId("area", a.id))
+  const areaIds = orderedAreas.map((a) => getDragId('area', a.id))
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -206,7 +229,7 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
         <button
           onClick={toggleSidebar}
           className="size-8 flex items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <PanelLeftIcon className="size-4" />
         </button>
@@ -229,8 +252,12 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                   <SidebarMenuButton
                     className="font-semibold"
                     tooltip={item.name}
-                    isActive={selection?.type === "nav" && selection.id === item.id}
-                    onClick={() => onSelectionChange({ type: "nav", id: item.id })}
+                    isActive={
+                      selection?.type === 'nav' && selection.id === item.id
+                    }
+                    onClick={() =>
+                      onSelectionChange({ type: 'nav', id: item.id })
+                    }
                   >
                     <item.icon className={item.iconClass} />
                     <span>{item.name}</span>
@@ -243,27 +270,45 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
           <SidebarSeparator className="my-2 group-data-[collapsible=icon]:hidden" />
 
           {/* Sortable Areas */}
-          <SortableContext items={areaIds} strategy={verticalListSortingStrategy}>
+          <SortableContext
+            items={areaIds}
+            strategy={verticalListSortingStrategy}
+          >
             {orderedAreas.map((area) => {
               const projects = getOrderedProjects(area.id)
-              const projectIds = projects.map((p) => getDragId("project", p.id))
+              const projectIds = projects.map((p) => getDragId('project', p.id))
 
               return (
                 <DraggableArea
                   key={area.id}
                   area={area}
-                  isSelected={selection?.type === "area" && selection.id === area.id}
-                  onSelect={() => onSelectionChange({ type: "area", id: area.id })}
+                  isSelected={
+                    selection?.type === 'area' && selection.id === area.id
+                  }
+                  onSelect={() =>
+                    onSelectionChange({ type: 'area', id: area.id })
+                  }
                 >
                   <SidebarMenu>
-                    <SortableContext items={projectIds} strategy={verticalListSortingStrategy}>
+                    <SortableContext
+                      items={projectIds}
+                      strategy={verticalListSortingStrategy}
+                    >
                       {projects.map((project) => (
                         <DraggableProject
                           key={project.id}
                           project={project}
                           containerId={area.id}
-                          isSelected={selection?.type === "project" && selection.id === project.id}
-                          onSelect={() => onSelectionChange({ type: "project", id: project.id })}
+                          isSelected={
+                            selection?.type === 'project' &&
+                            selection.id === project.id
+                          }
+                          onSelect={() =>
+                            onSelectionChange({
+                              type: 'project',
+                              id: project.id,
+                            })
+                          }
                           completion={getProjectCompletion(project.id)}
                         />
                       ))}
@@ -295,7 +340,9 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                       <EmptyDropZone id={ORPHAN_CONTAINER_ID} />
                     ) : (
                       <SortableContext
-                        items={orderedOrphanProjects.map((p) => getDragId("project", p.id))}
+                        items={orderedOrphanProjects.map((p) =>
+                          getDragId('project', p.id)
+                        )}
                         strategy={verticalListSortingStrategy}
                       >
                         {orderedOrphanProjects.map((project) => (
@@ -303,9 +350,15 @@ export function AppSidebar({ selection, onSelectionChange, ...props }: AppSideba
                             key={project.id}
                             project={project}
                             containerId={ORPHAN_CONTAINER_ID}
-                            isSelected={selection?.type === "project" && selection.id === project.id}
+                            isSelected={
+                              selection?.type === 'project' &&
+                              selection.id === project.id
+                            }
                             onSelect={() =>
-                              onSelectionChange({ type: "project", id: project.id })
+                              onSelectionChange({
+                                type: 'project',
+                                id: project.id,
+                              })
                             }
                             completion={getProjectCompletion(project.id)}
                           />
@@ -341,14 +394,14 @@ function EmptyDropZone({ id }: { id: string }) {
     <SidebarMenuItem ref={setNodeRef}>
       <div
         className={cn(
-          "h-8 mx-2 my-1 border-2 border-dashed rounded flex items-center justify-center transition-colors",
+          'h-8 mx-2 my-1 border-2 border-dashed rounded flex items-center justify-center transition-colors',
           isOver
-            ? "border-primary/50 bg-primary/5"
-            : "border-muted-foreground/25"
+            ? 'border-primary/50 bg-primary/5'
+            : 'border-muted-foreground/25'
         )}
       >
         <span className="text-xs text-muted-foreground">
-          {isOver ? "Drop to add" : "Drop here"}
+          {isOver ? 'Drop to add' : 'Drop here'}
         </span>
       </div>
     </SidebarMenuItem>
@@ -362,7 +415,7 @@ function EmptyDropZone({ id }: { id: string }) {
 function DragPreview({ item }: { item: DragItem }) {
   const { getAreaById, getProjectById, getProjectCompletion } = useAppData()
 
-  if (item.type === "area") {
+  if (item.type === 'area') {
     const area = getAreaById(item.id)
     if (!area) return null
 
@@ -377,7 +430,7 @@ function DragPreview({ item }: { item: DragItem }) {
     )
   }
 
-  if (item.type === "project") {
+  if (item.type === 'project') {
     const project = getProjectById(item.id)
     if (!project) return null
 
@@ -386,8 +439,13 @@ function DragPreview({ item }: { item: DragItem }) {
     return (
       <div className="bg-sidebar rounded-md shadow-lg border border-border">
         <SidebarMenuButton className="pl-7">
-          <ProjectStatusIndicator status={project.status} completion={completion} />
-          <span className={cn("truncate", getProjectTitleClass(project.status))}>
+          <ProjectStatusIndicator
+            status={project.status}
+            completion={completion}
+          />
+          <span
+            className={cn('truncate', getProjectTitleClass(project.status))}
+          >
             {project.title}
           </span>
         </SidebarMenuButton>

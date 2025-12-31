@@ -1,13 +1,8 @@
-import * as React from "react"
-import {
-  Check,
-  X,
-  Snowflake,
-  Inbox,
-} from "lucide-react"
+import * as React from 'react'
+import { Check, X, Snowflake, Inbox } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { TaskStatus } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { TaskStatus } from '@/types/data'
 
 interface TaskStatusCheckboxProps {
   status: TaskStatus
@@ -39,7 +34,7 @@ export function TaskStatusCheckbox({
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
+    if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault()
       e.stopPropagation()
       onToggle()
@@ -48,24 +43,21 @@ export function TaskStatusCheckbox({
 
   // Rounded square shape like Things 3
   const baseClasses = cn(
-    "relative flex items-center justify-center size-4 rounded-[4px] shrink-0",
-    "transition-all duration-150 cursor-pointer",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
+    'relative flex items-center justify-center size-4 rounded-[4px] shrink-0',
+    'transition-all duration-150 cursor-pointer',
+    'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
     className
   )
 
-  const iconClasses = "size-2.5"
+  const iconClasses = 'size-2.5'
 
   // Determine visual representation based on status
   switch (status) {
-    case "done":
+    case 'done':
       return (
         <button
           type="button"
-          className={cn(
-            baseClasses,
-            "bg-primary text-primary-foreground"
-          )}
+          className={cn(baseClasses, 'bg-primary text-primary-foreground')}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as incomplete"
@@ -74,14 +66,11 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "in-progress":
+    case 'in-progress':
       return (
         <button
           type="button"
-          className={cn(
-            baseClasses,
-            "border-2 border-status-in-progress"
-          )}
+          className={cn(baseClasses, 'border-2 border-status-in-progress')}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
@@ -91,14 +80,11 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "blocked":
+    case 'blocked':
       return (
         <button
           type="button"
-          className={cn(
-            baseClasses,
-            "bg-status-blocked text-white"
-          )}
+          className={cn(baseClasses, 'bg-status-blocked text-white')}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
@@ -107,13 +93,13 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "icebox":
+    case 'icebox':
       return (
         <button
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-status-icebox text-status-icebox"
+            'border-2 border-status-icebox text-status-icebox'
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -123,13 +109,13 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "inbox":
+    case 'inbox':
       return (
         <button
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-status-inbox text-status-inbox"
+            'border-2 border-status-inbox text-status-inbox'
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -139,14 +125,11 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "dropped":
+    case 'dropped':
       return (
         <button
           type="button"
-          className={cn(
-            baseClasses,
-            "bg-status-dropped text-white"
-          )}
+          className={cn(baseClasses, 'bg-status-dropped text-white')}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
           aria-label="Mark as complete"
@@ -155,15 +138,15 @@ export function TaskStatusCheckbox({
         </button>
       )
 
-    case "ready":
+    case 'ready':
     default:
       return (
         <button
           type="button"
           className={cn(
             baseClasses,
-            "border-2 border-muted-foreground/40 hover:border-primary/60",
-            "group"
+            'border-2 border-muted-foreground/40 hover:border-primary/60',
+            'group'
           )}
           onClick={handleClick}
           onKeyDown={handleKeyDown}
@@ -173,7 +156,7 @@ export function TaskStatusCheckbox({
           <Check
             className={cn(
               iconClasses,
-              "text-muted-foreground/0 group-hover:text-primary/40 transition-colors"
+              'text-muted-foreground/0 group-hover:text-primary/40 transition-colors'
             )}
             strokeWidth={2.5}
           />

@@ -1,22 +1,19 @@
-import * as React from "react"
-import { Sun, Flag, Sunrise } from "lucide-react"
+import * as React from 'react'
+import { Sun, Flag, Sunrise } from 'lucide-react'
 
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
-import { SectionTaskGroup } from "@/components/tasks/section-task-group"
-import { isOverdue, isToday } from "@/lib/date-utils"
-import type { Task } from "@/types/data"
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
+import { SectionTaskGroup } from '@/components/tasks/section-task-group'
+import { isOverdue, isToday } from '@/lib/date-utils'
+import type { Task } from '@/types/data'
 
 interface TodayViewProps {
   onNavigateToProject?: (projectId: string) => void
   onNavigateToArea?: (areaId: string) => void
 }
 
-export function TodayView({
-  // Reserved for future: clicking context name navigates to project/area
-  onNavigateToProject: _onNavigateToProject,
-  onNavigateToArea: _onNavigateToArea,
-}: TodayViewProps) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function TodayView(_props: TodayViewProps) {
   const {
     data,
     getProjectById,
@@ -28,17 +25,15 @@ export function TodayView({
   const { openTask } = useTaskDetail()
 
   // Get today's date in ISO format (YYYY-MM-DD)
-  const today = new Date().toISOString().split("T")[0]
+  const today = new Date().toISOString().split('T')[0]
 
   // Helper to check if task is active (not done/dropped)
   const isActiveTask = (task: Task) =>
-    task.status !== "done" && task.status !== "dropped"
+    task.status !== 'done' && task.status !== 'dropped'
 
   // Section 1: Tasks scheduled for today
   const scheduledToday = React.useMemo(() => {
-    return data.tasks.filter(
-      (t) => t.scheduled === today && isActiveTask(t)
-    )
+    return data.tasks.filter((t) => t.scheduled === today && isActiveTask(t))
   }, [data.tasks, today])
 
   // Section 2: Tasks overdue or due today (but NOT scheduled for today)
@@ -84,7 +79,7 @@ export function TodayView({
 
   // Reorder handlers (for now, these are no-ops since we don't persist section order)
   // Each section manages its own visual order
-  const handleReorder = React.useCallback((_reorderedTasks: Task[]) => {
+  const handleReorder = React.useCallback(() => {
     // Visual reorder only - not persisted
   }, [])
 
@@ -210,9 +205,7 @@ export function TodayView({
       {/* Empty state */}
       {!hasAnyTasks && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground">
-            Nothing scheduled for today.
-          </p>
+          <p className="text-muted-foreground">Nothing scheduled for today.</p>
           <p className="text-sm text-muted-foreground/70 mt-1">
             Schedule tasks to see them here.
           </p>

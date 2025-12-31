@@ -3,6 +3,7 @@
 ## Overview
 
 Implement drag-and-drop reordering for the sidebar, enabling:
+
 1. Reordering projects within an area
 2. Reordering areas themselves
 3. Moving a project from one area to another (changes entity data)
@@ -10,6 +11,7 @@ Implement drag-and-drop reordering for the sidebar, enabling:
 ## Library Choice
 
 **@dnd-kit** - Selected for:
+
 - Best React 19 compatibility among options
 - Smallest bundle size (~19 kB)
 - Hooks-based API aligns with shadcn/React patterns
@@ -21,16 +23,19 @@ Implement drag-and-drop reordering for the sidebar, enabling:
 ### Two Separate Concerns
 
 **1. Entity Data (mutable)** - The actual app data including project-to-area assignments
+
 - Wrapped in React context (`AppDataProvider`)
 - Moving a project between areas modifies `project.areaId` here
 - Eventually syncs to backend/files
 
 **2. Display Order (separate)** - The order items appear in the sidebar
+
 - Stored in `SidebarOrder` state
 - Reordering areas/projects updates this
 - Eventually persists to separate ordering file
 
 This separation is critical because:
+
 - Reordering within an area = display preference only
 - Moving to different area = actual data change + display update
 - In final Tauri app, these persist to different places
@@ -53,15 +58,16 @@ interface SidebarOrder {
 type DragItemType = 'area' | 'project'
 interface DragItem {
   type: DragItemType
-  id: string        // Original ID (e.g., "health-1")
-  dragId: string    // Prefixed ID for dnd-kit (e.g., "project-health-1")
-  containerId: string | null  // Area ID or null for orphans
+  id: string // Original ID (e.g., "health-1")
+  dragId: string // Prefixed ID for dnd-kit (e.g., "project-health-1")
+  containerId: string | null // Area ID or null for orphans
 }
 ```
 
 ### State Management
 
 **AppDataProvider** - Mutable entity data:
+
 ```typescript
 // src/context/app-data-context.tsx
 
@@ -73,6 +79,7 @@ interface AppDataContextValue {
 ```
 
 **useSidebarOrder** - Display ordering:
+
 ```typescript
 // src/hooks/use-sidebar-order.ts
 
@@ -133,6 +140,7 @@ Update helper functions to accept `data` parameter instead of reading from stati
 ### Step 3: Create Type Definitions
 
 Create `src/types/sidebar-order.ts` with:
+
 - `SidebarOrder` interface
 - `DragItem` type for tracking active drag
 - Constants for special keys (e.g., `ORPHAN_CONTAINER = "__orphan__"`)
@@ -204,7 +212,12 @@ function DraggableArea({ area, children, isSelected, onSelect }: Props) {
 ```typescript
 // src/components/sidebar/draggable-project.tsx
 
-function DraggableProject({ project, containerId, isSelected, onSelect }: Props) {
+function DraggableProject({
+  project,
+  containerId,
+  isSelected,
+  onSelect,
+}: Props) {
   const {
     attributes,
     listeners,
@@ -213,7 +226,7 @@ function DraggableProject({ project, containerId, isSelected, onSelect }: Props)
     transition,
     isDragging,
   } = useSortable({
-    id: `project-${project.id}`,  // Prefixed ID
+    id: `project-${project.id}`, // Prefixed ID
     data: { type: 'project', id: project.id, containerId } as DragItem,
   })
 
@@ -228,17 +241,20 @@ Modify `left-sidebar.tsx`:
 **Key changes:**
 
 1. **Read from context** instead of static import:
+
    ```typescript
    const { data } = useAppData()
-   const { order, reorderAreas, reorderProjectsInArea, moveProjectToArea } = useSidebarOrder()
+   const { order, reorderAreas, reorderProjectsInArea, moveProjectToArea } =
+     useSidebarOrder()
    ```
 
 2. **Configure sensors with activation constraint** (fixes click vs drag conflict):
+
    ```typescript
    const sensors = useSensors(
      useSensor(PointerSensor, {
        activationConstraint: {
-         distance: 8,  // Must move 8px before drag starts
+         distance: 8, // Must move 8px before drag starts
        },
      }),
      useSensor(KeyboardSensor, {
@@ -248,6 +264,7 @@ Modify `left-sidebar.tsx`:
    ```
 
 3. **Use custom collision detection** (fixes nested sortables):
+
    ```typescript
    import { pointerWithin, rectIntersection } from '@dnd-kit/core'
 
@@ -262,6 +279,7 @@ Modify `left-sidebar.tsx`:
    ```
 
 4. **Wrap with DndContext**:
+
    ```typescript
    <DndContext
      sensors={sensors}
@@ -273,6 +291,7 @@ Modify `left-sidebar.tsx`:
    ```
 
 5. **Always render "No Area" section** (fixes disappearing drop target):
+
    ```typescript
    // Remove the early return when empty
    <DroppableContainer id="__orphan__">
@@ -288,6 +307,7 @@ Modify `left-sidebar.tsx`:
    ```
 
 6. **Disable DnD in collapsed mode**:
+
    ```typescript
    const { state } = useSidebar()
    const isCollapsed = state === 'collapsed'
@@ -320,7 +340,7 @@ function handleDragOver(event: DragOverEvent) {
   if (activeData.type !== 'project') return
 
   const activeContainer = activeData.containerId
-  const overContainer = overData?.containerId ?? over.id  // Might be dropping on container itself
+  const overContainer = overData?.containerId ?? over.id // Might be dropping on container itself
 
   if (activeContainer !== overContainer) {
     // Move to new container (updates both order and entity data)
@@ -342,7 +362,10 @@ function handleDragEnd(event: DragEndEvent) {
       reorderAreas(activeData.id, overData.id)
     }
   } else if (activeData.type === 'project' && overData?.type === 'project') {
-    if (active.id !== over.id && activeData.containerId === overData.containerId) {
+    if (
+      active.id !== over.id &&
+      activeData.containerId === overData.containerId
+    ) {
       reorderProjectsInArea(activeData.containerId!, activeData.id, overData.id)
     }
   }
@@ -363,6 +386,7 @@ function handleDragEnd(event: DragEndEvent) {
 ```
 
 **CSS for drag states** (add to components):
+
 ```typescript
 // On draggable items
 className={cn(
@@ -373,6 +397,7 @@ className={cn(
 ```
 
 **Empty drop zone for "No Area":**
+
 ```typescript
 function EmptyDropZone() {
   return (
@@ -386,6 +411,7 @@ function EmptyDropZone() {
 ### Step 9: Keyboard Support
 
 Already configured in Step 6 via `KeyboardSensor`. Enables:
+
 - Tab to focus draggable items
 - Space/Enter to pick up
 - Arrow keys to move
@@ -443,11 +469,13 @@ src/
 ## Migration Notes
 
 Components currently importing from `@/data/app-data` need updating:
+
 - `left-sidebar.tsx` → use `useAppData()` context
 - `main-content.tsx` → use `useAppData()` context
 - View components → use `useAppData()` context
 
 Helper functions (`getProjectsByAreaId`, etc.) should either:
+
 - Accept `data` as parameter, OR
 - Be converted to hooks that read from context
 

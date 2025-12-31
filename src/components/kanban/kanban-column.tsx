@@ -1,22 +1,22 @@
-import * as React from "react"
-import { ChevronRight, Plus } from "lucide-react"
-import { useDroppable } from "@dnd-kit/core"
+import * as React from 'react'
+import { ChevronRight, Plus } from 'lucide-react'
+import { useDroppable } from '@dnd-kit/core'
 import {
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-import { cn } from "@/lib/utils"
-import type { Task, TaskStatus } from "@/types/data"
-import { statusConfig } from "@/components/tasks/task-status-pill"
-import { TaskCard } from "@/components/cards/task-card"
+import { cn } from '@/lib/utils'
+import type { Task, TaskStatus } from '@/types/data'
+import { statusConfig } from '@/components/tasks/task-status-pill'
+import { TaskCard } from '@/components/cards/task-card'
 import {
   createKanbanTaskData,
   createEmptyColumnData,
   useKanbanDragPreview,
-} from "./kanban-dnd-context"
+} from './kanban-dnd-context'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -93,7 +93,7 @@ export function KanbanColumn({
     return (
       <div
         className={cn(
-          "flex flex-col items-center py-3 px-1 rounded-lg border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors",
+          'flex flex-col items-center py-3 px-1 rounded-lg border bg-muted/30 cursor-pointer hover:bg-muted/50 transition-colors',
           className
         )}
         onClick={() => onCollapseChange(false)}
@@ -102,14 +102,14 @@ export function KanbanColumn({
         <ChevronRight className="size-4 text-muted-foreground mb-2" />
         <span
           className="text-xs font-medium writing-mode-vertical"
-          style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+          style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}
         >
           {config.label}
         </span>
         {tasks.length > 0 && (
           <span
             className={cn(
-              "mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium",
+              'mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium',
               config.color
             )}
           >
@@ -123,8 +123,8 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        "flex flex-col w-72 shrink-0 rounded-lg border bg-muted/30",
-        isDragTarget && "ring-2 ring-primary/30",
+        'flex flex-col w-72 shrink-0 rounded-lg border bg-muted/30',
+        isDragTarget && 'ring-2 ring-primary/30',
         className
       )}
     >
@@ -136,7 +136,7 @@ export function KanbanColumn({
       >
         <span
           className={cn(
-            "px-2 py-0.5 rounded-full text-xs font-medium",
+            'px-2 py-0.5 rounded-full text-xs font-medium',
             config.color
           )}
         >
@@ -150,8 +150,8 @@ export function KanbanColumn({
       <div
         ref={setDroppableRef}
         className={cn(
-          "flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px] flex flex-col",
-          isOver && tasks.length === 0 && "bg-primary/5"
+          'flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px] flex flex-col',
+          isOver && tasks.length === 0 && 'bg-primary/5'
         )}
       >
         <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
@@ -160,7 +160,9 @@ export function KanbanColumn({
               key={task.id}
               task={task}
               status={status}
-              projectName={task.projectId ? getProjectName?.(task.projectId) : undefined}
+              projectName={
+                task.projectId ? getProjectName?.(task.projectId) : undefined
+              }
               areaName={task.areaId ? getAreaName?.(task.areaId) : undefined}
               onStatusChange={
                 onTaskStatusChange
@@ -204,8 +206,8 @@ export function KanbanColumn({
         {tasks.length === 0 && (
           <div
             className={cn(
-              "flex items-center justify-center h-20 rounded-lg border-2 border-dashed border-muted-foreground/20 text-xs text-muted-foreground",
-              isOver && "border-primary/50 bg-primary/5"
+              'flex items-center justify-center h-20 rounded-lg border-2 border-dashed border-muted-foreground/20 text-xs text-muted-foreground',
+              isOver && 'border-primary/50 bg-primary/5'
             )}
           >
             Drop tasks here
@@ -281,13 +283,13 @@ export function SortableKanbanCard({
   }
 
   // Determine variant based on task state
-  let variant: "default" | "overdue" | "deferred" | "done" = "default"
-  if (task.status === "done" || task.status === "dropped") {
-    variant = "done"
+  let variant: 'default' | 'overdue' | 'deferred' | 'done' = 'default'
+  if (task.status === 'done' || task.status === 'dropped') {
+    variant = 'done'
   } else if (task.deferUntil && new Date(task.deferUntil) > new Date()) {
-    variant = "deferred"
+    variant = 'deferred'
   } else if (task.due && new Date(task.due) < new Date()) {
-    variant = "overdue"
+    variant = 'overdue'
   }
 
   return (
@@ -296,10 +298,7 @@ export function SortableKanbanCard({
       style={style}
       {...attributes}
       {...listeners}
-      className={cn(
-        "touch-manipulation",
-        isDragging && "opacity-50"
-      )}
+      className={cn('touch-manipulation', isDragging && 'opacity-50')}
     >
       <TaskCard
         task={task}

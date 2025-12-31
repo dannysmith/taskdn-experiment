@@ -1,9 +1,9 @@
-import { List, Columns3, Calendar } from "lucide-react"
+import { List, Columns3, Calendar } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { cn } from '@/lib/utils'
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
-export type ViewMode = "list" | "kanban" | "calendar"
+export type ViewMode = 'list' | 'kanban' | 'calendar'
 
 interface ViewToggleProps {
   value: ViewMode
@@ -14,15 +14,15 @@ interface ViewToggleProps {
 }
 
 const modeConfig: Record<ViewMode, { icon: typeof List; label: string }> = {
-  list: { icon: List, label: "List view" },
-  kanban: { icon: Columns3, label: "Kanban view" },
-  calendar: { icon: Calendar, label: "Calendar view" },
+  list: { icon: List, label: 'List view' },
+  kanban: { icon: Columns3, label: 'Kanban view' },
+  calendar: { icon: Calendar, label: 'Calendar view' },
 }
 
 export function ViewToggle({
   value,
   onChange,
-  availableModes = ["list", "kanban"],
+  availableModes = ['list', 'kanban'],
   className,
 }: ViewToggleProps) {
   return (
@@ -42,7 +42,7 @@ export function ViewToggle({
       }}
       variant="outline"
       size="sm"
-      className={cn("bg-muted/50", className)}
+      className={cn('bg-muted/50', className)}
     >
       {availableModes.map((mode) => {
         const config = modeConfig[mode]

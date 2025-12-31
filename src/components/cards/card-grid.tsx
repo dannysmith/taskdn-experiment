@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 export interface CardGridProps {
   children: React.ReactNode
@@ -21,7 +21,7 @@ export function CardGrid({
 }: CardGridProps) {
   return (
     <div
-      className={cn("grid", className)}
+      className={cn('grid', className)}
       style={{
         gridTemplateColumns: `repeat(auto-fill, minmax(${minCardWidth}px, 1fr))`,
         gap: `${gap}px`,

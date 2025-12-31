@@ -1,5 +1,5 @@
-import * as React from "react"
-import { format } from "date-fns"
+import * as React from 'react'
+import { format } from 'date-fns'
 import {
   X,
   Calendar,
@@ -9,20 +9,20 @@ import {
   CircleDot,
   ChevronsUpDown,
   Check,
-} from "lucide-react"
+} from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import { useAppData } from "@/context/app-data-context"
-import { useTaskDetail } from "@/context/task-detail-context"
+import { cn } from '@/lib/utils'
+import { useAppData } from '@/context/app-data-context'
+import { useTaskDetail } from '@/context/task-detail-context'
 
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from '@/components/ui/button'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
+} from '@/components/ui/popover'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import {
   Command,
   CommandEmpty,
@@ -30,10 +30,10 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { TaskStatusCheckbox } from "./task-status-checkbox"
-import { TaskStatusPill } from "./task-status-pill"
-import { MilkdownEditor } from "./milkdown-editor"
+} from '@/components/ui/command'
+import { TaskStatusCheckbox } from './task-status-checkbox'
+import { TaskStatusPill } from './task-status-pill'
+import { MilkdownEditor } from './milkdown-editor'
 
 // -----------------------------------------------------------------------------
 // Main Component
@@ -64,8 +64,9 @@ export function TaskDetailPanel() {
 
   // Include non-active projects/areas that are currently assigned
   const allProjects = React.useMemo(() => {
-    if (!task?.projectId) return activeProjects
-    const current = getProjectById(task.projectId)
+    const projectId = task?.projectId
+    if (!projectId) return activeProjects
+    const current = getProjectById(projectId)
     if (current && !activeProjects.find((p) => p.id === current.id)) {
       return [current, ...activeProjects]
     }
@@ -73,8 +74,9 @@ export function TaskDetailPanel() {
   }, [task?.projectId, activeProjects, getProjectById])
 
   const allAreas = React.useMemo(() => {
-    if (!task?.areaId) return activeAreas
-    const current = getAreaById(task.areaId)
+    const areaId = task?.areaId
+    if (!areaId) return activeAreas
+    const current = getAreaById(areaId)
     if (current && !activeAreas.find((a) => a.id === current.id)) {
       return [current, ...activeAreas]
     }
@@ -89,8 +91,10 @@ export function TaskDetailPanel() {
     )
   }
 
-  const currentProject = task.projectId ? getProjectById(task.projectId) ?? null : null
-  const currentArea = task.areaId ? getAreaById(task.areaId) ?? null : null
+  const currentProject = task.projectId
+    ? (getProjectById(task.projectId) ?? null)
+    : null
+  const currentArea = task.areaId ? (getAreaById(task.areaId) ?? null) : null
 
   return (
     <div className="flex h-full flex-col">
@@ -108,7 +112,12 @@ export function TaskDetailPanel() {
           placeholder="Task title..."
           rows={1}
         />
-        <Button variant="ghost" size="icon-sm" onClick={closeTask} className="-mr-1 shrink-0">
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          onClick={closeTask}
+          className="-mr-1 shrink-0"
+        >
           <X className="size-4" />
         </Button>
       </div>
@@ -119,7 +128,7 @@ export function TaskDetailPanel() {
         <div className="flex gap-2">
           <SearchableSelect
             value={task.projectId}
-            options={allProjects.map(p => ({ value: p.id, label: p.title }))}
+            options={allProjects.map((p) => ({ value: p.id, label: p.title }))}
             placeholder="Project..."
             displayValue={currentProject?.title}
             icon={<CircleDot className="size-3 text-entity-project" />}
@@ -128,7 +137,7 @@ export function TaskDetailPanel() {
           />
           <SearchableSelect
             value={task.areaId}
-            options={allAreas.map(a => ({ value: a.id, label: a.title }))}
+            options={allAreas.map((a) => ({ value: a.id, label: a.title }))}
             placeholder="Area..."
             displayValue={currentArea?.title}
             icon={<FolderOpen className="size-3 text-entity-area" />}
@@ -173,7 +182,7 @@ export function TaskDetailPanel() {
         <div className="h-full bg-card rounded-lg border overflow-hidden">
           <MilkdownEditor
             editorKey={task.id}
-            defaultValue={task.notes ?? ""}
+            defaultValue={task.notes ?? ''}
             onChange={(value) => updateTaskNotes(task.id, value)}
             className="h-full"
           />
@@ -184,7 +193,9 @@ export function TaskDetailPanel() {
       <div className="px-4 py-2 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
         <span>Created {formatShortDate(task.createdAt)}</span>
         <span>Updated {formatShortDate(task.updatedAt)}</span>
-        {task.completedAt && <span>Completed {formatShortDate(task.completedAt)}</span>}
+        {task.completedAt && (
+          <span>Completed {formatShortDate(task.completedAt)}</span>
+        )}
         <span className="font-mono opacity-50">{task.id}</span>
       </div>
     </div>
@@ -229,7 +240,9 @@ function SearchableSelect({
       >
         <span className="flex items-center gap-1.5 truncate">
           {icon}
-          <span className={cn("truncate", !displayValue && "text-muted-foreground")}>
+          <span
+            className={cn('truncate', !displayValue && 'text-muted-foreground')}
+          >
             {displayValue || placeholder}
           </span>
         </span>
@@ -286,31 +299,37 @@ interface DateButtonProps {
   value: string | undefined
   onChange: (date: string | undefined) => void
   tooltip: string
-  variant: "scheduled" | "due" | "defer"
+  variant: 'scheduled' | 'due' | 'defer'
 }
 
 const dateButtonStyles = {
   scheduled: {
-    base: "text-muted-foreground bg-muted/50 hover:bg-muted",
-    active: "text-muted-foreground bg-muted/80",
+    base: 'text-muted-foreground bg-muted/50 hover:bg-muted',
+    active: 'text-muted-foreground bg-muted/80',
   },
   due: {
-    base: "text-destructive/70 bg-destructive/5 hover:bg-destructive/10",
-    active: "text-destructive bg-destructive/10",
+    base: 'text-destructive/70 bg-destructive/5 hover:bg-destructive/10',
+    active: 'text-destructive bg-destructive/10',
   },
   defer: {
-    base: "text-status-icebox/70 bg-status-icebox/5 hover:bg-status-icebox/10",
-    active: "text-status-icebox bg-status-icebox/10",
+    base: 'text-status-icebox/70 bg-status-icebox/5 hover:bg-status-icebox/10',
+    active: 'text-status-icebox bg-status-icebox/10',
   },
 }
 
-function DateButton({ icon, value, onChange, tooltip, variant }: DateButtonProps) {
+function DateButton({
+  icon,
+  value,
+  onChange,
+  tooltip,
+  variant,
+}: DateButtonProps) {
   const [open, setOpen] = React.useState(false)
   const styles = dateButtonStyles[variant]
 
   const handleSelect = (date: Date | undefined) => {
     if (date) {
-      onChange(format(date, "yyyy-MM-dd"))
+      onChange(format(date, 'yyyy-MM-dd'))
     } else {
       onChange(undefined)
     }
@@ -325,7 +344,7 @@ function DateButton({ icon, value, onChange, tooltip, variant }: DateButtonProps
             variant="ghost"
             size="sm"
             className={cn(
-              "h-7 gap-1 px-2 text-xs font-normal border-0",
+              'h-7 gap-1 px-2 text-xs font-normal border-0',
               value ? styles.active : styles.base
             )}
             title={tooltip}
@@ -333,7 +352,7 @@ function DateButton({ icon, value, onChange, tooltip, variant }: DateButtonProps
         }
       >
         {icon}
-        <span>{value ? format(new Date(value), "MMM d") : tooltip}</span>
+        <span>{value ? format(new Date(value), 'MMM d') : tooltip}</span>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
         <CalendarComponent
@@ -367,7 +386,7 @@ function DateButton({ icon, value, onChange, tooltip, variant }: DateButtonProps
 
 function formatShortDate(isoString: string): string {
   try {
-    return format(new Date(isoString), "MMM d")
+    return format(new Date(isoString), 'MMM d')
   } catch {
     return isoString
   }

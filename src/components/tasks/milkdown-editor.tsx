@@ -1,19 +1,19 @@
-import * as React from "react"
-import { Editor, rootCtx, defaultValueCtx } from "@milkdown/kit/core"
-import { commonmark } from "@milkdown/kit/preset/commonmark"
-import { gfm } from "@milkdown/kit/preset/gfm"
-import { listener, listenerCtx } from "@milkdown/kit/plugin/listener"
-import { history } from "@milkdown/kit/plugin/history"
-import { listItemBlockComponent } from "@milkdown/components/list-item-block"
-import { Milkdown, MilkdownProvider, useEditor } from "@milkdown/react"
-import { $prose } from "@milkdown/utils"
-import { Plugin, PluginKey } from "@milkdown/kit/prose/state"
-import { InputRule, inputRules } from "@milkdown/kit/prose/inputrules"
+import * as React from 'react'
+import { Editor, rootCtx, defaultValueCtx } from '@milkdown/kit/core'
+import { commonmark } from '@milkdown/kit/preset/commonmark'
+import { gfm } from '@milkdown/kit/preset/gfm'
+import { listener, listenerCtx } from '@milkdown/kit/plugin/listener'
+import { history } from '@milkdown/kit/plugin/history'
+import { listItemBlockComponent } from '@milkdown/components/list-item-block'
+import { Milkdown, MilkdownProvider, useEditor } from '@milkdown/react'
+import { $prose } from '@milkdown/utils'
+import { Plugin, PluginKey } from '@milkdown/kit/prose/state'
+import { InputRule, inputRules } from '@milkdown/kit/prose/inputrules'
 
-import { cn } from "@/lib/utils"
+import { cn } from '@/lib/utils'
 
 // Import minimal ProseMirror base styles
-import "@milkdown/kit/prose/view/style/prosemirror.css"
+import '@milkdown/kit/prose/view/style/prosemirror.css'
 
 // -----------------------------------------------------------------------------
 // Custom Editor Enhancements Plugin
@@ -40,10 +40,10 @@ const checkboxShortcutPlugin = $prose(() => {
       const $start = state.doc.resolve(start)
 
       // Only apply at start of a paragraph that's not already in a list
-      if ($start.parent.type.name !== "paragraph") return null
+      if ($start.parent.type.name !== 'paragraph') return null
       if ($start.depth > 1) {
         const grandparent = $start.node($start.depth - 1)
-        if (grandparent.type.name === "list_item") return null
+        if (grandparent.type.name === 'list_item') return null
       }
 
       // Get content after the "[] " that we're replacing
@@ -55,7 +55,11 @@ const checkboxShortcutPlugin = $prose(() => {
       const bulletList = bulletListType.create(null, listItem)
 
       // Replace the entire paragraph with the new list
-      const tr = state.tr.replaceWith($start.before(), $start.after(), bulletList)
+      const tr = state.tr.replaceWith(
+        $start.before(),
+        $start.after(),
+        bulletList
+      )
 
       return tr
     }
@@ -71,7 +75,7 @@ const checkboxShortcutPlugin = $prose(() => {
  */
 const linkEnhancementsPlugin = $prose(() => {
   return new Plugin({
-    key: new PluginKey("link-enhancements"),
+    key: new PluginKey('link-enhancements'),
     props: {
       handlePaste(view, event) {
         const { state } = view
@@ -82,7 +86,7 @@ const linkEnhancementsPlugin = $prose(() => {
         if (empty) return false
 
         // Get clipboard text
-        const clipboardText = event.clipboardData?.getData("text/plain")?.trim()
+        const clipboardText = event.clipboardData?.getData('text/plain')?.trim()
         if (!clipboardText) return false
 
         // Check if clipboard contains a URL
@@ -114,14 +118,14 @@ const linkEnhancementsPlugin = $prose(() => {
         const marks = $pos.marks()
 
         // Find link mark at this position
-        const linkMark = marks.find(mark => mark.type.name === "link")
+        const linkMark = marks.find((mark) => mark.type.name === 'link')
         if (!linkMark) return false
 
         const href = linkMark.attrs.href
         if (!href) return false
 
         // Open link in new tab
-        window.open(href, "_blank", "noopener,noreferrer")
+        window.open(href, '_blank', 'noopener,noreferrer')
         return true
       },
     },
@@ -154,26 +158,29 @@ interface EditorCoreProps {
 function EditorCore({ defaultValue, onChange }: EditorCoreProps) {
   // Use ref to store onChange to avoid recreating editor when callback changes
   const onChangeRef = React.useRef(onChange)
-  onChangeRef.current = onChange
+  React.useEffect(() => {
+    onChangeRef.current = onChange
+  }, [onChange])
 
-  useEditor((root) =>
-    Editor.make()
-      .config((ctx) => {
-        ctx.set(rootCtx, root)
-        ctx.set(defaultValueCtx, defaultValue)
+  useEditor(
+    (root) =>
+      Editor.make()
+        .config((ctx) => {
+          ctx.set(rootCtx, root)
+          ctx.set(defaultValueCtx, defaultValue)
 
-        // Listen for content changes
-        ctx.get(listenerCtx).markdownUpdated((_ctx, markdown) => {
-          onChangeRef.current(markdown)
+          // Listen for content changes
+          ctx.get(listenerCtx).markdownUpdated((_ctx, markdown) => {
+            onChangeRef.current(markdown)
+          })
         })
-      })
-      .use(commonmark)
-      .use(gfm)
-      .use(listItemBlockComponent)
-      .use(listener)
-      .use(history)
-      .use(checkboxShortcutPlugin)
-      .use(linkEnhancementsPlugin),
+        .use(commonmark)
+        .use(gfm)
+        .use(listItemBlockComponent)
+        .use(listener)
+        .use(history)
+        .use(checkboxShortcutPlugin)
+        .use(linkEnhancementsPlugin),
     []
   )
 
@@ -188,14 +195,15 @@ export function MilkdownEditor({
   editorKey,
   defaultValue,
   onChange,
-  className
+  className,
 }: MilkdownEditorProps) {
   const wrapperRef = React.useRef<HTMLDivElement>(null)
   const [cmdHeld, setCmdHeld] = React.useState(false)
 
   // Track Cmd/Ctrl key for link cursor hint
   React.useEffect(() => {
-    const down = (e: KeyboardEvent) => (e.metaKey || e.ctrlKey) && setCmdHeld(true)
+    const down = (e: KeyboardEvent) =>
+      (e.metaKey || e.ctrlKey) && setCmdHeld(true)
     const up = () => setCmdHeld(false)
     window.addEventListener('keydown', down)
     window.addEventListener('keyup', up)
@@ -209,8 +217,13 @@ export function MilkdownEditor({
 
   const handleWrapperClick = React.useCallback((e: React.MouseEvent) => {
     // Only handle clicks directly on wrapper, not bubbled from editor
-    if (e.target === wrapperRef.current || e.target === wrapperRef.current?.firstElementChild) {
-      const proseMirror = wrapperRef.current?.querySelector('.ProseMirror') as HTMLElement
+    if (
+      e.target === wrapperRef.current ||
+      e.target === wrapperRef.current?.firstElementChild
+    ) {
+      const proseMirror = wrapperRef.current?.querySelector(
+        '.ProseMirror'
+      ) as HTMLElement
       proseMirror?.focus()
     }
   }, [])
@@ -218,14 +231,11 @@ export function MilkdownEditor({
   return (
     <div
       ref={wrapperRef}
-      className={cn("milkdown-editor", cmdHeld && "cmd-held", className)}
+      className={cn('milkdown-editor', cmdHeld && 'cmd-held', className)}
       onClick={handleWrapperClick}
     >
       <MilkdownProvider key={editorKey}>
-        <EditorCore
-          defaultValue={defaultValue}
-          onChange={onChange}
-        />
+        <EditorCore defaultValue={defaultValue} onChange={onChange} />
       </MilkdownProvider>
     </div>
   )

@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from 'react'
 import {
   DndContext,
   DragOverlay,
@@ -11,18 +11,18 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-} from "@dnd-kit/core"
-import { arrayMove } from "@dnd-kit/sortable"
+} from '@dnd-kit/core'
+import { arrayMove } from '@dnd-kit/sortable'
 
-import type { Task, TaskStatus } from "@/types/data"
-import { TaskDragPreview } from "@/components/tasks/task-list"
+import type { Task, TaskStatus } from '@/types/data'
+import { TaskDragPreview } from '@/components/tasks/task-list'
 
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
 interface KanbanDragData {
-  type: "kanban-task"
+  type: 'kanban-task'
   taskId: string
   status: TaskStatus
   /** Optional swimlane ID (e.g., projectId for area kanban) */
@@ -30,12 +30,12 @@ interface KanbanDragData {
 }
 
 interface EmptyColumnData {
-  type: "empty-column"
+  type: 'empty-column'
   status: TaskStatus
 }
 
 interface EmptySwimlaneData {
-  type: "empty-swimlane"
+  type: 'empty-swimlane'
   status: TaskStatus
   swimlaneId: string
 }
@@ -94,7 +94,9 @@ export function KanbanDndContext({
   getTaskById,
   onSwimlaneChange,
 }: KanbanDndContextProps) {
-  const [dragPreview, setDragPreview] = React.useState<DragPreviewState | null>(null)
+  const [dragPreview, setDragPreview] = React.useState<DragPreviewState | null>(
+    null
+  )
 
   // Sensors for drag and drop - PointerSensor with activation distance
   const sensors = useSensors(
@@ -108,13 +110,13 @@ export function KanbanDndContext({
   // Drop animation
   const dropAnimation: DropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({
-      styles: { active: { opacity: "0.5" } },
+      styles: { active: { opacity: '0.5' } },
     }),
   }
 
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current as KanbanDragData | undefined
-    if (data?.type === "kanban-task") {
+    if (data?.type === 'kanban-task') {
       const task = getTaskById(data.taskId)
       if (task) {
         setDragPreview({
@@ -144,13 +146,13 @@ export function KanbanDndContext({
     let newSwimlaneId = dragPreview.sourceSwimlaneId
     let newOverTaskId: string | null = null
 
-    if (overData.type === "kanban-task") {
+    if (overData.type === 'kanban-task') {
       newStatus = overData.status
       newSwimlaneId = overData.swimlaneId
       newOverTaskId = overData.taskId
-    } else if (overData.type === "empty-column") {
+    } else if (overData.type === 'empty-column') {
       newStatus = overData.status
-    } else if (overData.type === "empty-swimlane") {
+    } else if (overData.type === 'empty-swimlane') {
       newStatus = overData.status
       newSwimlaneId = overData.swimlaneId
     }
@@ -187,7 +189,7 @@ export function KanbanDndContext({
     const activeData = active.data.current as KanbanDragData | undefined
     const overData = over.data.current as DropTargetData | undefined
 
-    if (!activeData || activeData.type !== "kanban-task") {
+    if (!activeData || activeData.type !== 'kanban-task') {
       setDragPreview(null)
       return
     }
@@ -196,25 +198,29 @@ export function KanbanDndContext({
     let targetStatus = dragPreview.sourceStatus
     let targetSwimlaneId = dragPreview.sourceSwimlaneId
 
-    if (overData?.type === "kanban-task") {
+    if (overData?.type === 'kanban-task') {
       targetStatus = overData.status
       targetSwimlaneId = overData.swimlaneId
-    } else if (overData?.type === "empty-column") {
+    } else if (overData?.type === 'empty-column') {
       targetStatus = overData.status
-    } else if (overData?.type === "empty-swimlane") {
+    } else if (overData?.type === 'empty-swimlane') {
       targetStatus = overData.status
       targetSwimlaneId = overData.swimlaneId
     }
 
     // Handle swimlane change (for area kanban)
-    if (targetSwimlaneId !== dragPreview.sourceSwimlaneId && onSwimlaneChange && targetSwimlaneId) {
+    if (
+      targetSwimlaneId !== dragPreview.sourceSwimlaneId &&
+      onSwimlaneChange &&
+      targetSwimlaneId
+    ) {
       onSwimlaneChange(dragPreview.taskId, targetSwimlaneId)
     }
 
     // Handle status change
     if (targetStatus !== dragPreview.sourceStatus) {
       onStatusChange(dragPreview.taskId, targetStatus)
-    } else if (overData?.type === "kanban-task" && active.id !== over.id) {
+    } else if (overData?.type === 'kanban-task' && active.id !== over.id) {
       // Same-status reorder
       const statusTasks = tasksByStatus.get(targetStatus) ?? []
       const oldIndex = statusTasks.findIndex((t) => t.id === activeData.taskId)
@@ -262,9 +268,13 @@ export function KanbanDndContext({
 // Helper exports for data attributes
 // -----------------------------------------------------------------------------
 
-export function createKanbanTaskData(taskId: string, status: TaskStatus, swimlaneId?: string): KanbanDragData {
+export function createKanbanTaskData(
+  taskId: string,
+  status: TaskStatus,
+  swimlaneId?: string
+): KanbanDragData {
   return {
-    type: "kanban-task",
+    type: 'kanban-task',
     taskId,
     status,
     swimlaneId,
@@ -273,14 +283,17 @@ export function createKanbanTaskData(taskId: string, status: TaskStatus, swimlan
 
 export function createEmptyColumnData(status: TaskStatus): EmptyColumnData {
   return {
-    type: "empty-column",
+    type: 'empty-column',
     status,
   }
 }
 
-export function createEmptySwimlaneData(status: TaskStatus, swimlaneId: string): EmptySwimlaneData {
+export function createEmptySwimlaneData(
+  status: TaskStatus,
+  swimlaneId: string
+): EmptySwimlaneData {
   return {
-    type: "empty-swimlane",
+    type: 'empty-swimlane',
     status,
     swimlaneId,
   }

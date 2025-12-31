@@ -34,8 +34,8 @@ bun run preview  # Preview production build
 **Styling utility**: Use `cn()` from `@/lib/utils` for merging class names:
 
 ```tsx
-import { cn } from "@/lib/utils"
-cn("base-classes", variant && "conditional-class", className)
+import { cn } from '@/lib/utils'
+cn('base-classes', variant && 'conditional-class', className)
 ```
 
 **CSS variables**: Theme tokens defined in `src/index.css` using OKLCH colors. Light and dark mode via `.dark` class.

@@ -1,7 +1,7 @@
-import { Folder, FolderOpen } from "lucide-react"
+import { Folder, FolderOpen } from 'lucide-react'
 
-import { cn } from "@/lib/utils"
-import type { Area } from "@/types/data"
+import { cn } from '@/lib/utils'
+import type { Area } from '@/types/data'
 
 export interface AreaCardProps {
   area: Area
@@ -27,17 +27,17 @@ export function AreaCard({
   isSelected,
   className,
 }: AreaCardProps) {
-  const isArchived = area.status === "archived"
+  const isArchived = area.status === 'archived'
 
   return (
     <div
       onClick={onClick}
       className={cn(
-        "group bg-card rounded-xl border border-border/60 p-4 transition-all",
-        "hover:border-border hover:shadow-sm",
-        onClick && "cursor-pointer",
-        isSelected && "ring-2 ring-primary border-primary",
-        isArchived && "opacity-50",
+        'group bg-card rounded-xl border border-border/60 p-4 transition-all',
+        'hover:border-border hover:shadow-sm',
+        onClick && 'cursor-pointer',
+        isSelected && 'ring-2 ring-primary border-primary',
+        isArchived && 'opacity-50',
         className
       )}
     >
@@ -46,8 +46,8 @@ export function AreaCard({
         {/* Folder icon */}
         <div
           className={cn(
-            "shrink-0 size-8 rounded-lg flex items-center justify-center",
-            "bg-entity-area/10 text-entity-area"
+            'shrink-0 size-8 rounded-lg flex items-center justify-center',
+            'bg-entity-area/10 text-entity-area'
           )}
         >
           {activeProjectCount > 0 ? (
@@ -77,7 +77,8 @@ export function AreaCard({
       {/* Footer: Project count */}
       <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
         <span>
-          {activeProjectCount} active project{activeProjectCount !== 1 ? "s" : ""}
+          {activeProjectCount} active project
+          {activeProjectCount !== 1 ? 's' : ''}
         </span>
         {projectCount !== activeProjectCount && (
           <span>{projectCount} total</span>
@@ -92,20 +93,20 @@ export function AreaCard({
 // -----------------------------------------------------------------------------
 
 const typeColors: Record<string, string> = {
-  "life-area": "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  work: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-  client: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
-  personal: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+  'life-area': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  work: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+  client: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
+  personal: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
 }
 
 function AreaTypeBadge({ type }: { type: string }) {
-  const colorClass = typeColors[type] ?? "bg-muted text-muted-foreground"
-  const displayType = type.replace(/-/g, " ")
+  const colorClass = typeColors[type] ?? 'bg-muted text-muted-foreground'
+  const displayType = type.replace(/-/g, ' ')
 
   return (
     <span
       className={cn(
-        "shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded capitalize",
+        'shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded capitalize',
         colorClass
       )}
     >
