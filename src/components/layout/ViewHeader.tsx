@@ -1,6 +1,5 @@
 import type { Project, ProjectStatus } from '@/types/data'
-import type { ViewModeKey } from '@/context/view-mode-context'
-import { useViewMode } from '@/context/view-mode-context'
+import { useViewMode, type ViewModeKey } from '@/store/view-mode-store'
 import { ProjectStatusBadges } from '@/components/projects/project-status-badges'
 import { ProjectStatusPill } from '@/components/projects/project-status-pill'
 import { ViewToggle } from '@/components/ui/view-toggle'

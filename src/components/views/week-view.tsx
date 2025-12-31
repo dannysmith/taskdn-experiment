@@ -3,8 +3,8 @@ import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
-import { useViewMode } from '@/context/view-mode-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
+import { useViewMode } from '@/store/view-mode-store'
 import { WeekCalendar } from '@/components/calendar/week-calendar'
 import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
 import type { Task, TaskStatus } from '@/types/data'
@@ -32,7 +32,7 @@ export function WeekView({
     updateTaskScheduled,
     updateTaskDue,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   // Filter tasks for this week (scheduled or due within the week)
   const thisWeekTasks = React.useMemo(() => {

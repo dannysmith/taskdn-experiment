@@ -2,7 +2,7 @@ import * as React from 'react'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
 import { DraggableTaskList } from '@/components/tasks/task-list'
 
 export function InboxView() {
@@ -13,7 +13,7 @@ export function InboxView() {
     toggleTaskStatus,
     getTaskContextName,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   // Get all tasks with inbox status
   const inboxTasks = React.useMemo(() => {

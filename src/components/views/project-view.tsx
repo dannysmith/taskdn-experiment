@@ -2,8 +2,8 @@ import * as React from 'react'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
-import { useViewMode } from '@/context/view-mode-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
+import { useViewMode } from '@/store/view-mode-store'
 import { DraggableTaskList } from '@/components/tasks/task-list'
 import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
 import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
@@ -30,7 +30,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     toggleTaskStatus,
     reorderProjectTasks,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   const project = getProjectById(projectId)
   const tasks = getTasksByProjectId(projectId)

@@ -4,11 +4,8 @@ import { MainContent } from '@/components/layout/MainContent'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 // TODO(tauri-integration): Migrate to TanStack Query
 import { AppDataProvider, useAppData } from '@/context/app-data-context'
-import {
-  TaskDetailProvider,
-  useTaskDetail,
-} from '@/context/task-detail-context'
-import { ViewModeProvider, type ViewModeKey } from '@/context/view-mode-context'
+import { useIsTaskDetailOpen } from '@/store/task-detail-store'
+import type { ViewModeKey } from '@/store/view-mode-store'
 import { TaskDetailPanel } from '@/components/tasks/task-detail-panel'
 import { ViewHeader, DetailSideBar, ContentArea } from '@/components/layout'
 import type { Selection } from '@/types/navigation'
@@ -83,7 +80,7 @@ function AppContent() {
     return 'Dashboard'
   }
 
-  const { isOpen: isDetailOpen } = useTaskDetail()
+  const isDetailOpen = useIsTaskDetailOpen()
 
   return (
     <SidebarProvider>
@@ -110,11 +107,7 @@ function AppContent() {
 export function App() {
   return (
     <AppDataProvider>
-      <TaskDetailProvider>
-        <ViewModeProvider>
-          <AppContent />
-        </ViewModeProvider>
-      </TaskDetailProvider>
+      <AppContent />
     </AppDataProvider>
   )
 }

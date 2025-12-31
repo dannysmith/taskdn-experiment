@@ -3,8 +3,8 @@ import { ListTodo } from 'lucide-react'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
-import { useViewMode } from '@/context/view-mode-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
+import { useViewMode } from '@/store/view-mode-store'
 import { ProjectTaskGroup } from '@/components/tasks/project-task-group'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { TaskDndContext } from '@/components/tasks/task-dnd-context'
@@ -47,7 +47,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     reorderProjectTasks,
     moveTaskToProject,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   const area = getAreaById(areaId)
   const projects = getProjectsByAreaId(areaId)

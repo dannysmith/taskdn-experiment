@@ -3,7 +3,7 @@ import { Sun, Flag, Sunrise } from 'lucide-react'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { isOverdue, isToday } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
@@ -22,7 +22,7 @@ export function TodayView(_props: TodayViewProps) {
     toggleTaskStatus,
     getTaskContextName,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   // Get today's date in ISO format (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0]

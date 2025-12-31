@@ -11,7 +11,7 @@ import {
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -26,7 +26,7 @@ import { LazyMilkdownEditor } from './lazy-milkdown-editor'
 // -----------------------------------------------------------------------------
 
 export function TaskDetailPanel() {
-  const { openTaskId, closeTask } = useTaskDetail()
+  const { openTaskId, closeTask } = useTaskDetailStore()
   const {
     getTaskById,
     getActiveProjects,
