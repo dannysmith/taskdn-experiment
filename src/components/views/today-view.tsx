@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { Sun, Flag, Sunrise } from 'lucide-react'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'

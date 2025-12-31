@@ -433,14 +433,13 @@ export const useViewModeStore = create<ViewModeState>()(
 **Key patterns from the architecture research:**
 
 1. **Query keys use entity IDs, not file paths:**
+
    ```typescript
    // Good - stable across renames, hierarchical
-   ['tasks', 'list']                  // All tasks
-   ['tasks', 'list', { projectId }]   // Tasks for a project
-   ['tasks', taskId]                  // Single task
-
-   // Bad - breaks on rename
-   ['file', '/path/to/task.md']
+   ;['tasks', 'list'][('tasks', 'list', { projectId })][('tasks', taskId)][ // All tasks // Tasks for a project // Single task
+     // Bad - breaks on rename
+     ('file', '/path/to/task.md')
+   ]
    ```
 
 2. **Event-driven invalidation:** Rust emits events (`vault-changed`, `entity-updated`) when files change. TanStack Query listens and invalidates relevant queries.

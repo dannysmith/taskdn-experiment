@@ -1,5 +1,6 @@
 import * as React from 'react'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { MonthCalendar } from '@/components/calendar/month-calendar'

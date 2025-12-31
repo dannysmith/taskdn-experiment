@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { startOfWeek, endOfWeek, isWithinInterval, parseISO } from 'date-fns'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { useViewMode } from '@/context/view-mode-context'

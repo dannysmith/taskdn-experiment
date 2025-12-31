@@ -1,5 +1,11 @@
 import * as React from 'react'
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react'
 import type { AppData, Area, Project, Task } from '@/types/data'
 import { appData as initialAppData } from '@/data/app-data'
 
@@ -45,7 +51,10 @@ interface AppDataContextValue {
   getOrphanProjects: () => Project[]
   getTasksByProjectId: (projectId: string) => Task[]
   getProjectCompletion: (projectId: string) => number
-  getTaskCounts: (projectId: string) => { taskCount: number; completedTaskCount: number }
+  getTaskCounts: (projectId: string) => {
+    taskCount: number
+    completedTaskCount: number
+  }
   getActiveProjects: () => Project[]
   getActiveAreas: () => Area[]
   getAreaDirectTasks: (areaId: string) => Task[]

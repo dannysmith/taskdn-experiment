@@ -13,9 +13,25 @@ interface UseCalendarOrderOptions {
 }
 
 /**
- * Hook to manage calendar task display order.
- * Separates display ordering from entity data.
- * Order is preserved when dragging within a day.
+ * Manages calendar task display order separately from entity data.
+ *
+ * This hook tracks the visual ordering of tasks within calendar days,
+ * allowing drag-and-drop reordering without modifying task.scheduled directly.
+ * Order is preserved when dragging within a day, and the hook handles:
+ * - Syncing order when the visible date range changes
+ * - Adding new tasks to the end of their respective days
+ * - Removing deleted tasks from the order
+ *
+ * **Important:** This hook only manages display order. When moving a task
+ * to a different day, the caller must also update the task's scheduled date
+ * via the appropriate mutation (e.g., `updateTaskScheduled`).
+ *
+ * @returns Object with ordered data and reorder functions:
+ *   - `reorderTasksInDay(date, activeId, overId)` - Reorder within a single day
+ *   - `moveTaskToDay(taskId, fromDate, toDate, insertIndex?)` - Move task to new day
+ *   - `getOrderedTaskIds(date)` - Get task IDs for a date in display order
+ *   - `getOrderedTasks(date, tasks)` - Get Task objects for a date in display order
+ *   - `getInsertIndex(date, overTaskId)` - Get index for drop insertion
  */
 export function useCalendarOrder({
   tasks,

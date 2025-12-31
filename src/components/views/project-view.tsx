@@ -1,10 +1,11 @@
 import * as React from 'react'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { useViewMode } from '@/context/view-mode-context'
 import { DraggableTaskList } from '@/components/tasks/task-list'
-import { CollapsibleNotesSection } from '@/components/collapsible-notes-section'
+import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
 import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
 import type { Task } from '@/types/data'
 

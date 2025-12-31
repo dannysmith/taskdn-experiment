@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { ListTodo } from 'lucide-react'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { useViewMode } from '@/context/view-mode-context'
@@ -8,7 +9,7 @@ import { ProjectTaskGroup } from '@/components/tasks/project-task-group'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { TaskDndContext } from '@/components/tasks/task-dnd-context'
 import { ProjectCard } from '@/components/cards/project-card'
-import { CollapsibleNotesSection } from '@/components/collapsible-notes-section'
+import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
 import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
 import type { Task, Project } from '@/types/data'
 
