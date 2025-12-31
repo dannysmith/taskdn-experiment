@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { TaskStatusPill } from "@/components/tasks/task-status-pill"
 
-export type TaskCardVariant = "default" | "overdue" | "deferred"
+export type TaskCardVariant = "default" | "overdue" | "deferred" | "done"
 
 export interface TaskCardProps {
   task: Task
@@ -178,6 +178,8 @@ export function TaskCard({
           "bg-red-50 dark:bg-red-950/30 border-red-200/50 dark:border-red-900/50 hover:border-red-300 dark:hover:border-red-800",
         variant === "deferred" &&
           "bg-muted/50 border-dashed border-muted-foreground/30 hover:border-muted-foreground/50",
+        variant === "done" &&
+          "bg-green-50/50 dark:bg-green-950/20 border-green-200/30 dark:border-green-900/30 hover:border-green-300/50 dark:hover:border-green-800/50",
         onClick && "cursor-pointer",
         isSelected && "ring-2 ring-primary border-primary",
         isEditing && "ring-2 ring-primary",

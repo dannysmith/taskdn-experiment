@@ -126,7 +126,8 @@ export function WeekCalendar({
     }
 
     for (const task of tasks) {
-      if (task.status === "done" || task.status === "dropped") continue
+      // Skip dropped tasks, but keep done tasks
+      if (task.status === "dropped") continue
 
       // Determine which date to show this task on
       let displayDate: Date | null = null
@@ -179,6 +180,11 @@ export function WeekCalendar({
 
   // Determine task card variant based on task state
   const getTaskVariant = React.useCallback((task: Task): TaskCardVariant => {
+    // Done tasks get green styling
+    if (task.status === "done") {
+      return "done"
+    }
+
     // Deferred tasks (has deferUntil but no scheduled)
     if (task.deferUntil && !task.scheduled) {
       return "deferred"
