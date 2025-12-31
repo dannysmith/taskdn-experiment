@@ -70,9 +70,8 @@ export function DraggableArea({
       >
         <SidebarGroup className="py-0">
           <SidebarGroupLabel
-            render={<CollapsibleTrigger />}
             className={cn(
-              'group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer select-none',
+              'group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-grab select-none',
               isSelected && 'bg-sidebar-accent text-sidebar-accent-foreground'
             )}
             onClick={onSelect}
@@ -81,7 +80,16 @@ export function DraggableArea({
           >
             <FolderIcon className="text-icon-folder" />
             <span className="truncate">{area.title}</span>
-            <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+            {/* Wrapper div stops propagation so clicking chevron doesn't select area */}
+            <div
+              className="ml-auto"
+              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              <CollapsibleTrigger className="p-0.5 rounded hover:bg-sidebar-accent-foreground/10">
+                <ChevronRight className="size-4 transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+              </CollapsibleTrigger>
+            </div>
           </SidebarGroupLabel>
           <CollapsibleContent>
             <SidebarGroupContent>{children}</SidebarGroupContent>

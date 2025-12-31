@@ -140,98 +140,97 @@ export function TaskListItem({
   const dragProps = isEditing ? {} : { ...attributes, ...listeners }
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        'group relative flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all',
+        'select-none',
+        // Editing: thin primary border, no background
+        isEditing && 'ring-2 ring-primary bg-transparent',
+        // Selected but not editing: blue background
+        isSelected &&
+          !isEditing &&
+          !isDragging &&
+          'bg-primary/20 dark:bg-primary/30',
+        // Not selected: subtle hover
+        !isSelected && !isEditing && 'hover:bg-muted/50',
+        // Dragging state
+        isDragging && 'opacity-50 shadow-lg bg-card z-50 ring-1 ring-border'
+      )}
+      onClick={handleClick}
+      onDoubleClick={handleDoubleClick}
+      data-selected={isSelected}
+      data-editing={isEditing}
+      data-task-id={task.id}
+      {...dragProps}
+    >
       {/* Drop indicator line for cross-project drag */}
       {showDropIndicator && (
-        <div className="h-0.5 bg-primary rounded-full mx-2 mb-1" />
+        <div className="h-0.5 bg-primary rounded-full mx-2 mb-1 absolute -top-1 left-0 right-0" />
       )}
+      {/* Status checkbox */}
+      <TaskStatusCheckbox status={task.status} onToggle={onStatusToggle} />
 
-      <div
-        className={cn(
-          'group flex items-center gap-3 px-2 py-2 rounded-lg cursor-default transition-all',
-          'select-none',
-          // Editing: thin primary border, no background
-          isEditing && 'ring-2 ring-primary bg-transparent',
-          // Selected but not editing: blue background
-          isSelected &&
-            !isEditing &&
-            !isDragging &&
-            'bg-primary/20 dark:bg-primary/30',
-          // Not selected: subtle hover
-          !isSelected && !isEditing && 'hover:bg-muted/50',
-          // Dragging state
-          isDragging && 'opacity-50 shadow-lg bg-card z-50 ring-1 ring-border'
-        )}
-        onClick={handleClick}
-        onDoubleClick={handleDoubleClick}
-        data-selected={isSelected}
-        data-editing={isEditing}
-        data-task-id={task.id}
-        {...dragProps}
-      >
-        {/* Status checkbox */}
-        <TaskStatusCheckbox status={task.status} onToggle={onStatusToggle} />
-
-        {/* Title - editable or display */}
-        {isEditing ? (
-          <input
-            ref={inputRef}
-            type="text"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={handleInputBlur}
-            onKeyDown={handleInputKeyDown}
-            className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
-            placeholder="Task title..."
-          />
-        ) : (
-          <>
-            {/* Title + chevron grouped together */}
-            <span
-              className={cn(
-                'text-sm truncate',
-                (isDone || isDropped) && 'line-through text-muted-foreground'
-              )}
-            >
-              {task.title}
-            </span>
-
-            {/* Open detail button - immediately after title */}
-            {onOpenDetail && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onOpenDetail()
-                }}
-                className={cn(
-                  'shrink-0 p-1.5 -m-1 rounded-full text-primary/70',
-                  'hover:text-primary hover:bg-primary/10',
-                  'transition-opacity duration-100',
-                  // Show on hover (with delay) or when selected
-                  isSelected
-                    ? 'opacity-100 delay-150'
-                    : 'opacity-0 group-hover:opacity-100 group-hover:delay-150'
-                )}
-                title="Open details"
-              >
-                <CircleChevronRight className="size-4" />
-              </button>
+      {/* Title - editable or display */}
+      {isEditing ? (
+        <input
+          ref={inputRef}
+          type="text"
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleInputBlur}
+          onKeyDown={handleInputKeyDown}
+          className="flex-1 bg-transparent outline-none text-sm placeholder:text-muted-foreground"
+          placeholder="Task title..."
+        />
+      ) : (
+        <>
+          {/* Title + chevron grouped together */}
+          <span
+            className={cn(
+              'text-sm truncate',
+              (isDone || isDropped) && 'line-through text-muted-foreground'
             )}
+          >
+            {task.title}
+          </span>
 
-            {/* Spacer pushes metadata to the right */}
-            <div className="flex-1 min-w-2" />
+          {/* Open detail button - immediately after title */}
+          {onOpenDetail && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onOpenDetail()
+              }}
+              className={cn(
+                'shrink-0 p-1.5 -m-1 rounded-full text-primary/70',
+                'hover:text-primary hover:bg-primary/10',
+                'transition-opacity duration-100',
+                // Show on hover (with delay) or when selected
+                isSelected
+                  ? 'opacity-100 delay-150'
+                  : 'opacity-0 group-hover:opacity-100 group-hover:delay-150'
+              )}
+              title="Open details"
+            >
+              <CircleChevronRight className="size-4" />
+            </button>
+          )}
 
-            {/* Right-aligned metadata */}
-            <TaskMetadata
-              contextName={contextName}
-              scheduled={showScheduled ? task.scheduled : undefined}
-              due={showDue ? task.due : undefined}
-              isDone={isDone || isDropped}
-            />
-          </>
-        )}
-      </div>
+          {/* Spacer pushes metadata to the right */}
+          <div className="flex-1 min-w-2" />
+
+          {/* Right-aligned metadata */}
+          <TaskMetadata
+            contextName={contextName}
+            scheduled={showScheduled ? task.scheduled : undefined}
+            due={showDue ? task.due : undefined}
+            isDone={isDone || isDropped}
+          />
+        </>
+      )}
     </div>
   )
 }
