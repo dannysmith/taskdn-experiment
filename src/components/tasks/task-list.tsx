@@ -31,7 +31,7 @@ import { useTaskDragPreview } from './task-dnd-context'
 interface BaseTaskListProps {
   tasks: Task[]
   projectId: string
-  onTasksReorder?: (reorderedTasks: Task[]) => void
+  onTasksReorder: (reorderedTasks: Task[]) => void
   onTaskTitleChange: (taskId: string, newTitle: string) => void
   onTaskStatusToggle: (taskId: string) => void
   /** Called when a task's open-detail button is clicked */
@@ -152,14 +152,14 @@ export function TaskList({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault()
-        if (isMeta && selectedIndex !== null && onTasksReorder) {
+        if (isMeta && selectedIndex !== null) {
           // Reorder: move task down
           if (selectedIndex < tasks.length - 1) {
             const newTasks = arrayMove(tasks, selectedIndex, selectedIndex + 1)
             onTasksReorder(newTasks)
             setSelectedIndex(selectedIndex + 1)
           }
-        } else if (!isMeta) {
+        } else {
           // Navigate down
           if (selectedIndex === null) {
             setSelectedIndex(0)
@@ -171,14 +171,14 @@ export function TaskList({
 
       case 'ArrowUp':
         e.preventDefault()
-        if (isMeta && selectedIndex !== null && onTasksReorder) {
+        if (isMeta && selectedIndex !== null) {
           // Reorder: move task up
           if (selectedIndex > 0) {
             const newTasks = arrayMove(tasks, selectedIndex, selectedIndex - 1)
             onTasksReorder(newTasks)
             setSelectedIndex(selectedIndex - 1)
           }
-        } else if (!isMeta) {
+        } else {
           // Navigate up
           if (selectedIndex === null) {
             setSelectedIndex(tasks.length - 1)
@@ -383,7 +383,7 @@ export function DraggableTaskList({
     const oldIndex = tasks.findIndex((t) => t.id === activeData.taskId)
     const newIndex = tasks.findIndex((t) => t.id === overData.taskId)
 
-    if (oldIndex !== -1 && newIndex !== -1 && onTasksReorder) {
+    if (oldIndex !== -1 && newIndex !== -1) {
       const newTasks = arrayMove(tasks, oldIndex, newIndex)
       onTasksReorder(newTasks)
       setSelectedIndex(newIndex)
