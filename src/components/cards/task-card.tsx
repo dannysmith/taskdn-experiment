@@ -63,7 +63,7 @@ export function TaskCard({
   const [editValue, setEditValue] = React.useState(task.title)
   const [scheduledOpen, setScheduledOpen] = React.useState(false)
   const [dueOpen, setDueOpen] = React.useState(false)
-  const inputRef = React.useRef<HTMLInputElement>(null)
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null)
 
   const isDone = task.status === "done"
   const isDropped = task.status === "dropped"
@@ -76,11 +76,14 @@ export function TaskCard({
     }
   }, [task.title, isEditing])
 
-  // Focus input when entering edit mode
+  // Focus textarea when entering edit mode
   React.useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus()
-      inputRef.current.select()
+    if (isEditing && textareaRef.current) {
+      textareaRef.current.focus()
+      textareaRef.current.select()
+      // Auto-size the textarea
+      textareaRef.current.style.height = "auto"
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
     }
   }, [isEditing])
 
@@ -114,9 +117,10 @@ export function TaskCard({
     setIsEditing(false)
   }
 
-  const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     e.stopPropagation()
-    if (e.key === "Enter") {
+    // Enter without shift submits, Shift+Enter creates newline
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
       if (editValue.trim() && editValue.trim() !== task.title) {
         onTitleChange?.(editValue.trim())
@@ -127,6 +131,13 @@ export function TaskCard({
       setEditValue(task.title)
       setIsEditing(false)
     }
+  }
+
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditValue(e.target.value)
+    // Auto-resize textarea
+    e.target.style.height = "auto"
+    e.target.style.height = `${e.target.scrollHeight}px`
   }
 
   const handleScheduledSelect = (date: Date | undefined) => {
@@ -165,15 +176,15 @@ export function TaskCard({
       {/* Title row */}
       <div className="flex items-start gap-2">
         {isEditing ? (
-          <input
-            ref={inputRef}
-            type="text"
+          <textarea
+            ref={textareaRef}
             value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
+            onChange={handleTextareaInput}
             onBlur={handleInputBlur}
-            onKeyDown={handleInputKeyDown}
-            className="flex-1 text-sm font-medium bg-transparent outline-none"
+            onKeyDown={handleTextareaKeyDown}
+            className="flex-1 text-sm font-medium bg-transparent outline-none resize-none overflow-hidden leading-snug"
             placeholder="Task title..."
+            rows={1}
           />
         ) : (
           <>
@@ -207,10 +218,10 @@ export function TaskCard({
         )}
       </div>
 
-      {/* Footer: status pill + context + dates */}
+      {/* Footer: status pill + dates + context */}
       <div
         className={cn(
-          "mt-3 flex items-center gap-3 text-xs",
+          "mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs",
           isCompleted && "opacity-60"
         )}
       >
@@ -220,25 +231,8 @@ export function TaskCard({
           onStatusChange={onStatusChange}
         />
 
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* Context (project or area) */}
-        {contextName && (
-          <button
-            type="button"
-            onClick={handleContextClick}
-            className={cn(
-              "truncate text-muted-foreground",
-              hasContextClick && "hover:text-foreground hover:underline"
-            )}
-          >
-            {contextName}
-          </button>
-        )}
-
-        {/* Dates */}
-        <div className="flex items-center gap-2 shrink-0">
+        {/* Dates - placed early so they're visible on narrow cards */}
+        <div className="flex items-center gap-2">
           <DatePickerButton
             date={scheduledDate}
             icon={<Calendar className="size-3" />}
@@ -260,6 +254,20 @@ export function TaskCard({
             isOverdue={dueDate ? isOverdue(task.due!) && !isCompleted : false}
           />
         </div>
+
+        {/* Context (project or area) - can wrap to next line if needed */}
+        {contextName && (
+          <button
+            type="button"
+            onClick={handleContextClick}
+            className={cn(
+              "truncate max-w-full text-muted-foreground",
+              hasContextClick && "hover:text-foreground hover:underline"
+            )}
+          >
+            {contextName}
+          </button>
+        )}
       </div>
     </div>
   )

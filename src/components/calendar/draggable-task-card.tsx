@@ -1,12 +1,16 @@
 import * as React from "react"
-import { useDraggable } from "@dnd-kit/core"
+import { useSortable } from "@dnd-kit/sortable"
 import { CSS } from "@dnd-kit/utilities"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
+import {
+  getCalendarTaskDragId,
+  type CalendarTaskDragData,
+} from "@/types/calendar-order"
 import { TaskCard } from "@/components/cards/task-card"
 
-interface DraggableTaskCardProps {
+interface SortableTaskCardProps {
   task: Task
   date: string
   /** Project name for context */
@@ -23,10 +27,10 @@ interface DraggableTaskCardProps {
 }
 
 /**
- * A draggable wrapper around TaskCard for use in calendar views.
- * Enables drag-and-drop to move tasks between days.
+ * A sortable wrapper around TaskCard for use in calendar views.
+ * Enables drag-and-drop to reorder within a day or move between days.
  */
-export function DraggableTaskCard({
+export function SortableTaskCard({
   task,
   date,
   projectName,
@@ -38,24 +42,28 @@ export function DraggableTaskCard({
   onEditClick,
   onProjectClick,
   onAreaClick,
-}: DraggableTaskCardProps) {
+}: SortableTaskCardProps) {
+  const dragData: CalendarTaskDragData = {
+    type: "calendar-task",
+    taskId: task.id,
+    sourceDate: date,
+  }
+
   const {
     attributes,
     listeners,
     setNodeRef,
     transform,
+    transition,
     isDragging,
-  } = useDraggable({
-    id: `calendar-task-${date}-${task.id}`,
-    data: {
-      type: "calendar-task",
-      taskId: task.id,
-      sourceDate: date,
-    },
+  } = useSortable({
+    id: getCalendarTaskDragId(date, task.id),
+    data: dragData,
   })
 
   const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    transform: CSS.Transform.toString(transform),
+    transition,
   }
 
   return (
@@ -65,7 +73,7 @@ export function DraggableTaskCard({
       {...attributes}
       {...listeners}
       className={cn(
-        "cursor-grab active:cursor-grabbing",
+        "cursor-grab active:cursor-grabbing touch-none",
         isDragging && "opacity-50 z-50"
       )}
     >
@@ -84,6 +92,9 @@ export function DraggableTaskCard({
     </div>
   )
 }
+
+// Keep the old name as an alias for backwards compatibility during migration
+export const DraggableTaskCard = SortableTaskCard
 
 /**
  * Drag preview for TaskCard shown in the DragOverlay.

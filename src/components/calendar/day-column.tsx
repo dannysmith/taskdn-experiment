@@ -1,9 +1,14 @@
 import { useDroppable } from "@dnd-kit/core"
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable"
 import { format, isToday, isWeekend } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
-import { DraggableTaskCard } from "./draggable-task-card"
+import { getCalendarTaskDragId } from "@/types/calendar-order"
+import { SortableTaskCard } from "./draggable-task-card"
 
 interface TaskContext {
   projectName?: string
@@ -90,33 +95,38 @@ export function DayColumn({
 
       {/* Tasks container */}
       <div className="flex-1 p-1.5 space-y-1.5 overflow-y-auto">
-        {tasks.map((task) => {
-          const context = getTaskContext?.(task) ?? {}
-          return (
-            <DraggableTaskCard
-              key={task.id}
-              task={task}
-              date={dateString}
-              projectName={context.projectName}
-              areaName={context.areaName}
-              onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
-              onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
-              onScheduledChange={(date) => onTaskScheduledChange(task.id, date)}
-              onDueChange={(date) => onTaskDueChange(task.id, date)}
-              onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
-              onProjectClick={
-                context.projectId && onNavigateToProject
-                  ? () => onNavigateToProject(context.projectId!)
-                  : undefined
-              }
-              onAreaClick={
-                context.areaId && onNavigateToArea
-                  ? () => onNavigateToArea(context.areaId!)
-                  : undefined
-              }
-            />
-          )
-        })}
+        <SortableContext
+          items={tasks.map((t) => getCalendarTaskDragId(dateString, t.id))}
+          strategy={verticalListSortingStrategy}
+        >
+          {tasks.map((task) => {
+            const context = getTaskContext?.(task) ?? {}
+            return (
+              <SortableTaskCard
+                key={task.id}
+                task={task}
+                date={dateString}
+                projectName={context.projectName}
+                areaName={context.areaName}
+                onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
+                onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
+                onScheduledChange={(date) => onTaskScheduledChange(task.id, date)}
+                onDueChange={(date) => onTaskDueChange(task.id, date)}
+                onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+                onProjectClick={
+                  context.projectId && onNavigateToProject
+                    ? () => onNavigateToProject(context.projectId!)
+                    : undefined
+                }
+                onAreaClick={
+                  context.areaId && onNavigateToArea
+                    ? () => onNavigateToArea(context.areaId!)
+                    : undefined
+                }
+              />
+            )
+          })}
+        </SortableContext>
 
         {/* Empty state / drop zone indicator */}
         {tasks.length === 0 && (

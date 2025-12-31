@@ -25,24 +25,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
+import {
+  parseCalendarTaskDragId,
+  type CalendarTaskDragData,
+  type DayDropData,
+} from "@/types/calendar-order"
+import { useCalendarOrder } from "@/hooks/use-calendar-order"
 import { Button } from "@/components/ui/button"
 import { DayColumn } from "./day-column"
 import { TaskCardDragPreview } from "./draggable-task-card"
-
-// -----------------------------------------------------------------------------
-// Types
-// -----------------------------------------------------------------------------
-
-interface CalendarTaskDragData {
-  type: "calendar-task"
-  taskId: string
-  sourceDate: string
-}
-
-interface DayDropData {
-  type: "day"
-  date: string
-}
 
 interface DragState {
   taskId: string
@@ -115,7 +106,13 @@ export function WeekCalendar({
     })
   }, [currentWeekStart])
 
-  // Group tasks by their scheduled date
+  // Date strings for the week (used by order hook)
+  const weekDateStrings = React.useMemo(
+    () => weekDays.map((d) => format(d, "yyyy-MM-dd")),
+    [weekDays]
+  )
+
+  // Group tasks by their scheduled date (raw, unordered)
   const tasksByDate = React.useMemo(() => {
     const map = new Map<string, Task[]>()
 
@@ -140,6 +137,20 @@ export function WeekCalendar({
 
     return map
   }, [tasks, weekDays])
+
+  // Get tasks for a specific date (callback for order hook)
+  const getTasksForDate = React.useCallback(
+    (date: string): Task[] => tasksByDate.get(date) ?? [],
+    [tasksByDate]
+  )
+
+  // Calendar order management (for within-day reordering)
+  const { getOrderedTasks, reorderTasksInDay, moveTaskToDay, getInsertIndex } =
+    useCalendarOrder({
+      tasks,
+      dates: weekDateStrings,
+      getTasksForDate,
+    })
 
   // Navigation handlers
   const goToPreviousWeek = () => {
@@ -215,29 +226,59 @@ export function WeekCalendar({
   const handleDragEnd = (event: DragEndEvent) => {
     if (!dragState) return
 
-    const { over } = event
+    const { active, over } = event
     if (!over) {
       setDragState(null)
       return
     }
 
-    const overData = over.data.current as DayDropData | CalendarTaskDragData | undefined
+    const overData = over.data.current as
+      | DayDropData
+      | CalendarTaskDragData
+      | undefined
     if (!overData) {
       setDragState(null)
       return
     }
 
-    // Determine target date
-    let targetDate: string | null = null
-    if (overData.type === "day") {
-      targetDate = overData.date
-    } else if (overData.type === "calendar-task") {
-      targetDate = overData.sourceDate
+    // Parse the active item to get taskId
+    const activeId = active.id as string
+    const parsedActive = parseCalendarTaskDragId(activeId)
+    if (!parsedActive) {
+      setDragState(null)
+      return
     }
 
-    // If dropped on a different date, update the task's scheduled date
-    if (targetDate && targetDate !== dragState.sourceDate) {
-      onTaskScheduleChange(dragState.taskId, targetDate)
+    const { taskId: activeTaskId } = parsedActive
+    const sourceDate = dragState.sourceDate
+
+    // Determine target date and handling based on drop target type
+    if (overData.type === "day") {
+      // Dropped on a day container (not on a specific task)
+      const targetDate = overData.date
+
+      if (targetDate !== sourceDate) {
+        // Cross-day move: update scheduled date and add to end of target day
+        moveTaskToDay(activeTaskId, sourceDate, targetDate)
+        onTaskScheduleChange(activeTaskId, targetDate)
+      }
+      // If same day and dropped on container, no reorder needed
+    } else if (overData.type === "calendar-task") {
+      // Dropped on another task
+      const targetDate = overData.sourceDate
+      const overTaskId = overData.taskId
+
+      if (targetDate === sourceDate) {
+        // Within-day reorder: just update order
+        if (activeTaskId !== overTaskId) {
+          reorderTasksInDay(sourceDate, activeTaskId, overTaskId)
+        }
+      } else {
+        // Cross-day move with specific position
+        const insertIndex = getInsertIndex(targetDate, overTaskId)
+        moveTaskToDay(activeTaskId, sourceDate, targetDate, insertIndex)
+        onTaskScheduleChange(activeTaskId, targetDate)
+      }
     }
 
     setDragState(null)
@@ -281,14 +322,15 @@ export function WeekCalendar({
           <div className="grid grid-cols-7 h-full">
             {weekDays.map((day) => {
               const dateKey = format(day, "yyyy-MM-dd")
-              const dayTasks = tasksByDate.get(dateKey) ?? []
+              const rawTasks = tasksByDate.get(dateKey) ?? []
+              const orderedTasks = getOrderedTasks(dateKey, rawTasks)
               const isDropTarget = dragState?.currentOverDate === dateKey
 
               return (
                 <DayColumn
                   key={dateKey}
                   date={day}
-                  tasks={dayTasks}
+                  tasks={orderedTasks}
                   getTaskContext={getTaskContext}
                   onTaskStatusChange={onTaskStatusChange}
                   onTaskTitleChange={onTaskTitleChange}
