@@ -18,10 +18,15 @@ import { DEFAULT_STATUS_ORDER } from './kanban-board'
 // Types
 // -----------------------------------------------------------------------------
 
+/** Special ID for the "Loose Tasks" swim lane (area-direct tasks with no project) */
+export const LOOSE_TASKS_SWIMLANE_ID = '__loose-tasks__'
+
 interface AreaKanbanBoardProps {
   projects: Project[]
   /** All tasks for the area organized by project */
   tasksByProject: Map<string, Task[]>
+  /** Tasks that belong to the area directly (no project) */
+  areaDirectTasks?: Task[]
   /** Which columns are collapsed (by status) */
   collapsedColumns: Set<TaskStatus>
   /** Called when a column's collapse state changes */
@@ -52,6 +57,7 @@ interface AreaKanbanBoardProps {
 export function AreaKanbanBoard({
   projects,
   tasksByProject,
+  areaDirectTasks = [],
   collapsedColumns,
   onColumnCollapseChange,
   onTaskStatusChange,
@@ -64,13 +70,14 @@ export function AreaKanbanBoard({
   onProjectClick,
   className,
 }: AreaKanbanBoardProps) {
-  // Build tasksByStatus from tasksByProject (for DnD context)
+  // Build tasksByStatus from tasksByProject + areaDirectTasks (for DnD context)
   const tasksByStatus = React.useMemo(() => {
     const map = new Map<TaskStatus, Task[]>()
     for (const status of DEFAULT_STATUS_ORDER) {
       map.set(status, [])
     }
 
+    // Add tasks from projects
     tasksByProject.forEach((tasks) => {
       for (const task of tasks) {
         const existing = map.get(task.status) ?? []
@@ -79,10 +86,18 @@ export function AreaKanbanBoard({
       }
     })
 
+    // Add area-direct tasks
+    for (const task of areaDirectTasks) {
+      const existing = map.get(task.status) ?? []
+      existing.push(task)
+      map.set(task.status, existing)
+    }
+
     return map
-  }, [tasksByProject])
+  }, [tasksByProject, areaDirectTasks])
 
   // Build a map of tasks by (status, projectId) for rendering swim lanes
+  // Uses LOOSE_TASKS_SWIMLANE_ID for area-direct tasks
   const tasksByStatusAndProject = React.useMemo(() => {
     const map = new Map<string, Task[]>() // key: `${status}:${projectId}`
 
@@ -95,8 +110,16 @@ export function AreaKanbanBoard({
       }
     })
 
+    // Add area-direct tasks under the special swim lane ID
+    for (const task of areaDirectTasks) {
+      const key = `${task.status}:${LOOSE_TASKS_SWIMLANE_ID}`
+      const existing = map.get(key) ?? []
+      existing.push(task)
+      map.set(key, existing)
+    }
+
     return map
-  }, [tasksByProject])
+  }, [tasksByProject, areaDirectTasks])
 
   // Filter out done/dropped statuses from display but keep them in the model
   const displayStatuses = DEFAULT_STATUS_ORDER.filter(
@@ -128,6 +151,7 @@ export function AreaKanbanBoard({
               status={status}
               projects={projects}
               tasksByStatusAndProject={tasksByStatusAndProject}
+              hasLooseTasks={areaDirectTasks.length > 0}
               isCollapsed={isCollapsed}
               onCollapseChange={(collapsed) =>
                 onColumnCollapseChange(status, collapsed)
@@ -154,6 +178,7 @@ interface AreaKanbanColumnProps {
   status: TaskStatus
   projects: Project[]
   tasksByStatusAndProject: Map<string, Task[]>
+  hasLooseTasks: boolean
   isCollapsed: boolean
   onCollapseChange: (collapsed: boolean) => void
   onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void
@@ -168,6 +193,7 @@ function AreaKanbanColumn({
   status,
   projects,
   tasksByStatusAndProject,
+  hasLooseTasks,
   isCollapsed,
   onCollapseChange,
   onTaskStatusChange,
@@ -179,7 +205,7 @@ function AreaKanbanColumn({
 }: AreaKanbanColumnProps) {
   const config = statusConfig[status]
 
-  // Count total tasks in this column
+  // Count total tasks in this column (including loose tasks)
   const totalTasks = React.useMemo(() => {
     let count = 0
     for (const project of projects) {
@@ -187,8 +213,21 @@ function AreaKanbanColumn({
       const tasks = tasksByStatusAndProject.get(key) ?? []
       count += tasks.length
     }
+    // Include loose tasks
+    if (hasLooseTasks) {
+      const looseKey = `${status}:${LOOSE_TASKS_SWIMLANE_ID}`
+      const looseTasks = tasksByStatusAndProject.get(looseKey) ?? []
+      count += looseTasks.length
+    }
     return count
-  }, [projects, status, tasksByStatusAndProject])
+  }, [projects, status, tasksByStatusAndProject, hasLooseTasks])
+
+  // Get loose tasks for this status
+  const looseTasks = React.useMemo(() => {
+    if (!hasLooseTasks) return []
+    const key = `${status}:${LOOSE_TASKS_SWIMLANE_ID}`
+    return tasksByStatusAndProject.get(key) ?? []
+  }, [status, tasksByStatusAndProject, hasLooseTasks])
 
   const { dragPreview } = useKanbanDragPreview()
   const isDragTarget = dragPreview?.currentStatus === status
@@ -249,6 +288,19 @@ function AreaKanbanColumn({
 
       {/* Swim Lanes */}
       <div className="flex-1 overflow-y-auto">
+        {/* Loose Tasks Swimlane (first if there are any) */}
+        {hasLooseTasks && looseTasks.length > 0 && (
+          <LooseTasksSwimlane
+            status={status}
+            tasks={looseTasks}
+            onTaskStatusChange={onTaskStatusChange}
+            onTaskTitleChange={onTaskTitleChange}
+            onTaskScheduledChange={onTaskScheduledChange}
+            onTaskDueChange={onTaskDueChange}
+            onTaskEditClick={onTaskEditClick}
+          />
+        )}
+
         {projects.map((project) => {
           const key = `${status}:${project.id}`
           const tasks = tasksByStatusAndProject.get(key) ?? []
@@ -269,7 +321,7 @@ function AreaKanbanColumn({
           )
         })}
 
-        {projects.length === 0 && (
+        {projects.length === 0 && !hasLooseTasks && (
           <div className="p-3 text-xs text-muted-foreground text-center">
             No projects
           </div>
@@ -363,6 +415,116 @@ function ProjectSwimlane({
               task={task}
               status={status}
               swimlaneId={project.id}
+              onStatusChange={
+                onTaskStatusChange
+                  ? (newStatus) => onTaskStatusChange(task.id, newStatus)
+                  : undefined
+              }
+              onTitleChange={
+                onTaskTitleChange
+                  ? (newTitle) => onTaskTitleChange(task.id, newTitle)
+                  : undefined
+              }
+              onScheduledChange={
+                onTaskScheduledChange
+                  ? (date) => onTaskScheduledChange(task.id, date)
+                  : undefined
+              }
+              onDueChange={
+                onTaskDueChange
+                  ? (date) => onTaskDueChange(task.id, date)
+                  : undefined
+              }
+              onEditClick={
+                onTaskEditClick ? () => onTaskEditClick(task.id) : undefined
+              }
+            />
+          ))}
+        </SortableContext>
+
+        {/* Empty swimlane drop target */}
+        {tasks.length === 0 && (
+          <div
+            className={cn(
+              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-[10px] text-muted-foreground/50',
+              isOver && 'border-primary/30'
+            )}
+          >
+            {isOver ? 'Drop here' : ''}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// -----------------------------------------------------------------------------
+// LooseTasksSwimlane - A swim lane for area-direct tasks (no project)
+// -----------------------------------------------------------------------------
+
+interface LooseTasksSwimlaneProps {
+  status: TaskStatus
+  tasks: Task[]
+  onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void
+  onTaskTitleChange?: (taskId: string, newTitle: string) => void
+  onTaskScheduledChange?: (taskId: string, date: string | undefined) => void
+  onTaskDueChange?: (taskId: string, date: string | undefined) => void
+  onTaskEditClick?: (taskId: string) => void
+}
+
+function LooseTasksSwimlane({
+  status,
+  tasks,
+  onTaskStatusChange,
+  onTaskTitleChange,
+  onTaskScheduledChange,
+  onTaskDueChange,
+  onTaskEditClick,
+}: LooseTasksSwimlaneProps) {
+  const taskIds = tasks.map((t) => t.id)
+
+  // Set up droppable for empty swimlane
+  const { setNodeRef: setDroppableRef, isOver } = useDroppable({
+    id: `swimlane-${status}-${LOOSE_TASKS_SWIMLANE_ID}`,
+    data: createEmptySwimlaneData(status, LOOSE_TASKS_SWIMLANE_ID),
+  })
+
+  const { dragPreview } = useKanbanDragPreview()
+  const isDragTarget =
+    dragPreview?.currentStatus === status &&
+    dragPreview?.currentSwimlaneId === LOOSE_TASKS_SWIMLANE_ID
+
+  return (
+    <div
+      className={cn('border-b last:border-b-0', isDragTarget && 'bg-primary/5')}
+    >
+      {/* Swimlane Header */}
+      <div className="flex items-center gap-2 px-3 py-2 bg-accent/30">
+        <span className="text-xs font-medium text-muted-foreground truncate flex-1 italic">
+          Loose Tasks
+        </span>
+        {tasks.length > 0 && (
+          <span className="text-[10px] text-muted-foreground/70">
+            {tasks.length}
+          </span>
+        )}
+      </div>
+
+      {/* Tasks */}
+      <div
+        ref={setDroppableRef}
+        className={cn(
+          'p-2 space-y-2 min-h-[48px]',
+          isOver && tasks.length === 0 && 'bg-primary/5'
+        )}
+      >
+        <SortableContext items={taskIds} strategy={verticalListSortingStrategy}>
+          {tasks.map((task) => (
+            <SortableKanbanCard
+              key={task.id}
+              task={task}
+              status={status}
+              swimlaneId={LOOSE_TASKS_SWIMLANE_ID}
               onStatusChange={
                 onTaskStatusChange
                   ? (newStatus) => onTaskStatusChange(task.id, newStatus)

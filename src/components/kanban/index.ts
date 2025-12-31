@@ -12,4 +12,8 @@ export {
   createEmptyColumnData,
   createEmptySwimlaneData,
 } from './kanban-dnd-context'
-export { AreaKanbanBoard, useAreaCollapsedColumns } from './area-kanban-board'
+export {
+  AreaKanbanBoard,
+  useAreaCollapsedColumns,
+  LOOSE_TASKS_SWIMLANE_ID,
+} from './area-kanban-board'

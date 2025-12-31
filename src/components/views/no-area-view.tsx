@@ -1,41 +1,32 @@
 import * as React from 'react'
-import { ChevronDown, ListTodo } from 'lucide-react'
+import { ListTodo } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { useViewMode } from '@/context/view-mode-context'
 import { ProjectTaskGroup } from '@/components/tasks/project-task-group'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { TaskDndContext } from '@/components/tasks/task-dnd-context'
-import { ProjectCard } from '@/components/cards/project-card'
-import { MarkdownPreview } from '@/components/ui/markdown-preview'
 import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
-import type { Task, Project } from '@/types/data'
+import type { Task } from '@/types/data'
 
-/** Active statuses for project cards grid */
-const ACTIVE_STATUSES: Project['status'][] = [
-  'in-progress',
-  'ready',
-  'planning',
-  'blocked',
-]
-
-interface AreaViewProps {
-  areaId: string
+interface NoAreaViewProps {
   onNavigateToProject: (projectId: string) => void
 }
 
-export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
-  const [notesExpanded, setNotesExpanded] = React.useState(false)
+/**
+ * View for orphan projects and tasks (items without an area).
+ * Shows orphan projects with their tasks, plus any truly orphan tasks
+ * (tasks with no project AND no area).
+ */
+export function NoAreaView({ onNavigateToProject }: NoAreaViewProps) {
   const { viewMode } = useViewMode('area')
   const { collapsedColumns, toggleColumn } = useAreaCollapsedColumns()
 
   const {
-    getAreaById,
-    getProjectsByAreaId,
+    getOrphanProjects,
+    getOrphanTasks,
     getTasksByProjectId,
-    getAreaDirectTasks,
     getProjectCompletion,
     getTaskById,
     createTask,
@@ -50,14 +41,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   } = useAppData()
   const { openTask } = useTaskDetail()
 
-  const area = getAreaById(areaId)
-  const projects = getProjectsByAreaId(areaId)
-  const areaDirectTasks = getAreaDirectTasks(areaId)
-
-  // Split projects into active (for grid) and all (for task groups)
-  const activeProjects = React.useMemo(() => {
-    return projects.filter((p) => ACTIVE_STATUSES.includes(p.status))
-  }, [projects])
+  const projects = getOrphanProjects()
+  const orphanTasks = getOrphanTasks()
 
   // Build tasksByProject map for TaskDndContext
   const tasksByProject = React.useMemo(() => {
@@ -67,18 +52,6 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     }
     return map
   }, [projects, getTasksByProjectId])
-
-  // Get task counts for ProjectCard
-  const getTaskCounts = React.useCallback(
-    (projectId: string) => {
-      const tasks = tasksByProject.get(projectId) ?? []
-      const completedTaskCount = tasks.filter(
-        (t) => t.status === 'done' || t.status === 'dropped'
-      ).length
-      return { taskCount: tasks.length, completedTaskCount }
-    },
-    [tasksByProject]
-  )
 
   // Factory function to create task creation handlers for each project
   const makeCreateTaskHandler = React.useCallback(
@@ -91,24 +64,15 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     [createTask]
   )
 
-  // Handler for creating area-direct tasks (no project)
-  const handleCreateAreaDirectTask = React.useCallback(
+  // Handler for creating orphan tasks (no project, no area)
+  const handleCreateOrphanTask = React.useCallback(
     (afterTaskId: string | null) => {
       return createTask({
-        areaId,
         insertAfterId: afterTaskId ?? undefined,
       })
     },
-    [createTask, areaId]
+    [createTask]
   )
-
-  if (!area) {
-    return (
-      <div className="space-y-4">
-        <p className="text-muted-foreground">Area not found.</p>
-      </div>
-    )
-  }
 
   const handleTasksReorder = (projectId: string, reorderedTasks: Task[]) => {
     reorderProjectTasks(
@@ -127,82 +91,10 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
 
   return (
     <div className="space-y-8">
-      {/* Area Notes (collapsible) */}
-      {area.notes && (
-        <section className="bg-muted/30 rounded-lg border border-border/50">
-          <button
-            onClick={() => setNotesExpanded(!notesExpanded)}
-            className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors rounded-lg"
-          >
-            <ChevronDown
-              className={cn(
-                'size-4 text-muted-foreground shrink-0 transition-transform duration-200',
-                !notesExpanded && '-rotate-90'
-              )}
-            />
-            <span className="text-sm font-medium text-muted-foreground">
-              About this area
-            </span>
-          </button>
-          <div
-            className={cn(
-              'overflow-hidden transition-all duration-200',
-              notesExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-            )}
-          >
-            <div className="px-4 pb-4">
-              <MarkdownPreview
-                content={area.notes}
-                className="text-muted-foreground"
-              />
-            </div>
-          </div>
-          {/* Collapsed preview - show first line or two */}
-          {!notesExpanded && (
-            <div className="px-4 pb-3 -mt-1">
-              <p className="text-sm text-muted-foreground/70 line-clamp-2">
-                {area.notes
-                  .split('\n')
-                  .filter((line) => line.trim() && !line.startsWith('#'))
-                  .slice(0, 2)
-                  .join(' ')}
-              </p>
-            </div>
-          )}
-        </section>
-      )}
-
-      {/* Active Projects Grid */}
-      {activeProjects.length > 0 && (
-        <section>
-          <h2 className="text-sm font-medium text-muted-foreground mb-3">
-            Active Projects
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeProjects.map((project) => {
-              const completion = getProjectCompletion(project.id)
-              const { taskCount, completedTaskCount } = getTaskCounts(
-                project.id
-              )
-              return (
-                <ProjectCard
-                  key={project.id}
-                  project={project}
-                  completion={completion}
-                  taskCount={taskCount}
-                  completedTaskCount={completedTaskCount}
-                  onClick={() => onNavigateToProject(project.id)}
-                />
-              )
-            })}
-          </div>
-        </section>
-      )}
-
       {/* Projects/Tasks Content */}
       <section>
         <h2 className="text-sm font-medium text-muted-foreground mb-3">
-          {viewMode === 'list' ? 'All Projects' : 'Tasks by Status'}
+          {viewMode === 'list' ? 'All Projects & Tasks' : 'Tasks by Status'}
         </h2>
 
         {viewMode === 'list' ? (
@@ -213,22 +105,22 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
             getTaskById={getTaskById}
           >
             <div className="space-y-4">
-              {/* Area-direct tasks (tasks in this area but not in any project) */}
-              {areaDirectTasks.length > 0 && (
+              {/* Orphan tasks (tasks with no project AND no area) */}
+              {orphanTasks.length > 0 && (
                 <SectionTaskGroup
-                  sectionId={`area-${areaId}-direct`}
+                  sectionId="orphan-tasks"
                   title="Loose Tasks"
                   icon={<ListTodo className="size-4" />}
-                  tasks={areaDirectTasks}
+                  tasks={orphanTasks}
                   onTasksReorder={() => {
-                    // Reordering area-direct tasks not yet supported
+                    // Reordering orphan tasks not yet supported
                   }}
                   onTaskTitleChange={(taskId, newTitle) =>
                     updateTaskTitle(taskId, newTitle)
                   }
                   onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
                   onTaskOpenDetail={openTask}
-                  onCreateTask={handleCreateAreaDirectTask}
+                  onCreateTask={handleCreateOrphanTask}
                   showScheduled={true}
                   showDue={true}
                   defaultExpanded={true}
@@ -261,9 +153,9 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
                 )
               })}
 
-              {projects.length === 0 && areaDirectTasks.length === 0 && (
+              {projects.length === 0 && orphanTasks.length === 0 && (
                 <p className="text-muted-foreground text-sm">
-                  No projects or tasks in this area yet.
+                  No projects or tasks without an area.
                 </p>
               )}
             </div>
@@ -272,7 +164,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           <AreaKanbanBoard
             projects={projects}
             tasksByProject={tasksByProject}
-            areaDirectTasks={areaDirectTasks}
+            areaDirectTasks={orphanTasks}
             collapsedColumns={collapsedColumns}
             onColumnCollapseChange={toggleColumn}
             onTaskStatusChange={updateTaskStatus}

@@ -25,6 +25,7 @@ function getViewModeKey(selection: Selection | null): ViewModeKey | null {
     return 'this-week'
   if (selection.type === 'project') return 'project'
   if (selection.type === 'area') return 'area'
+  if (selection.type === 'no-area') return 'area' // Use same view modes as area
   return null
 }
 
@@ -81,6 +82,8 @@ function AppContent() {
         return getAreaById(selection.id)?.title ?? 'Area'
       case 'project':
         return getProjectById(selection.id)?.title ?? 'Project'
+      case 'no-area':
+        return 'No Area'
     }
     return 'Dashboard'
   }

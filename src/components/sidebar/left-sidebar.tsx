@@ -326,12 +326,27 @@ export function AppSidebar({
           >
             <SidebarGroup className="py-0">
               <SidebarGroupLabel
-                render={<CollapsibleTrigger />}
-                className="group/label gap-2 text-sm font-semibold hover:bg-sidebar-accent hover:text-sidebar-accent-foreground cursor-pointer"
+                className={cn(
+                  'group/label gap-2 text-sm font-semibold cursor-pointer',
+                  selection?.type === 'no-area'
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                    : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                )}
               >
-                <FolderIcon className="text-icon-folder-none" />
-                <span className="truncate">No Area</span>
-                <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                <button
+                  type="button"
+                  className="flex items-center gap-2 flex-1 min-w-0"
+                  onClick={() => onSelectionChange({ type: 'no-area' })}
+                >
+                  <FolderIcon className="text-icon-folder-none shrink-0" />
+                  <span className="truncate">No Area</span>
+                </button>
+                <CollapsibleTrigger
+                  className="p-0.5 rounded hover:bg-sidebar-accent-foreground/10"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ChevronRight className="size-4 transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                </CollapsibleTrigger>
               </SidebarGroupLabel>
               <CollapsibleContent>
                 <SidebarGroupContent>

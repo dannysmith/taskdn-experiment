@@ -5,6 +5,7 @@ import { InboxView } from '@/components/views/inbox-view'
 import { CalendarView } from '@/components/views/calendar-view'
 import { AreaView } from '@/components/views/area-view'
 import { ProjectView } from '@/components/views/project-view'
+import { NoAreaView } from '@/components/views/no-area-view'
 
 interface MainContentProps {
   selection: Selection | null
@@ -65,5 +66,13 @@ export function MainContent({
       )
     case 'project':
       return <ProjectView projectId={selection.id} />
+    case 'no-area':
+      return (
+        <NoAreaView
+          onNavigateToProject={(projectId) =>
+            onSelectionChange({ type: 'project', id: projectId })
+          }
+        />
+      )
   }
 }
