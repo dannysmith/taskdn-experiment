@@ -152,6 +152,31 @@ export function WeekCalendar({
     return map
   }, [tasks, weekDays])
 
+  // Group tasks by their due date (for showing due indicators)
+  const tasksDueByDate = React.useMemo(() => {
+    const map = new Map<string, Task[]>()
+
+    // Initialize all days of the week
+    for (const day of weekDays) {
+      map.set(format(day, "yyyy-MM-dd"), [])
+    }
+
+    for (const task of tasks) {
+      if (task.status === "done" || task.status === "dropped") continue
+      if (!task.due) continue
+
+      const dueDate = new Date(task.due)
+      const matchingDay = weekDays.find((day) => isSameDay(day, dueDate))
+      if (matchingDay) {
+        const dateKey = format(matchingDay, "yyyy-MM-dd")
+        const existing = map.get(dateKey) ?? []
+        map.set(dateKey, [...existing, task])
+      }
+    }
+
+    return map
+  }, [tasks, weekDays])
+
   // Determine task card variant based on task state
   const getTaskVariant = React.useCallback((task: Task): TaskCardVariant => {
     // Deferred tasks (has deferUntil but no scheduled)
@@ -357,6 +382,7 @@ export function WeekCalendar({
               const dateKey = format(day, "yyyy-MM-dd")
               const rawTasks = tasksByDate.get(dateKey) ?? []
               const orderedTasks = getOrderedTasks(dateKey, rawTasks)
+              const dueOnDay = tasksDueByDate.get(dateKey) ?? []
               const isDropTarget = dragState?.currentOverDate === dateKey
 
               return (
@@ -364,6 +390,7 @@ export function WeekCalendar({
                   key={dateKey}
                   date={day}
                   tasks={orderedTasks}
+                  tasksDueOnDay={dueOnDay}
                   getTaskContext={getTaskContext}
                   getTaskVariant={getTaskVariant}
                   onTaskStatusChange={onTaskStatusChange}

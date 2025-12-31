@@ -1574,6 +1574,47 @@ Update monthly in this note.`,
     },
 
     // ==========================================================================
+    // Tasks with DUE dates this week (for due date indicator testing)
+    // ==========================================================================
+    {
+      id: "due-indicator-1",
+      title: "Pay electricity bill",
+      status: "ready",
+      areaId: "finance",
+      createdAt: "2025-12-20T10:00:00",
+      updatedAt: "2025-12-20T10:00:00",
+      due: "2025-12-31",
+      notes: `Auto-pay didn't go through, need to pay manually.`,
+    },
+    {
+      id: "due-indicator-2",
+      title: "Submit Q4 report",
+      status: "ready",
+      projectId: "marketing-1",
+      createdAt: "2025-12-20T10:00:00",
+      updatedAt: "2025-12-20T10:00:00",
+      due: "2025-12-31",
+    },
+    {
+      id: "due-indicator-3",
+      title: "Renew domain registration",
+      status: "ready",
+      areaId: "coding",
+      createdAt: "2025-12-28T10:00:00",
+      updatedAt: "2025-12-28T10:00:00",
+      due: "2026-01-02",
+    },
+    {
+      id: "due-indicator-4",
+      title: "Send birthday card to mom",
+      status: "ready",
+      areaId: "family-friends",
+      createdAt: "2025-12-28T10:00:00",
+      updatedAt: "2025-12-28T10:00:00",
+      due: "2026-01-03",
+    },
+
+    // ==========================================================================
     // Tasks scheduled for THIS WEEK
     // ==========================================================================
     {

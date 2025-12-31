@@ -4,6 +4,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { format, isToday, isWeekend } from "date-fns"
+import { Flag } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
@@ -21,6 +22,8 @@ interface TaskContext {
 interface DayColumnProps {
   date: Date
   tasks: Task[]
+  /** Tasks that are due on this day (shown as links at bottom) */
+  tasksDueOnDay?: Task[]
   /** Function to get context (project/area names and IDs) for a task */
   getTaskContext?: (task: Task) => TaskContext
   /** Function to get the visual variant for a task */
@@ -43,6 +46,7 @@ interface DayColumnProps {
 export function DayColumn({
   date,
   tasks,
+  tasksDueOnDay = [],
   getTaskContext,
   getTaskVariant,
   onTaskStatusChange,
@@ -144,6 +148,23 @@ export function DayColumn({
           />
         )}
       </div>
+
+      {/* Due tasks section - pinned to bottom */}
+      {tasksDueOnDay.length > 0 && (
+        <div className="mt-auto p-1.5 pt-2 border-t border-border/30 space-y-0.5">
+          {tasksDueOnDay.map((task) => (
+            <button
+              key={task.id}
+              type="button"
+              onClick={() => onTaskOpenDetail?.(task.id)}
+              className="flex items-center gap-1 w-full text-left text-xs text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+            >
+              <Flag className="size-3 shrink-0" />
+              <span className="truncate">{task.title}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
