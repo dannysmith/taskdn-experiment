@@ -5,7 +5,8 @@ import {
   ProjectStatusIndicator,
   getProjectTitleClass,
 } from '@/components/sidebar/draggable-project'
-import type { Project, ProjectStatus } from '@/types/data'
+import type { Project } from '@/types/data'
+import { projectStatusConfig } from '@/config/status'
 
 interface ProjectHeaderProps {
   project: Project
@@ -13,33 +14,6 @@ interface ProjectHeaderProps {
   isExpanded: boolean
   onToggleExpand: () => void
   onOpenProject: () => void
-}
-
-/**
- * Status badge configuration following design conventions
- * - planning: Blue
- * - ready: Grey
- * - in-progress: Amber
- * - paused: Light amber
- * - blocked: Dark red
- * - done: Green
- */
-const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
-  planning: {
-    label: 'Planning',
-    color: 'bg-status-planning/15 text-status-planning',
-  },
-  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': {
-    label: 'Active',
-    color: 'bg-status-in-progress/15 text-status-in-progress',
-  },
-  blocked: {
-    label: 'Blocked',
-    color: 'bg-status-blocked/15 text-status-blocked',
-  },
-  paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
-  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
 }
 
 /**
@@ -63,7 +37,7 @@ export function ProjectHeader({
   }
 
   const status = project.status ?? 'planning'
-  const config = statusConfig[status]
+  const config = projectStatusConfig[status]
 
   return (
     <div

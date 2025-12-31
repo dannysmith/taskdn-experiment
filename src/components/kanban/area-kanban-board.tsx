@@ -5,7 +5,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 import { cn } from '@/lib/utils'
 import type { Task, TaskStatus, Project } from '@/types/data'
-import { statusConfig } from '@/components/tasks/task-status-pill'
+import { taskStatusConfig } from '@/config/status'
 import { SortableKanbanCard } from './kanban-column'
 import {
   KanbanDndContext,
@@ -203,7 +203,7 @@ function AreaKanbanColumn({
   onTaskEditClick,
   onProjectClick,
 }: AreaKanbanColumnProps) {
-  const config = statusConfig[status]
+  const config = taskStatusConfig[status]
 
   // Count total tasks in this column (including loose tasks)
   const totalTasks = React.useMemo(() => {

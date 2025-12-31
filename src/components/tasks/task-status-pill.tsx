@@ -4,45 +4,17 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { TaskStatus } from '@/types/data'
 import {
+  taskStatusConfig,
+  taskPrimaryStatuses,
+  taskSecondaryStatuses,
+} from '@/config/status'
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-
-// Status configuration with labels and colors
-export const statusConfig: Record<
-  TaskStatus,
-  { label: string; color: string }
-> = {
-  inbox: { label: 'Inbox', color: 'bg-status-inbox/15 text-status-inbox' },
-  icebox: { label: 'Icebox', color: 'bg-status-icebox/15 text-status-icebox' },
-  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': {
-    label: 'In Progress',
-    color: 'bg-status-in-progress/15 text-status-in-progress',
-  },
-  blocked: {
-    label: 'Blocked',
-    color: 'bg-status-blocked/15 text-status-blocked',
-  },
-  dropped: {
-    label: 'Dropped',
-    color: 'bg-status-dropped/15 text-status-dropped',
-  },
-  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
-}
-
-const allStatuses: TaskStatus[] = [
-  'inbox',
-  'ready',
-  'in-progress',
-  'blocked',
-  'done',
-  'icebox',
-  'dropped',
-]
 
 export interface TaskStatusPillProps {
   status: TaskStatus
@@ -55,7 +27,7 @@ export function TaskStatusPill({
   onStatusChange,
   className,
 }: TaskStatusPillProps) {
-  const config = statusConfig[status]
+  const config = taskStatusConfig[status]
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -89,7 +61,7 @@ export function TaskStatusPill({
         <ChevronDown className="size-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {allStatuses.slice(0, 5).map((s) => (
+        {taskPrimaryStatuses.map((s) => (
           <DropdownMenuItem
             key={s}
             onClick={(e) => {
@@ -101,15 +73,15 @@ export function TaskStatusPill({
             <span
               className={cn(
                 'px-1.5 py-0.5 rounded text-xs font-medium',
-                statusConfig[s].color
+                taskStatusConfig[s].color
               )}
             >
-              {statusConfig[s].label}
+              {taskStatusConfig[s].label}
             </span>
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        {allStatuses.slice(5).map((s) => (
+        {taskSecondaryStatuses.map((s) => (
           <DropdownMenuItem
             key={s}
             onClick={(e) => {
@@ -121,10 +93,10 @@ export function TaskStatusPill({
             <span
               className={cn(
                 'px-1.5 py-0.5 rounded text-xs font-medium',
-                statusConfig[s].color
+                taskStatusConfig[s].color
               )}
             >
-              {statusConfig[s].label}
+              {taskStatusConfig[s].label}
             </span>
           </DropdownMenuItem>
         ))}

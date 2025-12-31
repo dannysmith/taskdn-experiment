@@ -49,6 +49,7 @@ interface AppDataContextValue {
   getActiveAreas: () => Area[]
   getAreaDirectTasks: (areaId: string) => Task[]
   getOrphanTasks: () => Task[]
+  getTaskContextName: (task: Task) => string | undefined
 }
 
 const AppDataContext = createContext<AppDataContextValue | null>(null)
@@ -437,6 +438,21 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     return data.tasks.filter((t) => !t.projectId && !t.areaId)
   }, [data.tasks])
 
+  const getTaskContextName = useCallback(
+    (task: Task): string | undefined => {
+      if (task.projectId) {
+        const project = data.projects.find((p) => p.id === task.projectId)
+        return project?.title
+      }
+      if (task.areaId) {
+        const area = data.areas.find((a) => a.id === task.areaId)
+        return area?.title
+      }
+      return undefined
+    },
+    [data.projects, data.areas]
+  )
+
   const value: AppDataContextValue = {
     data,
     createTask,
@@ -464,6 +480,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     getActiveAreas,
     getAreaDirectTasks,
     getOrphanTasks,
+    getTaskContextName,
   }
 
   return (

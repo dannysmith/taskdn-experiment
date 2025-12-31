@@ -4,51 +4,17 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/data'
 import {
+  projectStatusConfig,
+  projectPrimaryStatuses,
+  projectSecondaryStatuses,
+} from '@/config/status'
+import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-
-/**
- * Status configuration following design conventions:
- * - planning: Blue
- * - ready: Grey
- * - in-progress: Amber
- * - paused: Light amber
- * - blocked: Dark red
- * - done: Green
- */
-export const projectStatusConfig: Record<
-  ProjectStatus,
-  { label: string; color: string }
-> = {
-  planning: {
-    label: 'Planning',
-    color: 'bg-status-planning/15 text-status-planning',
-  },
-  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': {
-    label: 'Active',
-    color: 'bg-status-in-progress/15 text-status-in-progress',
-  },
-  blocked: {
-    label: 'Blocked',
-    color: 'bg-status-blocked/15 text-status-blocked',
-  },
-  paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
-  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
-}
-
-// Primary statuses shown first, then secondary statuses after separator
-const primaryStatuses: ProjectStatus[] = [
-  'planning',
-  'ready',
-  'in-progress',
-  'blocked',
-]
-const secondaryStatuses: ProjectStatus[] = ['paused', 'done']
 
 export interface ProjectStatusPillProps {
   status: ProjectStatus
@@ -95,7 +61,7 @@ export function ProjectStatusPill({
         <ChevronDown className="size-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
-        {primaryStatuses.map((s) => (
+        {projectPrimaryStatuses.map((s) => (
           <DropdownMenuItem
             key={s}
             onClick={(e) => {
@@ -115,7 +81,7 @@ export function ProjectStatusPill({
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
-        {secondaryStatuses.map((s) => (
+        {projectSecondaryStatuses.map((s) => (
           <DropdownMenuItem
             key={s}
             onClick={(e) => {

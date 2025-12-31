@@ -3,16 +3,14 @@ import * as React from 'react'
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetail } from '@/context/task-detail-context'
 import { DraggableTaskList } from '@/components/tasks/task-list'
-import type { Task } from '@/types/data'
 
 export function InboxView() {
   const {
     data,
-    getProjectById,
-    getAreaById,
     createTask,
     updateTaskTitle,
     toggleTaskStatus,
+    getTaskContextName,
   } = useAppData()
   const { openTask } = useTaskDetail()
 
@@ -20,22 +18,6 @@ export function InboxView() {
   const inboxTasks = React.useMemo(() => {
     return data.tasks.filter((t) => t.status === 'inbox')
   }, [data.tasks])
-
-  // Get context name (project or area) for a task
-  const getContextName = React.useCallback(
-    (task: Task): string | undefined => {
-      if (task.projectId) {
-        const project = getProjectById(task.projectId)
-        return project?.title
-      }
-      if (task.areaId) {
-        const area = getAreaById(task.areaId)
-        return area?.title
-      }
-      return undefined
-    },
-    [getProjectById, getAreaById]
-  )
 
   const handleReorder = React.useCallback(() => {
     // Visual reorder only - not persisted
@@ -83,7 +65,7 @@ export function InboxView() {
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
           onCreateTask={handleCreateTask}
-          getContextName={getContextName}
+          getContextName={getTaskContextName}
           showScheduled={true}
           showDue={true}
         />

@@ -10,7 +10,7 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { cn } from '@/lib/utils'
 import type { Task, TaskStatus } from '@/types/data'
-import { statusConfig } from '@/components/tasks/task-status-pill'
+import { taskStatusConfig } from '@/config/status'
 import { TaskCard } from '@/components/cards/task-card'
 import {
   createKanbanTaskData,
@@ -76,7 +76,7 @@ export function KanbanColumn({
   editingTaskId,
   className,
 }: KanbanColumnProps) {
-  const config = statusConfig[status]
+  const config = taskStatusConfig[status]
   const taskIds = tasks.map((t) => t.id)
 
   // Set up droppable for empty column

@@ -16,11 +16,10 @@ interface TodayViewProps {
 export function TodayView(_props: TodayViewProps) {
   const {
     data,
-    getProjectById,
-    getAreaById,
     createTask,
     updateTaskTitle,
     toggleTaskStatus,
+    getTaskContextName,
   } = useAppData()
   const { openTask } = useTaskDetail()
 
@@ -60,22 +59,6 @@ export function TodayView(_props: TodayViewProps) {
       return false
     })
   }, [data.tasks, today])
-
-  // Get context name (project or area) for a task
-  const getContextName = React.useCallback(
-    (task: Task): string | undefined => {
-      if (task.projectId) {
-        const project = getProjectById(task.projectId)
-        return project?.title
-      }
-      if (task.areaId) {
-        const area = getAreaById(task.areaId)
-        return area?.title
-      }
-      return undefined
-    },
-    [getProjectById, getAreaById]
-  )
 
   // Reorder handlers (for now, these are no-ops since we don't persist section order)
   // Each section manages its own visual order
@@ -157,7 +140,7 @@ export function TodayView(_props: TodayViewProps) {
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
           onCreateTask={handleCreateScheduledTask}
-          getContextName={getContextName}
+          getContextName={getTaskContextName}
           showScheduled={false}
           showDue={true}
           defaultExpanded={true}
@@ -176,7 +159,7 @@ export function TodayView(_props: TodayViewProps) {
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
           onCreateTask={handleCreateDueTask}
-          getContextName={getContextName}
+          getContextName={getTaskContextName}
           showScheduled={true}
           showDue={true}
           defaultExpanded={true}
@@ -195,7 +178,7 @@ export function TodayView(_props: TodayViewProps) {
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
           onCreateTask={handleCreateAvailableTask}
-          getContextName={getContextName}
+          getContextName={getTaskContextName}
           showScheduled={true}
           showDue={true}
           defaultExpanded={true}

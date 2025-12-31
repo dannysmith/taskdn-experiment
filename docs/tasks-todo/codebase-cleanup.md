@@ -16,10 +16,12 @@ Low risk, immediate wins.
 ### 1.1 Delete Example Files
 
 **Files to delete:**
+
 - `src/components/example.tsx`
 - `src/components/component-example.tsx`
 
 These are shadcn demo files not imported anywhere. Verify with:
+
 ```bash
 grep -r "example" src/ --include="*.tsx" --include="*.ts" | grep -v "example.tsx"
 ```
@@ -27,6 +29,7 @@ grep -r "example" src/ --include="*.tsx" --include="*.ts" | grep -v "example.tsx
 ### 1.2 Delete CardGrid
 
 **File:** `src/components/cards/card-grid.tsx`
+
 - Exported but `AreaView` uses inline grid classes instead
 - Not worth the abstraction for a simple grid wrapper
 
@@ -35,6 +38,7 @@ grep -r "example" src/ --include="*.tsx" --include="*.ts" | grep -v "example.tsx
 ### 1.3 Keep AreaCard (No Action)
 
 **File:** `src/components/cards/area-card.tsx`
+
 - Currently unused but will be needed for future features
 - Keep in codebase, no changes needed
 
@@ -53,34 +57,63 @@ import type { TaskStatus, ProjectStatus } from '@/types/data'
 
 export interface StatusConfig {
   label: string
-  color: string  // Combined bg + text classes using CSS variables
+  color: string // Combined bg + text classes using CSS variables
 }
 
 export const taskStatusConfig: Record<TaskStatus, StatusConfig> = {
   inbox: { label: 'Inbox', color: 'bg-status-inbox/15 text-status-inbox' },
   icebox: { label: 'Icebox', color: 'bg-status-icebox/15 text-status-icebox' },
   ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': { label: 'In Progress', color: 'bg-status-in-progress/15 text-status-in-progress' },
-  blocked: { label: 'Blocked', color: 'bg-status-blocked/15 text-status-blocked' },
-  dropped: { label: 'Dropped', color: 'bg-status-dropped/15 text-status-dropped' },
+  'in-progress': {
+    label: 'In Progress',
+    color: 'bg-status-in-progress/15 text-status-in-progress',
+  },
+  blocked: {
+    label: 'Blocked',
+    color: 'bg-status-blocked/15 text-status-blocked',
+  },
+  dropped: {
+    label: 'Dropped',
+    color: 'bg-status-dropped/15 text-status-dropped',
+  },
   done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
 }
 
 export const projectStatusConfig: Record<ProjectStatus, StatusConfig> = {
-  planning: { label: 'Planning', color: 'bg-status-planning/15 text-status-planning' },
+  planning: {
+    label: 'Planning',
+    color: 'bg-status-planning/15 text-status-planning',
+  },
   ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': { label: 'Active', color: 'bg-status-in-progress/15 text-status-in-progress' },
-  blocked: { label: 'Blocked', color: 'bg-status-blocked/15 text-status-blocked' },
+  'in-progress': {
+    label: 'Active',
+    color: 'bg-status-in-progress/15 text-status-in-progress',
+  },
+  blocked: {
+    label: 'Blocked',
+    color: 'bg-status-blocked/15 text-status-blocked',
+  },
   paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
   done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
 }
 
 // Task status ordering: primary statuses first, then secondary after separator
-export const taskPrimaryStatuses: TaskStatus[] = ['inbox', 'ready', 'in-progress', 'blocked', 'done']
+export const taskPrimaryStatuses: TaskStatus[] = [
+  'inbox',
+  'ready',
+  'in-progress',
+  'blocked',
+  'done',
+]
 export const taskSecondaryStatuses: TaskStatus[] = ['icebox', 'dropped']
 
 // Project status ordering
-export const projectPrimaryStatuses: ProjectStatus[] = ['planning', 'ready', 'in-progress', 'blocked']
+export const projectPrimaryStatuses: ProjectStatus[] = [
+  'planning',
+  'ready',
+  'in-progress',
+  'blocked',
+]
 export const projectSecondaryStatuses: ProjectStatus[] = ['paused', 'done']
 ```
 
@@ -88,15 +121,15 @@ export const projectSecondaryStatuses: ProjectStatus[] = ['paused', 'done']
 
 **Files to update:**
 
-| File | Current | Change |
-|------|---------|--------|
-| `src/components/tasks/task-status-pill.tsx` | Defines & exports `statusConfig`, `allStatuses` | Import from `@/config/status`, remove local definitions |
-| `src/components/projects/project-status-pill.tsx` | Defines `projectStatusConfig`, `primaryStatuses`, `secondaryStatuses` | Import from `@/config/status`, remove local definitions |
-| `src/components/projects/project-status-badges.tsx` | Local `statusConfig` | Import `projectStatusConfig` from `@/config/status` |
-| `src/components/tasks/project-header.tsx` | Local `statusConfig` | Import `projectStatusConfig` from `@/config/status` |
-| `src/components/cards/project-card.tsx` | Local `statusConfig` | Import `projectStatusConfig` from `@/config/status` |
-| `src/components/kanban/kanban-column.tsx` | Imports `statusConfig` from `task-status-pill` | Import `taskStatusConfig` from `@/config/status` (rename usage) |
-| `src/components/kanban/area-kanban-board.tsx` | Imports `statusConfig` from `task-status-pill` | Import `taskStatusConfig` from `@/config/status` (rename usage) |
+| File                                                | Current                                                               | Change                                                          |
+| --------------------------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `src/components/tasks/task-status-pill.tsx`         | Defines & exports `statusConfig`, `allStatuses`                       | Import from `@/config/status`, remove local definitions         |
+| `src/components/projects/project-status-pill.tsx`   | Defines `projectStatusConfig`, `primaryStatuses`, `secondaryStatuses` | Import from `@/config/status`, remove local definitions         |
+| `src/components/projects/project-status-badges.tsx` | Local `statusConfig`                                                  | Import `projectStatusConfig` from `@/config/status`             |
+| `src/components/tasks/project-header.tsx`           | Local `statusConfig`                                                  | Import `projectStatusConfig` from `@/config/status`             |
+| `src/components/cards/project-card.tsx`             | Local `statusConfig`                                                  | Import `projectStatusConfig` from `@/config/status`             |
+| `src/components/kanban/kanban-column.tsx`           | Imports `statusConfig` from `task-status-pill`                        | Import `taskStatusConfig` from `@/config/status` (rename usage) |
+| `src/components/kanban/area-kanban-board.tsx`       | Imports `statusConfig` from `task-status-pill`                        | Import `taskStatusConfig` from `@/config/status` (rename usage) |
 
 **Note:** The pill components also export `statusConfig`/`projectStatusConfig` - these re-exports can be removed since consumers should import from `@/config/status` directly.
 
@@ -111,6 +144,7 @@ export const projectSecondaryStatuses: ProjectStatus[] = ['paused', 'done']
 ### 3.1 Extract getContextName
 
 **Current locations:**
+
 - `src/components/views/today-view.tsx:65-78`
 - `src/components/views/inbox-view.tsx:25-38`
 
@@ -120,17 +154,20 @@ Identical implementation in both.
 
 ```typescript
 // In app-data-context.tsx
-const getTaskContextName = useCallback((task: Task): string | undefined => {
-  if (task.projectId) {
-    const project = getProjectById(task.projectId)
-    return project?.title
-  }
-  if (task.areaId) {
-    const area = getAreaById(task.areaId)
-    return area?.title
-  }
-  return undefined
-}, [getProjectById, getAreaById])
+const getTaskContextName = useCallback(
+  (task: Task): string | undefined => {
+    if (task.projectId) {
+      const project = getProjectById(task.projectId)
+      return project?.title
+    }
+    if (task.areaId) {
+      const area = getAreaById(task.areaId)
+      return area?.title
+    }
+    return undefined
+  },
+  [getProjectById, getAreaById]
+)
 ```
 
 **Option B:** Create dedicated hook `src/hooks/use-task-context.ts`
@@ -140,10 +177,12 @@ const getTaskContextName = useCallback((task: Task): string | undefined => {
 ### 3.2 Extract CollapsibleNotesSection
 
 **Current locations:**
+
 - `src/components/views/project-view.tsx:76-117`
 - `src/components/views/area-view.tsx:131-173`
 
 Nearly identical collapsible notes UI with same:
+
 - Button styling
 - Expand/collapse animation
 - Collapsed preview logic (first 100 chars + "...")
@@ -160,8 +199,8 @@ interface CollapsibleNotesSectionProps {
 
 export function CollapsibleNotesSection({
   notes,
-  title = "Notes",
-  defaultExpanded = false
+  title = 'Notes',
+  defaultExpanded = false,
 }: CollapsibleNotesSectionProps) {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded)
   // ... shared implementation
@@ -185,19 +224,19 @@ import { cva } from 'class-variance-authority'
 
 const taskCardVariants = cva(
   // Base classes
-  "group relative rounded-lg border p-3 transition-all duration-200...",
+  'group relative rounded-lg border p-3 transition-all duration-200...',
   {
     variants: {
       variant: {
-        default: "bg-card border-border hover:border-border/80...",
-        overdue: "bg-red-50 dark:bg-red-950/30 border-red-200/50...",
-        deferred: "bg-amber-50/50 dark:bg-amber-950/20...",
-        done: "bg-muted/30 border-border/50...",
-      }
+        default: 'bg-card border-border hover:border-border/80...',
+        overdue: 'bg-red-50 dark:bg-red-950/30 border-red-200/50...',
+        deferred: 'bg-amber-50/50 dark:bg-amber-950/20...',
+        done: 'bg-muted/30 border-border/50...',
+      },
     },
     defaultVariants: {
-      variant: "default"
-    }
+      variant: 'default',
+    },
   }
 )
 ```
@@ -205,10 +244,12 @@ const taskCardVariants = cva(
 ### 4.2 Fix Empty handleReorder Callbacks
 
 **Files:**
+
 - `src/components/views/today-view.tsx:82-84`
 - `src/components/views/inbox-view.tsx:40-42`
 
 Current no-op handlers are misleading:
+
 ```typescript
 const handleReorder = React.useCallback(() => {
   // Visual reorder only - not persisted
@@ -216,6 +257,7 @@ const handleReorder = React.useCallback(() => {
 ```
 
 **Options:**
+
 1. Make `onTasksReorder` optional in `TaskList` interface, handle undefined
 2. Add `TODO:` comment explaining this is intentional placeholder
 3. Implement actual reorder logic if needed
@@ -227,6 +269,7 @@ const handleReorder = React.useCallback(() => {
 **File:** `src/data/app-data.ts`
 
 Exports standalone helper functions that duplicate `AppDataContext` methods:
+
 - `getAreaById()`
 - `getProjectById()`
 - `getTasksByProjectId()`
@@ -235,6 +278,7 @@ Exports standalone helper functions that duplicate `AppDataContext` methods:
 These operate on static `appData` while context operates on reactive state.
 
 **Options:**
+
 1. Remove standalone exports (breaking if anything uses them directly)
 2. Keep with comment explaining non-reactive use case (tests, initial data)
 3. Have them read from a shared source
@@ -244,11 +288,13 @@ These operate on static `appData` while context operates on reactive state.
 ### 4.4 Standardize Handler Naming
 
 Current inconsistency:
+
 - `onStatusChange` vs `onTaskStatusChange`
 - `onTitleChange` vs `onTaskTitleChange`
 - `onOpenDetail` vs `onTaskOpenDetail` vs `onEditClick`
 
 **Convention to adopt:**
+
 - Cross-component props: `onTask*` prefix (e.g., `onTaskStatusChange`)
 - Internal handlers: short form (e.g., `handleStatusChange`)
 
@@ -298,15 +344,18 @@ After each phase, verify:
 ## Files Changed Summary
 
 **New files:**
+
 - `src/config/status.ts`
 - `src/components/collapsible-notes-section.tsx`
 
 **Deleted files:**
+
 - `src/components/example.tsx`
 - `src/components/component-example.tsx`
 - `src/components/cards/card-grid.tsx`
 
 **Modified files:**
+
 - `src/components/cards/index.ts` (remove CardGrid export)
 - `src/components/tasks/task-status-pill.tsx`
 - `src/components/projects/project-status-pill.tsx`
@@ -322,4 +371,5 @@ After each phase, verify:
 - `src/context/app-data-context.tsx`
 
 **Kept (no changes):**
+
 - `src/components/cards/area-card.tsx` (for future use)

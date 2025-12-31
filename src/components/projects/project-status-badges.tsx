@@ -1,23 +1,6 @@
 import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/data'
-
-const statusConfig: Record<ProjectStatus, { label: string; color: string }> = {
-  planning: {
-    label: 'Planning',
-    color: 'bg-status-planning/15 text-status-planning',
-  },
-  ready: { label: 'Ready', color: 'bg-status-ready/15 text-status-ready' },
-  'in-progress': {
-    label: 'Active',
-    color: 'bg-status-in-progress/15 text-status-in-progress',
-  },
-  blocked: {
-    label: 'Blocked',
-    color: 'bg-status-blocked/15 text-status-blocked',
-  },
-  paused: { label: 'Paused', color: 'bg-status-paused/15 text-status-paused' },
-  done: { label: 'Done', color: 'bg-status-done/15 text-status-done' },
-}
+import { projectStatusConfig } from '@/config/status'
 
 // Display order for status badges
 const statusOrder: ProjectStatus[] = [
@@ -47,7 +30,7 @@ export function ProjectStatusBadges({
       {statusOrder.map((status) => {
         const count = counts[status]
         if (!count) return null
-        const config = statusConfig[status]
+        const config = projectStatusConfig[status]
         return (
           <span
             key={status}
