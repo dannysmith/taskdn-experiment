@@ -7,9 +7,23 @@ import { appData as initialAppData } from "@/data/app-data"
 // Context Types
 // -----------------------------------------------------------------------------
 
+/** Options for creating a new task */
+export interface CreateTaskOptions {
+  title?: string
+  status?: Task["status"]
+  projectId?: string
+  areaId?: string
+  scheduled?: string
+  due?: string
+  deferUntil?: string
+  /** Insert after this task ID (for list views) */
+  insertAfterId?: string
+}
+
 interface AppDataContextValue {
   data: AppData
   // Mutations
+  createTask: (options?: CreateTaskOptions) => string // returns new task ID
   updateProjectArea: (projectId: string, newAreaId: string | null) => void
   updateProjectStatus: (projectId: string, newStatus: Project["status"]) => void
   updateTaskTitle: (taskId: string, newTitle: string) => void
@@ -41,10 +55,59 @@ const AppDataContext = createContext<AppDataContextValue | null>(null)
 // Provider
 // -----------------------------------------------------------------------------
 
+// Generate a unique ID for new tasks
+let taskIdCounter = Date.now()
+function generateTaskId(): string {
+  return `task-${taskIdCounter++}`
+}
+
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState<AppData>(() => structuredClone(initialAppData))
 
   // Mutations
+  const createTask = useCallback((options: CreateTaskOptions = {}): string => {
+    const now = new Date().toISOString()
+    const newId = generateTaskId()
+
+    const newTask: Task = {
+      id: newId,
+      title: options.title ?? "",
+      status: options.status ?? "ready",
+      createdAt: now,
+      updatedAt: now,
+      projectId: options.projectId,
+      areaId: options.areaId,
+      scheduled: options.scheduled,
+      due: options.due,
+      deferUntil: options.deferUntil,
+    }
+
+    setData(prev => {
+      let newTasks: Task[]
+
+      if (options.insertAfterId) {
+        // Insert after specific task
+        const insertIndex = prev.tasks.findIndex(t => t.id === options.insertAfterId)
+        if (insertIndex !== -1) {
+          newTasks = [
+            ...prev.tasks.slice(0, insertIndex + 1),
+            newTask,
+            ...prev.tasks.slice(insertIndex + 1),
+          ]
+        } else {
+          newTasks = [...prev.tasks, newTask]
+        }
+      } else {
+        // Append to end
+        newTasks = [...prev.tasks, newTask]
+      }
+
+      return { ...prev, tasks: newTasks }
+    })
+
+    return newId
+  }, [])
+
   const updateProjectArea = useCallback((projectId: string, newAreaId: string | null) => {
     setData(prev => ({
       ...prev,
@@ -286,6 +349,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 
   const value: AppDataContextValue = {
     data,
+    createTask,
     updateProjectArea,
     updateProjectStatus,
     updateTaskTitle,

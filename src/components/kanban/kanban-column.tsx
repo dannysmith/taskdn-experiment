@@ -1,5 +1,5 @@
 import * as React from "react"
-import { ChevronRight } from "lucide-react"
+import { ChevronRight, Plus } from "lucide-react"
 import { useDroppable } from "@dnd-kit/core"
 import {
   SortableContext,
@@ -47,6 +47,10 @@ interface KanbanColumnProps {
   onProjectClick?: (projectId: string) => void
   /** Called when area name is clicked */
   onAreaClick?: (areaId: string) => void
+  /** Called when + button is clicked to create a task */
+  onCreateTask?: () => void
+  /** ID of task currently being edited (for auto-focus) */
+  editingTaskId?: string | null
   className?: string
 }
 
@@ -68,6 +72,8 @@ export function KanbanColumn({
   onTaskEditClick,
   onProjectClick,
   onAreaClick,
+  onCreateTask,
+  editingTaskId,
   className,
 }: KanbanColumnProps) {
   const config = statusConfig[status]
@@ -144,7 +150,7 @@ export function KanbanColumn({
       <div
         ref={setDroppableRef}
         className={cn(
-          "flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px]",
+          "flex-1 p-2 space-y-2 overflow-y-auto min-h-[200px] flex flex-col",
           isOver && tasks.length === 0 && "bg-primary/5"
         )}
       >
@@ -189,6 +195,7 @@ export function KanbanColumn({
                   ? () => onAreaClick(task.areaId!)
                   : undefined
               }
+              autoFocusEdit={task.id === editingTaskId}
             />
           ))}
         </SortableContext>
@@ -203,6 +210,18 @@ export function KanbanColumn({
           >
             Drop tasks here
           </div>
+        )}
+
+        {/* Add task button */}
+        {onCreateTask && (
+          <button
+            type="button"
+            onClick={onCreateTask}
+            className="mt-auto flex items-center gap-1.5 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+          >
+            <Plus className="size-3.5" />
+            Add task
+          </button>
         )}
       </div>
     </div>
@@ -226,6 +245,7 @@ interface SortableKanbanCardProps {
   onEditClick?: () => void
   onProjectClick?: () => void
   onAreaClick?: () => void
+  autoFocusEdit?: boolean
 }
 
 export function SortableKanbanCard({
@@ -241,6 +261,7 @@ export function SortableKanbanCard({
   onEditClick,
   onProjectClick,
   onAreaClick,
+  autoFocusEdit,
 }: SortableKanbanCardProps) {
   const {
     attributes,
@@ -292,6 +313,7 @@ export function SortableKanbanCard({
         onEditClick={onEditClick}
         onProjectClick={onProjectClick}
         onAreaClick={onAreaClick}
+        autoFocusEdit={autoFocusEdit}
       />
     </div>
   )

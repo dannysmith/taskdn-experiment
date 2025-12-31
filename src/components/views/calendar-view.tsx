@@ -9,6 +9,7 @@ export function CalendarView() {
   const {
     data,
     getTaskById,
+    createTask,
     updateTaskStatus,
     updateTaskScheduled,
   } = useAppData()
@@ -43,6 +44,7 @@ export function CalendarView() {
         onTaskScheduleChange={handleScheduleChange}
         onTaskStatusChange={handleStatusChange}
         onTaskOpenDetail={handleOpenDetail}
+        onCreateTask={(scheduledDate) => createTask({ scheduled: scheduledDate })}
         className="flex-1"
       />
     </div>

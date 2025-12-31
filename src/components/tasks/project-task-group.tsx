@@ -17,6 +17,8 @@ interface ProjectTaskGroupProps {
   onTaskStatusToggle: (taskId: string) => void
   /** Called when a task's open-detail button is clicked */
   onTaskOpenDetail?: (taskId: string) => void
+  /** Called when Cmd/Ctrl+N is pressed to create a task */
+  onCreateTask?: (afterTaskId: string | null) => string | void
   /** Function to get context name for a task (usually not needed within project group) */
   getContextName?: (task: Task) => string | undefined
   /** Whether to show scheduled dates (default: true) */
@@ -41,6 +43,7 @@ export function ProjectTaskGroup({
   onTaskTitleChange,
   onTaskStatusToggle,
   onTaskOpenDetail,
+  onCreateTask,
   getContextName,
   showScheduled = true,
   showDue = true,
@@ -74,6 +77,7 @@ export function ProjectTaskGroup({
               onTaskTitleChange={onTaskTitleChange}
               onTaskStatusToggle={onTaskStatusToggle}
               onTaskOpenDetail={onTaskOpenDetail}
+              onCreateTask={onCreateTask}
               getContextName={getContextName}
               showScheduled={showScheduled}
               showDue={showDue}

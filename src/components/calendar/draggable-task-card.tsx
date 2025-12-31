@@ -28,6 +28,8 @@ interface SortableTaskCardProps {
   onEditClick?: () => void
   onProjectClick?: () => void
   onAreaClick?: () => void
+  /** Start in editing mode (for newly created tasks) */
+  autoFocusEdit?: boolean
 }
 
 /**
@@ -48,6 +50,7 @@ export function SortableTaskCard({
   onEditClick,
   onProjectClick,
   onAreaClick,
+  autoFocusEdit,
 }: SortableTaskCardProps) {
   const dragData: CalendarTaskDragData = {
     type: "calendar-task",
@@ -96,6 +99,7 @@ export function SortableTaskCard({
         onEditClick={onEditClick}
         onProjectClick={onProjectClick}
         onAreaClick={onAreaClick}
+        autoFocusEdit={autoFocusEdit}
       />
     </div>
   )

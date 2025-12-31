@@ -55,6 +55,8 @@ interface KanbanBoardProps {
   onProjectClick?: (projectId: string) => void
   /** Called when area name is clicked */
   onAreaClick?: (areaId: string) => void
+  /** Called when + button is clicked to create a task. Returns the new task ID. */
+  onCreateTask?: (status: TaskStatus) => string | void
   /** Column order - defaults to DEFAULT_STATUS_ORDER */
   columnOrder?: TaskStatus[]
   /** Which statuses to display - defaults to all in columnOrder */
@@ -81,10 +83,36 @@ export function KanbanBoard({
   onTaskEditClick,
   onProjectClick,
   onAreaClick,
+  onCreateTask,
   columnOrder = DEFAULT_STATUS_ORDER,
   visibleStatuses,
   className,
 }: KanbanBoardProps) {
+  // Track newly created task ID for auto-focus
+  const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
+
+  // Handle creating a task in a column
+  const handleCreateTask = React.useCallback(
+    (status: TaskStatus) => {
+      if (!onCreateTask) return
+      const newTaskId = onCreateTask(status)
+      if (newTaskId) {
+        setEditingTaskId(newTaskId)
+      }
+    },
+    [onCreateTask]
+  )
+
+  // Clear editing state when task title is changed (user finished editing)
+  const handleTaskTitleChange = React.useCallback(
+    (taskId: string, newTitle: string) => {
+      onTaskTitleChange?.(taskId, newTitle)
+      if (taskId === editingTaskId) {
+        setEditingTaskId(null)
+      }
+    },
+    [onTaskTitleChange, editingTaskId]
+  )
   // Build tasks by status map
   const tasksByStatus = React.useMemo(() => {
     const map = new Map<TaskStatus, Task[]>()
@@ -138,12 +166,14 @@ export function KanbanBoard({
               getProjectName={getProjectName}
               getAreaName={getAreaName}
               onTaskStatusChange={onTaskStatusChange}
-              onTaskTitleChange={onTaskTitleChange}
+              onTaskTitleChange={handleTaskTitleChange}
               onTaskScheduledChange={onTaskScheduledChange}
               onTaskDueChange={onTaskDueChange}
               onTaskEditClick={onTaskEditClick}
               onProjectClick={onProjectClick}
               onAreaClick={onAreaClick}
+              onCreateTask={onCreateTask ? () => handleCreateTask(status) : undefined}
+              editingTaskId={editingTaskId}
             />
           )
         })}

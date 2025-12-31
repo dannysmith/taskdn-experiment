@@ -4,6 +4,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { format, isToday, isWeekend } from "date-fns"
+import { Plus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
@@ -20,6 +21,10 @@ interface MonthDayCellProps {
   getTaskVariant?: (task: Task) => TaskCardVariant
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
   onTaskOpenDetail?: (taskId: string) => void
+  /** Called when + button is clicked to create a task */
+  onCreateTask?: () => void
+  /** ID of task currently being edited (for auto-focus) */
+  editingTaskId?: string | null
   /** Whether this cell is being dragged over */
   isDropTarget?: boolean
 }
@@ -35,6 +40,8 @@ export function MonthDayCell({
   getTaskVariant,
   onTaskStatusChange,
   onTaskOpenDetail,
+  onCreateTask,
+  editingTaskId,
   isDropTarget = false,
 }: MonthDayCellProps) {
   const dateString = format(date, "yyyy-MM-dd")
@@ -59,8 +66,19 @@ export function MonthDayCell({
         (isOver || isDropTarget) && "bg-primary/5"
       )}
     >
-      {/* Day number */}
-      <div className="px-1.5 py-1 flex justify-end">
+      {/* Day header */}
+      <div className="group/header px-1.5 py-1 flex justify-between items-center">
+        {/* Add task button - shown on hover */}
+        {onCreateTask && (
+          <button
+            type="button"
+            onClick={onCreateTask}
+            className="opacity-0 group-hover/header:opacity-100 transition-opacity p-0.5 -m-0.5 text-muted-foreground hover:text-foreground rounded"
+          >
+            <Plus className="size-3" />
+          </button>
+        )}
+        {!onCreateTask && <div />}
         <span
           className={cn(
             "text-xs tabular-nums",
@@ -92,6 +110,7 @@ export function MonthDayCell({
                 size="compact"
                 onStatusChange={(newStatus) => onTaskStatusChange(task.id, newStatus)}
                 onEditClick={onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined}
+                autoFocusEdit={task.id === editingTaskId}
               />
             )
           })}

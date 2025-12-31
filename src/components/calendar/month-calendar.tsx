@@ -62,6 +62,8 @@ interface MonthCalendarProps {
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
   /** Called when a task should be opened in detail view */
   onTaskOpenDetail?: (taskId: string) => void
+  /** Called when + button is clicked to create a task. Returns the new task ID. */
+  onCreateTask?: (scheduledDate: string) => string | void
   className?: string
 }
 
@@ -75,10 +77,35 @@ export function MonthCalendar({
   onTaskScheduleChange,
   onTaskStatusChange,
   onTaskOpenDetail,
+  onCreateTask,
   className,
 }: MonthCalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(() => new Date())
   const [dragState, setDragState] = React.useState<DragState | null>(null)
+  const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
+
+  // Handle creating a task for a day
+  const handleCreateTask = React.useCallback(
+    (dateKey: string) => {
+      if (!onCreateTask) return
+      const newTaskId = onCreateTask(dateKey)
+      if (newTaskId) {
+        setEditingTaskId(newTaskId)
+      }
+    },
+    [onCreateTask]
+  )
+
+  // Handle status change and clear editing state
+  const handleStatusChange = React.useCallback(
+    (taskId: string, newStatus: TaskStatus) => {
+      onTaskStatusChange(taskId, newStatus)
+      if (taskId === editingTaskId) {
+        setEditingTaskId(null)
+      }
+    },
+    [onTaskStatusChange, editingTaskId]
+  )
 
   // Generate all days to display (includes overflow from prev/next months)
   const calendarDays = React.useMemo(() => {
@@ -364,8 +391,10 @@ export function MonthCalendar({
                       tasks={orderedTasks}
                       isCurrentMonth={isCurrentMonth}
                       getTaskVariant={getTaskVariant}
-                      onTaskStatusChange={onTaskStatusChange}
+                      onTaskStatusChange={handleStatusChange}
                       onTaskOpenDetail={onTaskOpenDetail}
+                      onCreateTask={onCreateTask ? () => handleCreateTask(dateKey) : undefined}
+                      editingTaskId={editingTaskId}
                       isDropTarget={isDropTarget}
                     />
                   )

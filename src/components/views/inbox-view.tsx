@@ -10,6 +10,7 @@ export function InboxView() {
     data,
     getProjectById,
     getAreaById,
+    createTask,
     updateTaskTitle,
     toggleTaskStatus,
   } = useAppData()
@@ -61,6 +62,16 @@ export function InboxView() {
     [openTask]
   )
 
+  const handleCreateTask = React.useCallback(
+    (afterTaskId: string | null) => {
+      return createTask({
+        status: "inbox",
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask]
+  )
+
   return (
     <div className="space-y-4">
       {inboxTasks.length > 0 ? (
@@ -71,6 +82,7 @@ export function InboxView() {
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
+          onCreateTask={handleCreateTask}
           getContextName={getContextName}
           showScheduled={true}
           showDue={true}

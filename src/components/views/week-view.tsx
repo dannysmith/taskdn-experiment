@@ -25,6 +25,7 @@ export function WeekView({
     getTaskById,
     getProjectById,
     getAreaById,
+    createTask,
     updateTaskStatus,
     updateTaskTitle,
     updateTaskScheduled,
@@ -160,6 +161,7 @@ export function WeekView({
           onTaskOpenDetail={handleOpenDetail}
           onNavigateToProject={onNavigateToProject}
           onNavigateToArea={onNavigateToArea}
+          onCreateTask={(scheduledDate) => createTask({ scheduled: scheduledDate })}
           className="flex-1"
         />
       ) : (
@@ -177,6 +179,7 @@ export function WeekView({
           onTaskEditClick={handleOpenDetail}
           onProjectClick={onNavigateToProject}
           onAreaClick={onNavigateToArea}
+          onCreateTask={(status) => createTask({ status })}
         />
       )}
     </div>

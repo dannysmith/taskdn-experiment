@@ -21,6 +21,7 @@ export function TodayView({
     data,
     getProjectById,
     getAreaById,
+    createTask,
     updateTaskTitle,
     toggleTaskStatus,
   } = useAppData()
@@ -108,6 +109,39 @@ export function TodayView({
     [openTask]
   )
 
+  // Create task handler for "Scheduled for Today" section
+  const handleCreateScheduledTask = React.useCallback(
+    (afterTaskId: string | null) => {
+      return createTask({
+        scheduled: today,
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask, today]
+  )
+
+  // Create task handler for due/overdue section (set due date to today)
+  const handleCreateDueTask = React.useCallback(
+    (afterTaskId: string | null) => {
+      return createTask({
+        due: today,
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask, today]
+  )
+
+  // Create task handler for "became available" section (schedule for today)
+  const handleCreateAvailableTask = React.useCallback(
+    (afterTaskId: string | null) => {
+      return createTask({
+        scheduled: today,
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask, today]
+  )
+
   // Check if there are any tasks to show
   const hasAnyTasks =
     scheduledToday.length > 0 ||
@@ -127,6 +161,7 @@ export function TodayView({
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
+          onCreateTask={handleCreateScheduledTask}
           getContextName={getContextName}
           showScheduled={false}
           showDue={true}
@@ -145,6 +180,7 @@ export function TodayView({
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
+          onCreateTask={handleCreateDueTask}
           getContextName={getContextName}
           showScheduled={true}
           showDue={true}
@@ -163,6 +199,7 @@ export function TodayView({
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
+          onCreateTask={handleCreateAvailableTask}
           getContextName={getContextName}
           showScheduled={true}
           showDue={true}

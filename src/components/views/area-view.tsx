@@ -31,6 +31,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     getTasksByProjectId,
     getProjectCompletion,
     getTaskById,
+    createTask,
     updateTaskTitle,
     updateTaskStatus,
     updateTaskScheduled,
@@ -87,6 +88,17 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const handleTaskMove = (taskId: string, _fromProjectId: string, toProjectId: string) => {
     moveTaskToProject(taskId, toProjectId)
   }
+
+  // Factory function to create task creation handlers for each project
+  const makeCreateTaskHandler = React.useCallback(
+    (projectId: string) => (afterTaskId: string | null) => {
+      return createTask({
+        projectId,
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask]
+  )
 
   return (
     <div className="space-y-8">
@@ -185,6 +197,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
                     onTaskTitleChange={(taskId, newTitle) => updateTaskTitle(taskId, newTitle)}
                     onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
                     onTaskOpenDetail={openTask}
+                    onCreateTask={makeCreateTaskHandler(project.id)}
                     showScheduled={true}
                     showDue={true}
                   />

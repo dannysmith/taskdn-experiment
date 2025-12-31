@@ -24,6 +24,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
     getTaskById,
     getAreaById,
     getTasksByProjectId,
+    createTask,
     updateTaskTitle,
     updateTaskStatus,
     updateTaskScheduled,
@@ -56,6 +57,16 @@ export function ProjectView({ projectId }: ProjectViewProps) {
   const handleTaskStatusToggle = (taskId: string) => {
     toggleTaskStatus(taskId)
   }
+
+  const handleCreateTask = React.useCallback(
+    (afterTaskId: string | null) => {
+      return createTask({
+        projectId,
+        insertAfterId: afterTaskId ?? undefined,
+      })
+    },
+    [createTask, projectId]
+  )
 
   return (
     <div className="space-y-6">
@@ -115,6 +126,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
               onTaskTitleChange={handleTaskTitleChange}
               onTaskStatusToggle={handleTaskStatusToggle}
               onTaskOpenDetail={openTask}
+              onCreateTask={handleCreateTask}
             />
             {tasks.length === 0 && (
               <p className="text-muted-foreground text-sm">
@@ -138,6 +150,7 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             onTaskScheduledChange={updateTaskScheduled}
             onTaskDueChange={updateTaskDue}
             onTaskEditClick={openTask}
+            onCreateTask={(status) => createTask({ projectId, status })}
           />
         )}
       </section>

@@ -77,6 +77,8 @@ interface WeekCalendarProps {
   onNavigateToProject?: (projectId: string) => void
   /** Called when navigating to an area */
   onNavigateToArea?: (areaId: string) => void
+  /** Called when + button is clicked to create a task. Returns the new task ID. */
+  onCreateTask?: (scheduledDate: string) => string | void
   className?: string
 }
 
@@ -95,12 +97,37 @@ export function WeekCalendar({
   onTaskOpenDetail,
   onNavigateToProject,
   onNavigateToArea,
+  onCreateTask,
   className,
 }: WeekCalendarProps) {
   const [currentWeekStart, setCurrentWeekStart] = React.useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 }) // Monday
   )
   const [dragState, setDragState] = React.useState<DragState | null>(null)
+  const [editingTaskId, setEditingTaskId] = React.useState<string | null>(null)
+
+  // Handle creating a task for a day
+  const handleCreateTask = React.useCallback(
+    (dateKey: string) => {
+      if (!onCreateTask) return
+      const newTaskId = onCreateTask(dateKey)
+      if (newTaskId) {
+        setEditingTaskId(newTaskId)
+      }
+    },
+    [onCreateTask]
+  )
+
+  // Clear editing state when task title is changed
+  const handleTaskTitleChange = React.useCallback(
+    (taskId: string, newTitle: string) => {
+      onTaskTitleChange(taskId, newTitle)
+      if (taskId === editingTaskId) {
+        setEditingTaskId(null)
+      }
+    },
+    [onTaskTitleChange, editingTaskId]
+  )
 
   // Generate the 7 days of the current week
   const weekDays = React.useMemo(() => {
@@ -400,12 +427,14 @@ export function WeekCalendar({
                   getTaskContext={getTaskContext}
                   getTaskVariant={getTaskVariant}
                   onTaskStatusChange={onTaskStatusChange}
-                  onTaskTitleChange={onTaskTitleChange}
+                  onTaskTitleChange={handleTaskTitleChange}
                   onTaskScheduledChange={onTaskScheduleChange}
                   onTaskDueChange={onTaskDueChange}
                   onTaskOpenDetail={onTaskOpenDetail}
                   onNavigateToProject={onNavigateToProject}
                   onNavigateToArea={onNavigateToArea}
+                  onCreateTask={onCreateTask ? () => handleCreateTask(dateKey) : undefined}
+                  editingTaskId={editingTaskId}
                   isDropTarget={isDropTarget}
                 />
               )

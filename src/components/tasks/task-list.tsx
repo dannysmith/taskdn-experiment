@@ -36,6 +36,8 @@ interface BaseTaskListProps {
   onTaskStatusToggle: (taskId: string) => void
   /** Called when a task's open-detail button is clicked */
   onTaskOpenDetail?: (taskId: string) => void
+  /** Called when Cmd/Ctrl+N is pressed. Returns the new task ID to edit. */
+  onCreateTask?: (afterTaskId: string | null) => string | void
   className?: string
   /** Function to get context name (project/area) for a task */
   getContextName?: (task: Task) => string | undefined
@@ -76,6 +78,7 @@ export function TaskList({
   onTaskTitleChange,
   onTaskStatusToggle,
   onTaskOpenDetail,
+  onCreateTask,
   className,
   getContextName,
   showScheduled = true,
@@ -195,6 +198,30 @@ export function TaskList({
           onTaskStatusToggle(tasks[selectedIndex].id)
         }
         break
+
+      case "n":
+      case "N":
+        if (isMeta && onCreateTask) {
+          e.preventDefault()
+          const afterTaskId = selectedIndex !== null && tasks[selectedIndex]
+            ? tasks[selectedIndex].id
+            : null
+          const newTaskId = onCreateTask(afterTaskId)
+          // If a new task ID was returned, start editing it
+          if (newTaskId) {
+            // Find the index of the new task (it should be right after the selected one)
+            // We need to wait for the tasks to update, so we'll set editing state
+            // The new task will be in editing mode once it appears
+            setEditingTaskId(newTaskId)
+            // Select the new task (it will be after the current one)
+            if (selectedIndex !== null) {
+              setSelectedIndex(selectedIndex + 1)
+            } else {
+              setSelectedIndex(tasks.length) // Will be at the end
+            }
+          }
+        }
+        break
     }
   }
 
@@ -285,6 +312,7 @@ export function DraggableTaskList({
   onTaskTitleChange,
   onTaskStatusToggle,
   onTaskOpenDetail,
+  onCreateTask,
   className,
   getContextName,
   showScheduled = true,
@@ -370,6 +398,7 @@ export function DraggableTaskList({
         onTaskTitleChange={onTaskTitleChange}
         onTaskStatusToggle={onTaskStatusToggle}
         onTaskOpenDetail={onTaskOpenDetail}
+        onCreateTask={onCreateTask}
         className={className}
         getContextName={getContextName}
         showScheduled={showScheduled}

@@ -4,7 +4,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable"
 import { format, isToday, isWeekend } from "date-fns"
-import { Flag } from "lucide-react"
+import { Flag, Plus } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import type { Task, TaskStatus } from "@/types/data"
@@ -35,6 +35,10 @@ interface DayColumnProps {
   onTaskOpenDetail?: (taskId: string) => void
   onNavigateToProject?: (projectId: string) => void
   onNavigateToArea?: (areaId: string) => void
+  /** Called when + button is clicked to create a task */
+  onCreateTask?: () => void
+  /** ID of task currently being edited (for auto-focus) */
+  editingTaskId?: string | null
   /** Whether this column is being dragged over */
   isDropTarget?: boolean
 }
@@ -56,6 +60,8 @@ export function DayColumn({
   onTaskOpenDetail,
   onNavigateToProject,
   onNavigateToArea,
+  onCreateTask,
+  editingTaskId,
   isDropTarget = false,
 }: DayColumnProps) {
   const dateString = format(date, "yyyy-MM-dd")
@@ -102,7 +108,7 @@ export function DayColumn({
       </div>
 
       {/* Tasks container */}
-      <div className="flex-1 p-1.5 space-y-1.5 overflow-y-auto">
+      <div className="flex-1 p-1.5 space-y-1.5 overflow-y-auto flex flex-col">
         <SortableContext
           items={tasks.map((t) => getCalendarTaskDragId(dateString, t.id))}
           strategy={verticalListSortingStrategy}
@@ -133,6 +139,7 @@ export function DayColumn({
                     ? () => onNavigateToArea(context.areaId!)
                     : undefined
                 }
+                autoFocusEdit={task.id === editingTaskId}
               />
             )
           })}
@@ -146,6 +153,17 @@ export function DayColumn({
               (isOver || isDropTarget) && "border-primary/30"
             )}
           />
+        )}
+
+        {/* Add task button */}
+        {onCreateTask && (
+          <button
+            type="button"
+            onClick={onCreateTask}
+            className="mt-auto flex items-center justify-center gap-1 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded-lg transition-colors"
+          >
+            <Plus className="size-3.5" />
+          </button>
         )}
       </div>
 

@@ -45,6 +45,8 @@ export interface TaskCardProps {
   onDueChange?: (date: string | undefined) => void
   /** Whether the card is selected */
   isSelected?: boolean
+  /** Start in editing mode (for newly created tasks) */
+  autoFocusEdit?: boolean
   className?: string
 }
 
@@ -67,9 +69,10 @@ export function TaskCard({
   onScheduledChange,
   onDueChange,
   isSelected,
+  autoFocusEdit = false,
   className,
 }: TaskCardProps) {
-  const [isEditing, setIsEditing] = React.useState(false)
+  const [isEditing, setIsEditing] = React.useState(autoFocusEdit)
   const [editValue, setEditValue] = React.useState(task.title)
   const [scheduledOpen, setScheduledOpen] = React.useState(false)
   const [dueOpen, setDueOpen] = React.useState(false)
