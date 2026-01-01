@@ -60,6 +60,7 @@ const KanbanDndReactContext = React.createContext<KanbanDndContextValue>({
   dragPreview: null,
 })
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useKanbanDragPreview() {
   return React.useContext(KanbanDndReactContext)
 }
@@ -268,6 +269,7 @@ export function KanbanDndContext({
 // Helper exports for data attributes
 // -----------------------------------------------------------------------------
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function createKanbanTaskData(
   taskId: string,
   status: TaskStatus,
@@ -281,6 +283,7 @@ export function createKanbanTaskData(
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function createEmptyColumnData(status: TaskStatus): EmptyColumnData {
   return {
     type: 'empty-column',
@@ -288,6 +291,7 @@ export function createEmptyColumnData(status: TaskStatus): EmptyColumnData {
   }
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function createEmptySwimlaneData(
   status: TaskStatus,
   swimlaneId: string

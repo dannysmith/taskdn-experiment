@@ -33,6 +33,7 @@ export interface DateButtonProps {
 // Styles
 // -----------------------------------------------------------------------------
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const dateButtonStyles = {
   scheduled: {
     base: 'text-muted-foreground bg-muted/50 hover:bg-muted',

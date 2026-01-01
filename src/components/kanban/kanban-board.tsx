@@ -10,6 +10,7 @@ import { KanbanDndContext } from './kanban-dnd-context'
 // -----------------------------------------------------------------------------
 
 /** Default column order for task status Kanban boards */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_STATUS_ORDER: TaskStatus[] = [
   'inbox',
   'icebox',
@@ -21,6 +22,7 @@ export const DEFAULT_STATUS_ORDER: TaskStatus[] = [
 ]
 
 /** Columns to show expanded by default */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_EXPANDED_STATUSES: TaskStatus[] = [
   'ready',
   'in-progress',
@@ -192,6 +194,7 @@ export function KanbanBoard({
  * Hook to manage collapsed column state for a Kanban board.
  * Initializes with sensible defaults (common columns expanded).
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCollapsedColumns(
   initialExpanded: TaskStatus[] = DEFAULT_EXPANDED_STATUSES
 ) {

@@ -55,6 +55,7 @@ const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   clearLastDroppedTaskId: () => {},
 })
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useTaskDragPreview() {
   return React.useContext(TaskDndReactContext)
 }
@@ -250,6 +251,7 @@ export function TaskDndContext({
  * Returns whether to show a drop indicator above this task.
  * Used for visual feedback during cross-project drag.
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function shouldShowDropIndicator(
   taskId: string,
   projectId: string,
