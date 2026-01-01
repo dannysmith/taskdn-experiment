@@ -91,32 +91,31 @@ These extend or wrap base shadcn/ui components:
 
 ## Data Flow
 
-### Current Architecture (React Context)
+### Current Architecture (Zustand + React Context)
+
+UI state has been migrated to Zustand. Entity data remains in React Context pending TanStack Query migration.
 
 ```
-AppDataProvider
-├── data: { areas, projects, tasks }
-├── Lookup helpers: getTaskById, getProjectsByAreaId, etc.
-├── Derived values: getProjectCompletion, getEffectiveAreaId
-└── Mutations: createTask, updateTaskStatus, etc.
+Zustand Stores (UI state) ✓ MIGRATED
+├── task-detail-store: { openTaskId, openTask, closeTask }
+└── view-mode-store: { modes, setViewMode, useViewMode hook }
 
-TaskDetailProvider
-├── openTaskId: string | null
-└── openTask/closeTask actions
-
-ViewModeProvider
-├── modes: Record<ViewModeKey, ViewMode>
-└── getViewMode/setViewMode for each view
+React Context (entity data) → To be replaced by TanStack Query
+└── AppDataProvider
+    ├── data: { areas, projects, tasks }
+    ├── Lookup helpers: getTaskById, getProjectsByAreaId, etc.
+    ├── Derived values: getProjectCompletion, getEffectiveAreaId
+    └── Mutations: createTask, updateTaskStatus, etc.
 ```
 
-### Target Architecture (Zustand + TanStack Query)
+### Target Architecture (tdn-desktop)
 
 ```
-Zustand Stores (UI state):
+Zustand Stores (UI state) — Already compatible
 ├── task-detail-store: { openTaskId, openTask, closeTask }
 └── view-mode-store: { modes, getViewMode, setViewMode }
 
-TanStack Query (entity data):
+TanStack Query (entity data) — Replaces AppDataContext
 ├── useQuery(['tasks', 'list']) → all tasks
 ├── useQuery(['tasks', taskId]) → single task
 ├── useQuery(['projects', 'list', { areaId }]) → projects by area
