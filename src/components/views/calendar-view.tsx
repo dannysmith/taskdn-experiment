@@ -1,7 +1,8 @@
 import * as React from 'react'
 
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
 import { MonthCalendar } from '@/components/calendar/month-calendar'
 import type { TaskStatus } from '@/types/data'
 
@@ -13,7 +14,7 @@ export function CalendarView() {
     updateTaskStatus,
     updateTaskScheduled,
   } = useAppData()
-  const { openTask } = useTaskDetail()
+  const { openTask } = useTaskDetailStore()
 
   const handleScheduleChange = React.useCallback(
     (taskId: string, newDate: string | undefined) => {

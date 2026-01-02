@@ -7,30 +7,16 @@ import {
   Snowflake,
   FolderOpen,
   CircleDot,
-  ChevronsUpDown,
-  Check,
 } from 'lucide-react'
 
-import { cn } from '@/lib/utils'
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
-import { useTaskDetail } from '@/context/task-detail-context'
+import { useTaskDetailStore } from '@/store/task-detail-store'
 
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command'
+import { SearchableSelect } from '@/components/ui/searchable-select'
+import { DateButton } from '@/components/ui/date-button'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 import { TaskStatusPill } from './task-status-pill'
 import { LazyMilkdownEditor } from './lazy-milkdown-editor'
@@ -40,7 +26,7 @@ import { LazyMilkdownEditor } from './lazy-milkdown-editor'
 // -----------------------------------------------------------------------------
 
 export function TaskDetailPanel() {
-  const { openTaskId, closeTask } = useTaskDetail()
+  const { openTaskId, closeTask } = useTaskDetailStore()
   const {
     getTaskById,
     getActiveProjects,
@@ -199,184 +185,6 @@ export function TaskDetailPanel() {
         <span className="font-mono opacity-50">{task.id}</span>
       </div>
     </div>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// Searchable Select (Popover + Command pattern)
-// -----------------------------------------------------------------------------
-
-interface SearchableSelectProps {
-  value: string | undefined
-  options: { value: string; label: string }[]
-  placeholder: string
-  displayValue?: string
-  icon?: React.ReactNode
-  onChange: (value: string | undefined) => void
-  emptyText: string
-}
-
-function SearchableSelect({
-  value,
-  options,
-  placeholder,
-  displayValue,
-  icon,
-  onChange,
-  emptyText,
-}: SearchableSelectProps) {
-  const [open, setOpen] = React.useState(false)
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 justify-between min-w-0 h-8"
-          />
-        }
-      >
-        <span className="flex items-center gap-1.5 truncate">
-          {icon}
-          <span
-            className={cn('truncate', !displayValue && 'text-muted-foreground')}
-          >
-            {displayValue || placeholder}
-          </span>
-        </span>
-        <ChevronsUpDown className="size-3 shrink-0 opacity-50" />
-      </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0" align="start">
-        <Command>
-          <CommandInput placeholder={`Search...`} />
-          <CommandList>
-            <CommandEmpty>{emptyText}</CommandEmpty>
-            <CommandGroup>
-              {value && (
-                <CommandItem
-                  value="__clear__"
-                  onSelect={() => {
-                    onChange(undefined)
-                    setOpen(false)
-                  }}
-                >
-                  <span className="text-muted-foreground">Clear selection</span>
-                </CommandItem>
-              )}
-              {options.map((option) => (
-                <CommandItem
-                  key={option.value}
-                  value={option.label}
-                  data-checked={value === option.value}
-                  onSelect={() => {
-                    onChange(option.value)
-                    setOpen(false)
-                  }}
-                >
-                  {icon}
-                  {option.label}
-                  {value === option.value && (
-                    <Check className="ml-auto size-4" />
-                  )}
-                </CommandItem>
-              ))}
-            </CommandGroup>
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
-  )
-}
-
-// -----------------------------------------------------------------------------
-// Date Button
-// -----------------------------------------------------------------------------
-
-interface DateButtonProps {
-  icon: React.ReactNode
-  value: string | undefined
-  onChange: (date: string | undefined) => void
-  tooltip: string
-  variant: 'scheduled' | 'due' | 'defer'
-}
-
-const dateButtonStyles = {
-  scheduled: {
-    base: 'text-muted-foreground bg-muted/50 hover:bg-muted',
-    active: 'text-muted-foreground bg-muted/80',
-  },
-  due: {
-    base: 'text-destructive/70 bg-destructive/5 hover:bg-destructive/10',
-    active: 'text-destructive bg-destructive/10',
-  },
-  defer: {
-    base: 'text-status-icebox/70 bg-status-icebox/5 hover:bg-status-icebox/10',
-    active: 'text-status-icebox bg-status-icebox/10',
-  },
-}
-
-function DateButton({
-  icon,
-  value,
-  onChange,
-  tooltip,
-  variant,
-}: DateButtonProps) {
-  const [open, setOpen] = React.useState(false)
-  const styles = dateButtonStyles[variant]
-
-  const handleSelect = (date: Date | undefined) => {
-    if (date) {
-      onChange(format(date, 'yyyy-MM-dd'))
-    } else {
-      onChange(undefined)
-    }
-    setOpen(false)
-  }
-
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="sm"
-            className={cn(
-              'h-7 gap-1 px-2 text-xs font-normal border-0',
-              value ? styles.active : styles.base
-            )}
-            title={tooltip}
-          />
-        }
-      >
-        {icon}
-        <span>{value ? format(new Date(value), 'MMM d') : tooltip}</span>
-      </PopoverTrigger>
-      <PopoverContent className="w-auto p-0" align="end">
-        <CalendarComponent
-          mode="single"
-          selected={value ? new Date(value) : undefined}
-          onSelect={handleSelect}
-        />
-        {value && (
-          <div className="border-t p-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="w-full"
-              onClick={() => {
-                onChange(undefined)
-                setOpen(false)
-              }}
-            >
-              Clear date
-            </Button>
-          </div>
-        )}
-      </PopoverContent>
-    </Popover>
   )
 }
 

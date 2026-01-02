@@ -1,4 +1,4 @@
-import type { Selection } from '@/types/selection'
+import type { Selection } from '@/types/navigation'
 import { TodayView } from '@/components/views/today-view'
 import { WeekView } from '@/components/views/week-view'
 import { InboxView } from '@/components/views/inbox-view'

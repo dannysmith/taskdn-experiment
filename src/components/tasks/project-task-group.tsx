@@ -106,9 +106,11 @@ function EmptyProjectDropZone({ projectId }: { projectId: string }) {
     },
   })
 
-  // Check if we're dragging from a different project
+  // Check if we're dragging a task from a different project
   const isDraggingFromOtherProject =
-    dragPreview && dragPreview.sourceProjectId !== projectId
+    dragPreview &&
+    dragPreview.type === 'task' &&
+    dragPreview.sourceProjectId !== projectId
 
   return (
     <div

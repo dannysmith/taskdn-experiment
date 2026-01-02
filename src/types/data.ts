@@ -1,6 +1,10 @@
 /**
  * Core data types matching the Taskdn S1 specification.
  * These types represent the in-memory/JSON structure for UI exploration.
+ *
+ * NOTE: When integrating with tdn-desktop, these types will be replaced
+ * by types generated via tauri-specta from the Rust backend. The shape
+ * should remain similar, but source of truth moves to Rust.
  */
 
 // -----------------------------------------------------------------------------

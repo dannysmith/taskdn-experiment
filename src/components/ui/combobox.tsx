@@ -280,6 +280,7 @@ function useComboboxAnchor() {
   return React.useRef<HTMLDivElement | null>(null)
 }
 
+/* eslint-disable react-refresh/only-export-components */
 export {
   Combobox,
   ComboboxInput,
@@ -298,3 +299,4 @@ export {
   ComboboxValue,
   useComboboxAnchor,
 }
+/* eslint-enable react-refresh/only-export-components */

@@ -59,6 +59,18 @@ export function TaskListItem({
     dragPreview
   )
 
+  // Check if ANY cross-container task drag is active (to disable all sortable transforms)
+  const isCrossContainerDragActive =
+    dragPreview &&
+    dragPreview.type === 'task' &&
+    dragPreview.sourceProjectId !== dragPreview.currentProjectId
+
+  // Check if THIS specific item is the one being dragged cross-container (to hide it)
+  const isThisItemBeingDraggedCrossContainer =
+    isCrossContainerDragActive &&
+    dragPreview?.type === 'task' &&
+    dragPreview?.taskId === task.id
+
   // Sync editValue with task.title when task changes
   React.useEffect(() => {
     if (!isEditing) {
@@ -92,7 +104,11 @@ export function TaskListItem({
   })
 
   const style: React.CSSProperties = {
-    transform: CSS.Translate.toString(transform),
+    // Disable ALL transforms during cross-container drag to prevent
+    // the SortableContext from shifting items in the source list
+    transform: isCrossContainerDragActive
+      ? undefined
+      : CSS.Translate.toString(transform),
     transition,
   }
 
@@ -155,8 +171,12 @@ export function TaskListItem({
           'bg-primary/20 dark:bg-primary/30',
         // Not selected: subtle hover
         !isSelected && !isEditing && 'hover:bg-muted/50',
-        // Dragging state
-        isDragging && 'opacity-50 shadow-lg bg-card z-50 ring-1 ring-border'
+        // Dragging within same container: semi-transparent
+        isDragging &&
+          !isThisItemBeingDraggedCrossContainer &&
+          'opacity-50 shadow-lg bg-card z-50 ring-1 ring-border',
+        // Dragging to different container: hide completely
+        isThisItemBeingDraggedCrossContainer && 'opacity-0'
       )}
       onClick={handleClick}
       onDoubleClick={handleDoubleClick}

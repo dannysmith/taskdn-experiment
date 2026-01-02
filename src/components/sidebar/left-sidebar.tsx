@@ -59,7 +59,8 @@ import {
   ProjectStatusIndicator,
   getProjectTitleClass,
 } from './draggable-project'
-import type { Selection, NavId } from '@/types/selection'
+// TODO(tauri-integration): Migrate to TanStack Query (via useSidebarOrder)
+import type { Selection, NavId } from '@/types/navigation'
 import { getDragId, ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
 import type { DragItem } from '@/types/sidebar-order'
 

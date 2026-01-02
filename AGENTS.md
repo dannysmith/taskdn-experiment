@@ -61,7 +61,8 @@ Types in `src/types/data.ts`. Mock data in `src/data/app-data.ts` as flat arrays
 ```
 src/
 ├── components/
-│   ├── ui/          # shadcn/base-ui primitives
+│   ├── ui/          # shadcn/base-ui primitives + custom extensions
+│   ├── layout/      # ViewHeader, ContentArea, DetailSideBar, MainContent
 │   ├── views/       # View components (Today, Week, Inbox, Calendar, Area, Project)
 │   ├── cards/       # TaskCard, ProjectCard, AreaCard
 │   ├── tasks/       # TaskList, TaskListItem, TaskDetailPanel
@@ -69,15 +70,21 @@ src/
 │   ├── calendar/    # Month and week calendar views
 │   └── sidebar/     # Navigation and drag-drop
 ├── config/          # Status configuration (colors, labels)
-├── context/         # React context providers
+├── context/         # React context (AppDataContext only)
+├── store/           # Zustand stores (task-detail, view-mode)
 ├── data/            # Mock data and helpers
 ├── hooks/           # Custom React hooks
 ├── lib/             # Utilities (cn, date formatting)
 └── types/           # TypeScript types
 ```
 
-## Context Providers
+## State Management
 
-- **AppDataContext** — Full app state (areas, projects, tasks) with CRUD operations and lookup helpers
-- **ViewModeContext** — Tracks view mode (list/kanban/calendar) per view type
-- **TaskDetailContext** — Controls the right-panel task detail view
+**Zustand stores** (UI state):
+
+- **task-detail-store** — Controls which task is open in the right-panel detail view
+- **view-mode-store** — Tracks view mode (list/kanban/calendar) per view type
+
+**React Context** (entity data):
+
+- **AppDataContext** — Full app state (areas, projects, tasks) with CRUD operations and lookup helpers. Marked for migration to TanStack Query when integrating with tdn-desktop.

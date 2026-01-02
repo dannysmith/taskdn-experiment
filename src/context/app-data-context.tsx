@@ -1,5 +1,11 @@
 import * as React from 'react'
-import { createContext, useContext, useState, useCallback, useMemo } from 'react'
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react'
 import type { AppData, Area, Project, Task } from '@/types/data'
 import { appData as initialAppData } from '@/data/app-data'
 
@@ -36,7 +42,17 @@ interface AppDataContextValue {
   updateTaskArea: (taskId: string, areaId: string | undefined) => void
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
-  moveTaskToProject: (taskId: string, newProjectId: string) => void
+  reorderAreaLooseTasks: (areaId: string, reorderedTaskIds: string[]) => void
+  moveTaskToProject: (
+    taskId: string,
+    newProjectId: string,
+    insertBeforeTaskId?: string | null
+  ) => void
+  moveTaskToLooseTasks: (
+    taskId: string,
+    areaId: string,
+    insertBeforeTaskId?: string | null
+  ) => void
   // Lookups (derived from data)
   getAreaById: (id: string) => Area | undefined
   getProjectById: (id: string) => Project | undefined
@@ -45,7 +61,10 @@ interface AppDataContextValue {
   getOrphanProjects: () => Project[]
   getTasksByProjectId: (projectId: string) => Task[]
   getProjectCompletion: (projectId: string) => number
-  getTaskCounts: (projectId: string) => { taskCount: number; completedTaskCount: number }
+  getTaskCounts: (projectId: string) => {
+    taskCount: number
+    completedTaskCount: number
+  }
   getActiveProjects: () => Project[]
   getActiveAreas: () => Area[]
   getAreaDirectTasks: (areaId: string) => Task[]
@@ -323,23 +342,52 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     []
   )
 
+  const reorderAreaLooseTasks = useCallback(
+    (areaId: string, reorderedTaskIds: string[]) => {
+      setData((prev) => {
+        // Get loose tasks for this area (tasks with areaId but no projectId)
+        const looseTasks = prev.tasks.filter(
+          (t) => t.areaId === areaId && !t.projectId
+        )
+
+        // Reorder the loose tasks according to the new order
+        const reorderedLooseTasks = reorderedTaskIds
+          .map((id) => looseTasks.find((t) => t.id === id))
+          .filter((t): t is Task => t !== undefined)
+
+        // Maintain relative positions in the main array
+        const result: Task[] = []
+        let looseTaskIndex = 0
+
+        for (const task of prev.tasks) {
+          if (task.areaId === areaId && !task.projectId) {
+            if (looseTaskIndex < reorderedLooseTasks.length) {
+              result.push(reorderedLooseTasks[looseTaskIndex])
+              looseTaskIndex++
+            }
+          } else {
+            result.push(task)
+          }
+        }
+
+        return { ...prev, tasks: result }
+      })
+    },
+    []
+  )
+
   const moveTaskToProject = useCallback(
-    (taskId: string, newProjectId: string) => {
+    (
+      taskId: string,
+      newProjectId: string,
+      insertBeforeTaskId?: string | null
+    ) => {
       setData((prev) => {
         const task = prev.tasks.find((t) => t.id === taskId)
         if (!task || task.projectId === newProjectId) return prev
 
         // Remove task from its current position
         const tasksWithoutMoved = prev.tasks.filter((t) => t.id !== taskId)
-
-        // Find where to insert: after the last task of the target project
-        let lastTargetTaskIndex = -1
-        for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
-          if (tasksWithoutMoved[i].projectId === newProjectId) {
-            lastTargetTaskIndex = i
-            break
-          }
-        }
 
         // Update the task with new projectId
         const updatedTask: Task = {
@@ -348,11 +396,88 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
           updatedAt: new Date().toISOString(),
         }
 
-        // Insert after last task of target project, or at end if no tasks in target
-        const insertIndex =
-          lastTargetTaskIndex === -1
-            ? tasksWithoutMoved.length
-            : lastTargetTaskIndex + 1
+        // Find where to insert
+        let insertIndex: number
+
+        if (insertBeforeTaskId) {
+          // Insert before the specified task
+          const beforeIndex = tasksWithoutMoved.findIndex(
+            (t) => t.id === insertBeforeTaskId
+          )
+          insertIndex =
+            beforeIndex !== -1 ? beforeIndex : tasksWithoutMoved.length
+        } else {
+          // Append after the last task of the target project
+          let lastTargetTaskIndex = -1
+          for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
+            if (tasksWithoutMoved[i].projectId === newProjectId) {
+              lastTargetTaskIndex = i
+              break
+            }
+          }
+          insertIndex =
+            lastTargetTaskIndex === -1
+              ? tasksWithoutMoved.length
+              : lastTargetTaskIndex + 1
+        }
+
+        const newTasks = [
+          ...tasksWithoutMoved.slice(0, insertIndex),
+          updatedTask,
+          ...tasksWithoutMoved.slice(insertIndex),
+        ]
+
+        return { ...prev, tasks: newTasks }
+      })
+    },
+    []
+  )
+
+  const moveTaskToLooseTasks = useCallback(
+    (taskId: string, areaId: string, insertBeforeTaskId?: string | null) => {
+      setData((prev) => {
+        const task = prev.tasks.find((t) => t.id === taskId)
+        if (!task) return prev
+
+        // Already a loose task in this area
+        if (!task.projectId && task.areaId === areaId) return prev
+
+        // Remove task from its current position
+        const tasksWithoutMoved = prev.tasks.filter((t) => t.id !== taskId)
+
+        // Update the task: clear projectId, set areaId
+        const updatedTask: Task = {
+          ...task,
+          projectId: undefined,
+          areaId: areaId,
+          updatedAt: new Date().toISOString(),
+        }
+
+        // Find where to insert
+        let insertIndex: number
+
+        if (insertBeforeTaskId) {
+          // Insert before the specified task
+          const beforeIndex = tasksWithoutMoved.findIndex(
+            (t) => t.id === insertBeforeTaskId
+          )
+          insertIndex =
+            beforeIndex !== -1 ? beforeIndex : tasksWithoutMoved.length
+        } else {
+          // Append after the last loose task in the target area
+          let lastLooseTaskIndex = -1
+          for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
+            const t = tasksWithoutMoved[i]
+            if (t.areaId === areaId && !t.projectId) {
+              lastLooseTaskIndex = i
+              break
+            }
+          }
+          insertIndex =
+            lastLooseTaskIndex === -1
+              ? tasksWithoutMoved.length
+              : lastLooseTaskIndex + 1
+        }
 
         const newTasks = [
           ...tasksWithoutMoved.slice(0, insertIndex),
@@ -496,7 +621,9 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     updateTaskArea,
     toggleTaskStatus,
     reorderProjectTasks,
+    reorderAreaLooseTasks,
     moveTaskToProject,
+    moveTaskToLooseTasks,
     getAreaById,
     getProjectById,
     getTaskById,
@@ -521,6 +648,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
 // Hook
 // -----------------------------------------------------------------------------
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAppData(): AppDataContextValue {
   const context = useContext(AppDataContext)
   if (!context) {

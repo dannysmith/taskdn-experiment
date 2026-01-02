@@ -1,12 +1,28 @@
 import { useState, useCallback, useMemo } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
+// TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import type { SidebarOrder } from '@/types/sidebar-order'
 import { ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
 
 /**
- * Hook to manage sidebar display order.
- * Separates display ordering from entity data mutations.
+ * Manages sidebar display order separately from entity data.
+ *
+ * This hook tracks the visual ordering of areas and projects in the sidebar,
+ * allowing drag-and-drop reordering without modifying the underlying entities.
+ *
+ * When a project is moved to a different area, this hook updates both:
+ * 1. The display order (local state)
+ * 2. The project's areaId (via updateProjectArea from AppDataContext)
+ *
+ * @returns Object with ordered data and reorder functions:
+ *   - `order` - Internal display-order state (SidebarOrder) with areaOrder and projectOrder maps
+ *   - `orderedAreas` - Area objects in display order
+ *   - `orderedOrphanProjects` - Projects without an area, in display order
+ *   - `getOrderedProjects(containerId)` - Get projects for an area in display order
+ *   - `reorderAreas(activeId, overId)` - Swap two areas in the sidebar
+ *   - `reorderProjectsInArea(containerId, activeId, overId)` - Reorder within an area
+ *   - `moveProjectToArea(projectId, fromId, toId, insertIndex?)` - Move project to new area
  */
 export function useSidebarOrder() {
   const { data, updateProjectArea } = useAppData()

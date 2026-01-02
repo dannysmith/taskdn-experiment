@@ -1,22 +1,14 @@
 import { useState, useMemo } from 'react'
 import { AppSidebar } from '@/components/sidebar/left-sidebar'
-import { MainContent } from '@/components/main-content'
+import { MainContent } from '@/components/layout/MainContent'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
+// TODO(tauri-integration): Migrate to TanStack Query
 import { AppDataProvider, useAppData } from '@/context/app-data-context'
-import {
-  TaskDetailProvider,
-  useTaskDetail,
-} from '@/context/task-detail-context'
-import {
-  ViewModeProvider,
-  useViewMode,
-  type ViewModeKey,
-} from '@/context/view-mode-context'
+import { useIsTaskDetailOpen } from '@/store/task-detail-store'
+import type { ViewModeKey } from '@/store/view-mode-store'
 import { TaskDetailPanel } from '@/components/tasks/task-detail-panel'
-import { ProjectStatusBadges } from '@/components/projects/project-status-badges'
-import { ProjectStatusPill } from '@/components/projects/project-status-pill'
-import { ViewToggle } from '@/components/ui/view-toggle'
-import type { Selection } from '@/types/selection'
+import { ViewHeader, DetailSideBar, ContentArea } from '@/components/layout'
+import type { Selection } from '@/types/navigation'
 
 /** Get the view mode key for a selection (if it supports view toggling) */
 function getViewModeKey(selection: Selection | null): ViewModeKey | null {
@@ -88,72 +80,34 @@ function AppContent() {
     return 'Dashboard'
   }
 
-  const { isOpen: isDetailOpen } = useTaskDetail()
+  const isDetailOpen = useIsTaskDetailOpen()
 
   return (
     <SidebarProvider>
       <AppSidebar selection={selection} onSelectionChange={setSelection} />
       <SidebarInset className="flex flex-col overflow-hidden min-w-0">
-        <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
-          <h1 className="text-xl font-semibold">{getHeaderTitle(selection)}</h1>
-          {projectStatusCounts && (
-            <ProjectStatusBadges counts={projectStatusCounts} />
-          )}
-          {currentProject && (
-            <ProjectStatusPill
-              status={currentProject.status ?? 'planning'}
-              onStatusChange={(newStatus) =>
-                updateProjectStatus(currentProject.id, newStatus)
-              }
-            />
-          )}
-          {/* View mode toggle - pushed to right */}
-          {viewModeKey && (
-            <div className="ml-auto">
-              <HeaderViewToggle viewModeKey={viewModeKey} />
-            </div>
-          )}
-        </header>
-        <main className="flex-1 overflow-y-auto p-6">
+        <ViewHeader
+          title={getHeaderTitle(selection)}
+          projectStatusCounts={projectStatusCounts}
+          currentProject={currentProject}
+          viewModeKey={viewModeKey}
+          onProjectStatusChange={updateProjectStatus}
+        />
+        <ContentArea>
           <MainContent selection={selection} onSelectionChange={setSelection} />
-        </main>
+        </ContentArea>
       </SidebarInset>
-      {/* Right sidebar - full height, slides in from right */}
-      <aside
-        className={`
-          bg-sidebar border-l flex-shrink-0 overflow-hidden
-          transition-[width,opacity] duration-150 ease-out
-          ${isDetailOpen ? 'w-[400px] opacity-100' : 'w-0 opacity-0'}
-        `}
-      >
-        <div className="w-[400px] h-full">
-          <TaskDetailPanel />
-        </div>
-      </aside>
+      <DetailSideBar isOpen={isDetailOpen}>
+        <TaskDetailPanel />
+      </DetailSideBar>
     </SidebarProvider>
-  )
-}
-
-/** Small component to use the view mode hook (can't use hooks conditionally in AppContent) */
-function HeaderViewToggle({ viewModeKey }: { viewModeKey: ViewModeKey }) {
-  const { viewMode, setViewMode, availableModes } = useViewMode(viewModeKey)
-  return (
-    <ViewToggle
-      value={viewMode}
-      onChange={setViewMode}
-      availableModes={availableModes}
-    />
   )
 }
 
 export function App() {
   return (
     <AppDataProvider>
-      <TaskDetailProvider>
-        <ViewModeProvider>
-          <AppContent />
-        </ViewModeProvider>
-      </TaskDetailProvider>
+      <AppContent />
     </AppDataProvider>
   )
 }

@@ -10,6 +10,7 @@ import { KanbanDndContext } from './kanban-dnd-context'
 // -----------------------------------------------------------------------------
 
 /** Default column order for task status Kanban boards */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_STATUS_ORDER: TaskStatus[] = [
   'inbox',
   'icebox',
@@ -21,6 +22,7 @@ export const DEFAULT_STATUS_ORDER: TaskStatus[] = [
 ]
 
 /** Columns to show expanded by default */
+// eslint-disable-next-line react-refresh/only-export-components
 export const DEFAULT_EXPANDED_STATUSES: TaskStatus[] = [
   'ready',
   'in-progress',
@@ -35,8 +37,12 @@ interface KanbanBoardProps {
   onColumnCollapseChange: (status: TaskStatus, collapsed: boolean) => void
   /** Called when a task's status changes */
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
-  /** Called when tasks are reordered within a column */
-  onTasksReorder?: (status: TaskStatus, reorderedTasks: Task[]) => void
+  /** Called when tasks are reordered within a column (and swimlane if applicable) */
+  onTasksReorder?: (
+    status: TaskStatus,
+    reorderedTasks: Task[],
+    swimlaneId?: string
+  ) => void
   /** Get a task by ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Get project name for a task */
@@ -133,8 +139,12 @@ export function KanbanBoard({
   const displayStatuses = visibleStatuses ?? columnOrder
 
   // Handle task reordering
-  const handleTasksReorder = (status: TaskStatus, reorderedTasks: Task[]) => {
-    onTasksReorder?.(status, reorderedTasks)
+  const handleTasksReorder = (
+    status: TaskStatus,
+    reorderedTasks: Task[],
+    swimlaneId?: string
+  ) => {
+    onTasksReorder?.(status, reorderedTasks, swimlaneId)
   }
 
   return (
@@ -192,6 +202,7 @@ export function KanbanBoard({
  * Hook to manage collapsed column state for a Kanban board.
  * Initializes with sensible defaults (common columns expanded).
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export function useCollapsedColumns(
   initialExpanded: TaskStatus[] = DEFAULT_EXPANDED_STATUSES
 ) {

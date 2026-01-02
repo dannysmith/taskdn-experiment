@@ -7,6 +7,7 @@ Design exploration for a personal task management app, inspired by Things 3. Thi
 ## What It Does
 
 Manages three entity types:
+
 - **Areas** — Ongoing life responsibilities (Health, Finance, etc.)
 - **Projects** — Finishable efforts with a clear outcome
 - **Tasks** — Single actionable items
