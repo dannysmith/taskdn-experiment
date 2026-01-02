@@ -1,4 +1,4 @@
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, Plus, Minus } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -9,6 +9,10 @@ interface SectionHeaderProps {
   taskCount?: number
   isExpanded: boolean
   onToggleExpand: () => void
+  /** If provided, shows a "+ Task" button */
+  onAddTask?: () => void
+  /** If provided, shows a "+ Heading" button */
+  onAddHeading?: () => void
   className?: string
 }
 
@@ -23,12 +27,14 @@ export function SectionHeader({
   taskCount,
   isExpanded,
   onToggleExpand,
+  onAddTask,
+  onAddHeading,
   className,
 }: SectionHeaderProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 py-2 px-1 cursor-pointer select-none',
+        'group flex items-center gap-2 py-2 px-1 cursor-pointer select-none',
         'border-b border-border/60',
         'hover:bg-muted/30 transition-colors',
         className
@@ -48,6 +54,53 @@ export function SectionHeader({
 
       {/* Section title */}
       <span className="font-semibold text-sm truncate flex-1">{title}</span>
+
+      {/* Action buttons - visible on hover */}
+      {(onAddTask || onAddHeading) && (
+        <div
+          className={cn(
+            'flex items-center gap-0.5 shrink-0',
+            'opacity-0 group-hover:opacity-100 transition-opacity duration-100'
+          )}
+        >
+          {onAddHeading && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddHeading()
+              }}
+              className={cn(
+                'flex items-center gap-1 px-1.5 py-0.5 rounded text-xs',
+                'text-muted-foreground hover:text-foreground',
+                'hover:bg-muted transition-colors'
+              )}
+              title="Add heading"
+            >
+              <Minus className="size-3" />
+              <span className="sr-only">Heading</span>
+            </button>
+          )}
+          {onAddTask && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onAddTask()
+              }}
+              className={cn(
+                'flex items-center gap-1 px-1.5 py-0.5 rounded text-xs',
+                'text-muted-foreground hover:text-foreground',
+                'hover:bg-muted transition-colors'
+              )}
+              title="Add task"
+            >
+              <Plus className="size-3" />
+              <span className="sr-only">Task</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Task count badge */}
       {taskCount !== undefined && taskCount > 0 && (

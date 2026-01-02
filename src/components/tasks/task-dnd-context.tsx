@@ -16,7 +16,9 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { arrayMove } from '@dnd-kit/sortable'
 
 import type { Task } from '@/types/data'
+import type { Heading } from '@/types/headings'
 import { TaskDragPreview } from './task-list'
+import { HeadingDragPreview } from '@/components/headings'
 
 // -----------------------------------------------------------------------------
 // Loose Tasks Helpers
@@ -60,20 +62,37 @@ interface TaskDragData {
   projectId: string
 }
 
+interface HeadingDragData {
+  type: 'heading'
+  headingId: string
+  containerId: string
+}
+
 interface EmptyProjectData {
   type: 'empty-project'
   projectId: string
 }
 
-type DropTargetData = TaskDragData | EmptyProjectData
+type DragItemData = TaskDragData | HeadingDragData
+type DropTargetData = TaskDragData | HeadingDragData | EmptyProjectData
 
-interface DragPreviewState {
+interface TaskDragPreviewState {
+  type: 'task'
   taskId: string
   task: Task
   sourceProjectId: string
   currentProjectId: string
   overTaskId: string | null
 }
+
+interface HeadingDragPreviewState {
+  type: 'heading'
+  headingId: string
+  heading: Heading
+  containerId: string
+}
+
+type DragPreviewState = TaskDragPreviewState | HeadingDragPreviewState
 
 interface TaskDndContextValue {
   dragPreview: DragPreviewState | null
@@ -111,6 +130,8 @@ interface TaskDndContextProps {
   onTasksReorder: (projectId: string, reorderedTasks: Task[]) => void
   /** Get a task by its ID */
   getTaskById: (taskId: string) => Task | undefined
+  /** Get a heading by its ID (optional, for heading drag preview) */
+  getHeadingById?: (headingId: string) => Heading | undefined
 }
 
 // -----------------------------------------------------------------------------
@@ -128,6 +149,7 @@ export function TaskDndContext({
   onTaskMove,
   onTasksReorder,
   getTaskById,
+  getHeadingById,
 }: TaskDndContextProps) {
   const [dragPreview, setDragPreview] = React.useState<DragPreviewState | null>(
     null
@@ -157,16 +179,28 @@ export function TaskDndContext({
   }
 
   const handleDragStart = (event: DragStartEvent) => {
-    const data = event.active.data.current as TaskDragData | undefined
+    const data = event.active.data.current as DragItemData | undefined
+
     if (data?.type === 'task') {
       const task = getTaskById(data.taskId)
       if (task) {
         setDragPreview({
+          type: 'task',
           taskId: data.taskId,
           task,
           sourceProjectId: data.projectId,
           currentProjectId: data.projectId,
           overTaskId: null,
+        })
+      }
+    } else if (data?.type === 'heading' && getHeadingById) {
+      const heading = getHeadingById(data.headingId)
+      if (heading) {
+        setDragPreview({
+          type: 'heading',
+          headingId: data.headingId,
+          heading,
+          containerId: data.containerId,
         })
       }
     }
@@ -175,14 +209,18 @@ export function TaskDndContext({
   const handleDragOver = (event: DragOverEvent) => {
     if (!dragPreview) return
 
+    // Headings don't participate in cross-section drag, so no preview update needed
+    if (dragPreview.type === 'heading') return
+
     const { over } = event
     if (!over) return
 
     const overData = over.data.current as DropTargetData | undefined
     if (!overData) return
 
-    // Handle both task and empty-project targets
-    const newProjectId = overData.projectId
+    // Only update for task drags - handle both task and empty-project targets
+    const newProjectId =
+      overData.type === 'heading' ? overData.containerId : overData.projectId
     const newOverTaskId = overData.type === 'task' ? overData.taskId : null
 
     // Update preview to show which project/task we're hovering over
@@ -192,19 +230,25 @@ export function TaskDndContext({
       newOverTaskId !== dragPreview.overTaskId
     ) {
       setDragPreview((prev) =>
-        prev
+        prev && prev.type === 'task'
           ? {
               ...prev,
               currentProjectId: newProjectId,
               overTaskId: newOverTaskId,
             }
-          : null
+          : prev
       )
     }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
     if (!dragPreview) return
+
+    // Heading drags are handled by SortableContext, just clear the preview
+    if (dragPreview.type === 'heading') {
+      setDragPreview(null)
+      return
+    }
 
     const { active, over } = event
 
@@ -222,7 +266,11 @@ export function TaskDndContext({
     }
 
     // Determine target project from where we dropped
-    const targetProjectId = overData?.projectId ?? dragPreview.sourceProjectId
+    // Handle dropping on headings (use their containerId) or tasks/empty-projects
+    const targetProjectId =
+      overData?.type === 'heading'
+        ? overData.containerId
+        : overData?.projectId ?? dragPreview.sourceProjectId
 
     if (targetProjectId !== dragPreview.sourceProjectId) {
       // Cross-project move (including drops on empty projects)
@@ -277,7 +325,12 @@ export function TaskDndContext({
 
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={dropAnimation}>
-          {dragPreview && <TaskDragPreview task={dragPreview.task} />}
+          {dragPreview &&
+            (dragPreview.type === 'task' ? (
+              <TaskDragPreview task={dragPreview.task} />
+            ) : (
+              <HeadingDragPreview heading={dragPreview.heading} />
+            ))}
         </DragOverlay>
       </DndContext>
     </TaskDndReactContext.Provider>
@@ -306,6 +359,9 @@ export function shouldShowDropIndicator(
   dragPreview: DragPreviewState | null
 ): boolean {
   if (!dragPreview) return false
+
+  // Only task drags can show drop indicators (not heading drags)
+  if (dragPreview.type !== 'task') return false
 
   // Only show indicator if dragging to a different project
   if (dragPreview.sourceProjectId === dragPreview.currentProjectId) return false

@@ -1,0 +1,78 @@
+import * as React from 'react'
+import { Check } from 'lucide-react'
+
+import { cn } from '@/lib/utils'
+import type { HeadingColor } from '@/types/headings'
+import { headingColors, headingColorConfig } from '@/config/heading-colors'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+
+interface HeadingColorPickerProps {
+  color: HeadingColor
+  onColorChange: (color: HeadingColor) => void
+  /** Whether the picker is disabled */
+  disabled?: boolean
+}
+
+export function HeadingColorPicker({
+  color,
+  onColorChange,
+  disabled = false,
+}: HeadingColorPickerProps) {
+  const [open, setOpen] = React.useState(false)
+
+  const handleColorSelect = (newColor: HeadingColor) => {
+    onColorChange(newColor)
+    setOpen(false)
+  }
+
+  const currentConfig = headingColorConfig[color]
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        disabled={disabled}
+        className={cn(
+          'size-4 rounded-full shrink-0 transition-transform',
+          'hover:scale-110 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+          'disabled:opacity-50 disabled:pointer-events-none',
+          currentConfig.dotClass
+        )}
+        title={`Color: ${currentConfig.label}`}
+      />
+      <PopoverContent
+        className="w-auto p-2"
+        align="start"
+        side="bottom"
+        sideOffset={4}
+      >
+        <div className="flex gap-1.5">
+          {headingColors.map((c) => {
+            const config = headingColorConfig[c]
+            const isSelected = c === color
+            return (
+              <button
+                key={c}
+                type="button"
+                onClick={() => handleColorSelect(c)}
+                className={cn(
+                  'size-6 rounded-full flex items-center justify-center transition-transform',
+                  'hover:scale-110 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+                  config.dotClass
+                )}
+                title={config.label}
+              >
+                {isSelected && (
+                  <Check className="size-3.5 text-white dark:text-black" />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}

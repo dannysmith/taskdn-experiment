@@ -59,14 +59,17 @@ export function TaskListItem({
     dragPreview
   )
 
-  // Check if ANY cross-container drag is active (to disable all sortable transforms)
+  // Check if ANY cross-container task drag is active (to disable all sortable transforms)
   const isCrossContainerDragActive =
     dragPreview &&
+    dragPreview.type === 'task' &&
     dragPreview.sourceProjectId !== dragPreview.currentProjectId
 
   // Check if THIS specific item is the one being dragged cross-container (to hide it)
   const isThisItemBeingDraggedCrossContainer =
-    isCrossContainerDragActive && dragPreview?.taskId === task.id
+    isCrossContainerDragActive &&
+    dragPreview?.type === 'task' &&
+    dragPreview?.taskId === task.id
 
   // Sync editValue with task.title when task changes
   React.useEffect(() => {
