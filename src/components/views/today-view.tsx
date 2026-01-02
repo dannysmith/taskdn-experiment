@@ -4,6 +4,7 @@ import { Sun, Flag, Sunrise } from 'lucide-react'
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetailStore } from '@/store/task-detail-store'
+import { useTodayOrder, type TodaySectionId } from '@/hooks/use-today-order'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { isOverdue, isToday } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
@@ -61,11 +62,25 @@ export function TodayView(_props: TodayViewProps) {
     })
   }, [data.tasks, today])
 
-  // Reorder handlers (for now, these are no-ops since we don't persist section order)
-  // Each section manages its own visual order
-  const handleReorder = React.useCallback(() => {
-    // Visual reorder only - not persisted
-  }, [])
+  // Manage display order for each section
+  const { setSectionTaskOrder, getOrderedTasks } = useTodayOrder({
+    scheduledToday,
+    overdueOrDueToday,
+    becameAvailableToday,
+  })
+
+  // Get ordered tasks for each section
+  const orderedScheduledToday = getOrderedTasks('scheduled-today')
+  const orderedOverdueOrDueToday = getOrderedTasks('overdue-due-today')
+  const orderedBecameAvailableToday = getOrderedTasks('became-available-today')
+
+  // Factory for reorder handlers
+  const makeReorderHandler = React.useCallback(
+    (sectionId: TodaySectionId) => (reorderedTasks: Task[]) => {
+      setSectionTaskOrder(sectionId, reorderedTasks)
+    },
+    [setSectionTaskOrder]
+  )
 
   const handleTitleChange = React.useCallback(
     (taskId: string, newTitle: string) => {
@@ -123,20 +138,20 @@ export function TodayView(_props: TodayViewProps) {
 
   // Check if there are any tasks to show
   const hasAnyTasks =
-    scheduledToday.length > 0 ||
-    overdueOrDueToday.length > 0 ||
-    becameAvailableToday.length > 0
+    orderedScheduledToday.length > 0 ||
+    orderedOverdueOrDueToday.length > 0 ||
+    orderedBecameAvailableToday.length > 0
 
   return (
     <div className="space-y-6">
       {/* Scheduled for Today */}
-      {scheduledToday.length > 0 && (
+      {orderedScheduledToday.length > 0 && (
         <SectionTaskGroup
           sectionId="scheduled-today"
           title="Scheduled for Today"
           icon={<Sun className="size-4" />}
-          tasks={scheduledToday}
-          onTasksReorder={handleReorder}
+          tasks={orderedScheduledToday}
+          onTasksReorder={makeReorderHandler('scheduled-today')}
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
@@ -149,13 +164,13 @@ export function TodayView(_props: TodayViewProps) {
       )}
 
       {/* Overdue or Due Today */}
-      {overdueOrDueToday.length > 0 && (
+      {orderedOverdueOrDueToday.length > 0 && (
         <SectionTaskGroup
           sectionId="overdue-due-today"
           title="Overdue or Due Today"
           icon={<Flag className="size-4" />}
-          tasks={overdueOrDueToday}
-          onTasksReorder={handleReorder}
+          tasks={orderedOverdueOrDueToday}
+          onTasksReorder={makeReorderHandler('overdue-due-today')}
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}
@@ -168,13 +183,13 @@ export function TodayView(_props: TodayViewProps) {
       )}
 
       {/* Became Available Today */}
-      {becameAvailableToday.length > 0 && (
+      {orderedBecameAvailableToday.length > 0 && (
         <SectionTaskGroup
           sectionId="became-available-today"
           title="Became Available Today"
           icon={<Sunrise className="size-4" />}
-          tasks={becameAvailableToday}
-          onTasksReorder={handleReorder}
+          tasks={orderedBecameAvailableToday}
+          onTasksReorder={makeReorderHandler('became-available-today')}
           onTaskTitleChange={handleTitleChange}
           onTaskStatusToggle={handleStatusToggle}
           onTaskOpenDetail={handleOpenDetail}

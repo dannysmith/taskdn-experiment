@@ -7,7 +7,11 @@ import { useTaskDetailStore } from '@/store/task-detail-store'
 import { useViewMode } from '@/store/view-mode-store'
 import { ProjectTaskGroup } from '@/components/tasks/project-task-group'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
-import { TaskDndContext } from '@/components/tasks/task-dnd-context'
+import {
+  TaskDndContext,
+  getLooseTasksProjectId,
+  isLooseTasksProjectId,
+} from '@/components/tasks/task-dnd-context'
 import { ProjectCard } from '@/components/cards/project-card'
 import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
 import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
@@ -45,6 +49,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     updateTaskProject,
     toggleTaskStatus,
     reorderProjectTasks,
+    reorderAreaLooseTasks,
     moveTaskToProject,
   } = useAppData()
   const { openTask } = useTaskDetailStore()
@@ -58,14 +63,18 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     return projects.filter((p) => ACTIVE_STATUSES.includes(p.status))
   }, [projects])
 
-  // Build tasksByProject map for TaskDndContext
+  // Build tasksByProject map for TaskDndContext (includes loose tasks as pseudo-project)
+  const looseTasksProjectId = getLooseTasksProjectId(areaId)
   const tasksByProject = React.useMemo(() => {
     const map = new Map<string, Task[]>()
+    // Add loose tasks with pseudo-project ID
+    map.set(looseTasksProjectId, areaDirectTasks)
+    // Add regular project tasks
     for (const project of projects) {
       map.set(project.id, getTasksByProjectId(project.id))
     }
     return map
-  }, [projects, getTasksByProjectId])
+  }, [projects, getTasksByProjectId, looseTasksProjectId, areaDirectTasks])
 
   // Get task counts for ProjectCard
   const getTaskCounts = React.useCallback(
@@ -110,10 +119,19 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   }
 
   const handleTasksReorder = (projectId: string, reorderedTasks: Task[]) => {
-    reorderProjectTasks(
-      projectId,
-      reorderedTasks.map((t) => t.id)
-    )
+    if (isLooseTasksProjectId(projectId)) {
+      // Reordering loose tasks within the area
+      reorderAreaLooseTasks(
+        areaId,
+        reorderedTasks.map((t) => t.id)
+      )
+    } else {
+      // Reordering tasks within a project
+      reorderProjectTasks(
+        projectId,
+        reorderedTasks.map((t) => t.id)
+      )
+    }
   }
 
   const handleTaskMove = (
@@ -121,7 +139,14 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     _fromProjectId: string,
     toProjectId: string
   ) => {
-    moveTaskToProject(taskId, toProjectId)
+    if (isLooseTasksProjectId(toProjectId)) {
+      // Moving to loose tasks: remove project association
+      // The task already has areaId, just clear projectId
+      updateTaskProject(taskId, undefined)
+    } else {
+      // Moving to a project
+      moveTaskToProject(taskId, toProjectId)
+    }
   }
 
   return (
@@ -175,13 +200,13 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
               {/* Area-direct tasks (tasks in this area but not in any project) */}
               {areaDirectTasks.length > 0 && (
                 <SectionTaskGroup
-                  sectionId={`area-${areaId}-direct`}
+                  sectionId={looseTasksProjectId}
                   title="Loose Tasks"
                   icon={<ListTodo className="size-4" />}
                   tasks={areaDirectTasks}
-                  onTasksReorder={() => {
-                    // Reordering area-direct tasks not yet supported
-                  }}
+                  onTasksReorder={(reorderedTasks) =>
+                    handleTasksReorder(looseTasksProjectId, reorderedTasks)
+                  }
                   onTaskTitleChange={(taskId, newTitle) =>
                     updateTaskTitle(taskId, newTitle)
                   }

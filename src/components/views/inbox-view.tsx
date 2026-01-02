@@ -3,6 +3,7 @@ import * as React from 'react'
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
 import { useTaskDetailStore } from '@/store/task-detail-store'
+import { useInboxOrder } from '@/hooks/use-inbox-order'
 import { DraggableTaskList } from '@/components/tasks/task-list'
 
 export function InboxView() {
@@ -20,9 +21,16 @@ export function InboxView() {
     return data.tasks.filter((t) => t.status === 'inbox')
   }, [data.tasks])
 
-  const handleReorder = React.useCallback(() => {
-    // Visual reorder only - not persisted
-  }, [])
+  // Manage display order for inbox tasks
+  const { setOrder, getOrderedTasks } = useInboxOrder(inboxTasks)
+  const orderedInboxTasks = getOrderedTasks()
+
+  const handleReorder = React.useCallback(
+    (reorderedTasks: import('@/types/data').Task[]) => {
+      setOrder(reorderedTasks)
+    },
+    [setOrder]
+  )
 
   const handleTitleChange = React.useCallback(
     (taskId: string, newTitle: string) => {
@@ -57,9 +65,9 @@ export function InboxView() {
 
   return (
     <div className="space-y-4">
-      {inboxTasks.length > 0 ? (
+      {orderedInboxTasks.length > 0 ? (
         <DraggableTaskList
-          tasks={inboxTasks}
+          tasks={orderedInboxTasks}
           projectId="inbox"
           onTasksReorder={handleReorder}
           onTaskTitleChange={handleTitleChange}

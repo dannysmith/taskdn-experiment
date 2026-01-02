@@ -42,6 +42,7 @@ interface AppDataContextValue {
   updateTaskArea: (taskId: string, areaId: string | undefined) => void
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
+  reorderAreaLooseTasks: (areaId: string, reorderedTaskIds: string[]) => void
   moveTaskToProject: (taskId: string, newProjectId: string) => void
   // Lookups (derived from data)
   getAreaById: (id: string) => Area | undefined
@@ -332,6 +333,40 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     []
   )
 
+  const reorderAreaLooseTasks = useCallback(
+    (areaId: string, reorderedTaskIds: string[]) => {
+      setData((prev) => {
+        // Get loose tasks for this area (tasks with areaId but no projectId)
+        const looseTasks = prev.tasks.filter(
+          (t) => t.areaId === areaId && !t.projectId
+        )
+
+        // Reorder the loose tasks according to the new order
+        const reorderedLooseTasks = reorderedTaskIds
+          .map((id) => looseTasks.find((t) => t.id === id))
+          .filter((t): t is Task => t !== undefined)
+
+        // Maintain relative positions in the main array
+        const result: Task[] = []
+        let looseTaskIndex = 0
+
+        for (const task of prev.tasks) {
+          if (task.areaId === areaId && !task.projectId) {
+            if (looseTaskIndex < reorderedLooseTasks.length) {
+              result.push(reorderedLooseTasks[looseTaskIndex])
+              looseTaskIndex++
+            }
+          } else {
+            result.push(task)
+          }
+        }
+
+        return { ...prev, tasks: result }
+      })
+    },
+    []
+  )
+
   const moveTaskToProject = useCallback(
     (taskId: string, newProjectId: string) => {
       setData((prev) => {
@@ -505,6 +540,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     updateTaskArea,
     toggleTaskStatus,
     reorderProjectTasks,
+    reorderAreaLooseTasks,
     moveTaskToProject,
     getAreaById,
     getProjectById,
