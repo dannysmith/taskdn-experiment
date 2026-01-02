@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { cn } from '@/lib/utils'
 
 interface DetailSideBarProps {
   isOpen: boolean
@@ -13,11 +14,11 @@ export function DetailSideBar({
 }: DetailSideBarProps) {
   return (
     <aside
-      className={`
-        bg-sidebar border-l flex-shrink-0 overflow-hidden
-        transition-[width,opacity] duration-150 ease-out
-        ${isOpen ? `w-[${width}px] opacity-100` : 'w-0 opacity-0'}
-      `}
+      className={cn(
+        'bg-sidebar border-l flex-shrink-0 overflow-hidden',
+        'transition-[width,opacity] duration-150 ease-out',
+        isOpen ? 'opacity-100' : 'w-0 opacity-0'
+      )}
       style={{ width: isOpen ? width : 0 }}
     >
       <div className="h-full" style={{ width }}>

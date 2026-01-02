@@ -16,6 +16,7 @@ import { ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
  * 2. The project's areaId (via updateProjectArea from AppDataContext)
  *
  * @returns Object with ordered data and reorder functions:
+ *   - `order` - Internal display-order state (SidebarOrder) with areaOrder and projectOrder maps
  *   - `orderedAreas` - Area objects in display order
  *   - `orderedOrphanProjects` - Projects without an area, in display order
  *   - `getOrderedProjects(containerId)` - Get projects for an area in display order

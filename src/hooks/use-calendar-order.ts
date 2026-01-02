@@ -30,7 +30,7 @@ interface UseCalendarOrderOptions {
  *   - `reorderTasksInDay(date, activeId, overId)` - Reorder within a single day
  *   - `moveTaskToDay(taskId, fromDate, toDate, insertIndex?)` - Move task to new day
  *   - `getOrderedTaskIds(date)` - Get task IDs for a date in display order
- *   - `getOrderedTasks(date, tasks)` - Get Task objects for a date in display order
+ *   - `getOrderedTasks(date, allTasksForDate)` - Get Task objects for a date in display order
  *   - `getInsertIndex(date, overTaskId)` - Get index for drop insertion
  */
 export function useCalendarOrder({

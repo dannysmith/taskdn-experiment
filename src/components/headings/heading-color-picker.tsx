@@ -66,7 +66,7 @@ export function HeadingColorPicker({
                 title={config.label}
               >
                 {isSelected && (
-                  <Check className="size-3.5 text-white dark:text-black" />
+                  <Check className={cn('size-3.5', config.checkClass)} />
                 )}
               </button>
             )

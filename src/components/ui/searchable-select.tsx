@@ -18,6 +18,13 @@ import {
 } from '@/components/ui/command'
 
 // -----------------------------------------------------------------------------
+// Constants
+// -----------------------------------------------------------------------------
+
+/** Sentinel value for the "clear selection" option - namespaced to avoid collision */
+const CLEAR_SELECTION_VALUE = '__searchable_select_clear_8f4a2b__'
+
+// -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------
 
@@ -87,7 +94,7 @@ export function SearchableSelect({
             <CommandGroup>
               {value && (
                 <CommandItem
-                  value="__clear__"
+                  value={CLEAR_SELECTION_VALUE}
                   onSelect={() => {
                     onChange(undefined)
                     setOpen(false)

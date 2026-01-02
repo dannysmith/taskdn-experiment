@@ -292,6 +292,13 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
                 }
               }
 
+              // Append any remaining tasks from reorderedColumnTasks that weren't in allTasks
+              // (e.g., tasks added during the drag operation)
+              while (columnIndex < reorderedColumnTasks.length) {
+                result.push(reorderedColumnTasks[columnIndex])
+                columnIndex++
+              }
+
               if (isLooseTasks) {
                 reorderAreaLooseTasks(
                   areaId,
