@@ -4,7 +4,7 @@
  */
 
 export type HeadingColor =
-  | 'gray'
+  | 'default'
   | 'blue'
   | 'teal'
   | 'purple'

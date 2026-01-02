@@ -122,13 +122,11 @@ export function HeadingListItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative flex items-center gap-2 px-2 py-1.5 cursor-default transition-all',
+        'group relative flex items-center gap-2 px-2 pt-3 pb-1.5 cursor-default transition-all',
         'select-none',
-        // Bottom border in the heading's color
-        'border-b-2',
-        colorConfig.borderClass,
-        // Editing state
-        isEditing && 'ring-2 ring-primary bg-transparent',
+        // Bottom border - blue when editing, otherwise heading's color with opacity
+        'border-b',
+        isEditing ? 'border-primary' : colorConfig.borderClass,
         // Selected but not editing
         isSelected && !isEditing && !isDragging && 'bg-primary/10',
         // Hover state
@@ -143,13 +141,6 @@ export function HeadingListItem({
       data-heading-id={heading.id}
       {...dragProps}
     >
-      {/* Color picker dot */}
-      <HeadingColorPicker
-        color={heading.color}
-        onColorChange={onColorChange}
-        disabled={isEditing}
-      />
-
       {/* Title - editable or display */}
       {isEditing ? (
         <input
@@ -160,7 +151,7 @@ export function HeadingListItem({
           onBlur={handleInputBlur}
           onKeyDown={handleInputKeyDown}
           className={cn(
-            'flex-1 bg-transparent outline-none text-sm font-medium',
+            'flex-1 bg-transparent outline-none text-sm font-semibold',
             'placeholder:text-muted-foreground',
             colorConfig.textClass
           )}
@@ -168,7 +159,7 @@ export function HeadingListItem({
         />
       ) : (
         <span
-          className={cn('flex-1 text-sm font-medium truncate', colorConfig.textClass)}
+          className={cn('flex-1 text-sm font-semibold truncate', colorConfig.textClass)}
         >
           {heading.title || (
             <span className="text-muted-foreground italic">Untitled</span>
@@ -197,6 +188,13 @@ export function HeadingListItem({
           <Minus className="size-3.5" />
         </button>
       )}
+
+      {/* Color picker dot - on the right */}
+      <HeadingColorPicker
+        color={heading.color}
+        onColorChange={onColorChange}
+        disabled={isEditing}
+      />
     </div>
   )
 }

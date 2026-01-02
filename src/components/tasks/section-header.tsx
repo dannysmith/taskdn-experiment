@@ -1,4 +1,4 @@
-import { ChevronRight, Plus, Minus } from 'lucide-react'
+import { ChevronRight, Plus, PlusCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
@@ -53,16 +53,11 @@ export function SectionHeader({
       {icon && <span className="text-muted-foreground shrink-0">{icon}</span>}
 
       {/* Section title */}
-      <span className="font-semibold text-sm truncate flex-1">{title}</span>
+      <span className="font-semibold text-sm truncate">{title}</span>
 
-      {/* Action buttons - visible on hover */}
+      {/* Action buttons - always visible, right after title */}
       {(onAddTask || onAddHeading) && (
-        <div
-          className={cn(
-            'flex items-center gap-0.5 shrink-0',
-            'opacity-0 group-hover:opacity-100 transition-opacity duration-100'
-          )}
-        >
+        <div className="flex items-center gap-0.5 shrink-0">
           {onAddHeading && (
             <button
               type="button"
@@ -77,7 +72,7 @@ export function SectionHeader({
               )}
               title="Add heading"
             >
-              <Minus className="size-3" />
+              <PlusCircle className="size-3" />
               <span className="sr-only">Heading</span>
             </button>
           )}
@@ -101,6 +96,9 @@ export function SectionHeader({
           )}
         </div>
       )}
+
+      {/* Spacer */}
+      <div className="flex-1" />
 
       {/* Task count badge */}
       {taskCount !== undefined && taskCount > 0 && (

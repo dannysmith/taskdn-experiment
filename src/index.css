@@ -70,7 +70,6 @@
   --entity-area: oklch(0.55 0.15 180);
 
   /* Heading colors - for visual section dividers in task lists */
-  --heading-gray: oklch(0.55 0 0);
   --heading-blue: oklch(0.55 0.2 260);
   --heading-teal: oklch(0.55 0.15 180);
   --heading-purple: oklch(0.55 0.18 300);
@@ -140,7 +139,6 @@
   --entity-area: oklch(0.65 0.12 180);
 
   /* Heading colors - for visual section dividers in task lists */
-  --heading-gray: oklch(0.6 0 0);
   --heading-blue: oklch(0.7 0.18 260);
   --heading-teal: oklch(0.65 0.12 180);
   --heading-purple: oklch(0.7 0.15 300);
@@ -170,7 +168,6 @@
   --color-status-done: var(--status-done);
   --color-entity-project: var(--entity-project);
   --color-entity-area: var(--entity-area);
-  --color-heading-gray: var(--heading-gray);
   --color-heading-blue: var(--heading-blue);
   --color-heading-teal: var(--heading-teal);
   --color-heading-purple: var(--heading-purple);

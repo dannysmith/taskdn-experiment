@@ -128,6 +128,11 @@ interface TaskDndContextProps {
   ) => void
   /** Called when tasks are reordered within the same project */
   onTasksReorder: (projectId: string, reorderedTasks: Task[]) => void
+  /**
+   * Called when items (tasks or headings) are reordered within a container.
+   * Passes the drag IDs so the caller can calculate the new order.
+   */
+  onItemsReorder?: (containerId: string, activeId: string, overId: string) => void
   /** Get a task by its ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Get a heading by its ID (optional, for heading drag preview) */
@@ -148,6 +153,7 @@ export function TaskDndContext({
   tasksByProject,
   onTaskMove,
   onTasksReorder,
+  onItemsReorder,
   getTaskById,
   getHeadingById,
 }: TaskDndContextProps) {
@@ -244,12 +250,6 @@ export function TaskDndContext({
   const handleDragEnd = (event: DragEndEvent) => {
     if (!dragPreview) return
 
-    // Heading drags are handled by SortableContext, just clear the preview
-    if (dragPreview.type === 'heading') {
-      setDragPreview(null)
-      return
-    }
-
     const { active, over } = event
 
     if (!over) {
@@ -257,6 +257,30 @@ export function TaskDndContext({
       return
     }
 
+    // Handle heading drags
+    if (dragPreview.type === 'heading') {
+      const overData = over.data.current as DropTargetData | undefined
+
+      // Determine target container from where we dropped
+      const targetContainerId =
+        overData?.type === 'heading'
+          ? overData.containerId
+          : overData?.projectId ?? dragPreview.containerId
+
+      // Headings can only reorder within their own container
+      if (
+        targetContainerId === dragPreview.containerId &&
+        active.id !== over.id &&
+        onItemsReorder
+      ) {
+        onItemsReorder(dragPreview.containerId, String(active.id), String(over.id))
+      }
+
+      setDragPreview(null)
+      return
+    }
+
+    // Handle task drags
     const activeData = active.data.current as TaskDragData | undefined
     const overData = over.data.current as DropTargetData | undefined
 
@@ -284,16 +308,23 @@ export function TaskDndContext({
         insertBeforeTaskId
       )
       setLastDroppedTaskId(dragPreview.taskId)
-    } else if (overData?.type === 'task' && active.id !== over.id) {
-      // Same-project reorder (only when dropping on another task)
-      const projectTasks = tasksByProject.get(targetProjectId) ?? []
-      const oldIndex = projectTasks.findIndex((t) => t.id === activeData.taskId)
-      const newIndex = projectTasks.findIndex((t) => t.id === overData.taskId)
-
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
-        onTasksReorder(targetProjectId, newTasks)
+    } else if (active.id !== over.id) {
+      // Same-container reorder
+      if (onItemsReorder) {
+        // Use items reorder callback (for mixed containers with headings)
+        onItemsReorder(targetProjectId, String(active.id), String(over.id))
         setLastDroppedTaskId(activeData.taskId)
+      } else if (overData?.type === 'task') {
+        // Fall back to task-only reorder
+        const projectTasks = tasksByProject.get(targetProjectId) ?? []
+        const oldIndex = projectTasks.findIndex((t) => t.id === activeData.taskId)
+        const newIndex = projectTasks.findIndex((t) => t.id === overData.taskId)
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
+          onTasksReorder(targetProjectId, newTasks)
+          setLastDroppedTaskId(activeData.taskId)
+        }
       }
     }
 

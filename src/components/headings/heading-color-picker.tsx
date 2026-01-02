@@ -36,7 +36,7 @@ export function HeadingColorPicker({
       <PopoverTrigger
         disabled={disabled}
         className={cn(
-          'size-4 rounded-full shrink-0 transition-transform',
+          'size-2.5 rounded-full shrink-0 transition-transform',
           'hover:scale-110 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
           'disabled:opacity-50 disabled:pointer-events-none',
           currentConfig.dotClass

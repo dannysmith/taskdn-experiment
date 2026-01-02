@@ -9,7 +9,8 @@ import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { TaskDndContext } from '@/components/tasks/task-dnd-context'
 import { isOverdue, isToday } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
-import type { HeadingColor } from '@/types/headings'
+import { toHeadingId, type HeadingColor } from '@/types/headings'
+import { arrayMove } from '@dnd-kit/sortable'
 
 interface TodayViewProps {
   onNavigateToProject?: (projectId: string) => void
@@ -176,6 +177,61 @@ export function TodayView(_props: TodayViewProps) {
     [setSectionItemOrder]
   )
 
+  // Handler for drag-based reordering (TaskDndContext callback)
+  // Converts drag IDs back to order IDs and applies the reorder
+  const handleDragItemsReorder = React.useCallback(
+    (containerId: string, activeDragId: string, overDragId: string) => {
+      // Parse drag ID to extract type and item ID
+      // Drag ID format: "type-containerId-itemId"
+      const parseDragId = (dragId: string): { type: 'heading' | 'task'; id: string } | null => {
+        const headingPrefix = `heading-${containerId}-`
+        if (dragId.startsWith(headingPrefix)) {
+          return { type: 'heading', id: dragId.slice(headingPrefix.length) }
+        }
+        const taskPrefix = `task-${containerId}-`
+        if (dragId.startsWith(taskPrefix)) {
+          return { type: 'task', id: dragId.slice(taskPrefix.length) }
+        }
+        return null
+      }
+
+      // Convert parsed drag ID to order ID format
+      const toOrderId = (parsed: { type: 'heading' | 'task'; id: string }): string => {
+        return parsed.type === 'heading' ? toHeadingId(parsed.id) : parsed.id
+      }
+
+      const activeParsed = parseDragId(activeDragId)
+      const overParsed = parseDragId(overDragId)
+
+      if (!activeParsed || !overParsed) return
+
+      const activeOrderId = toOrderId(activeParsed)
+      const overOrderId = toOrderId(overParsed)
+
+      // Get current order for the section
+      const currentItems = containerId === 'scheduled-today'
+        ? orderedScheduledItems
+        : containerId === 'overdue-due-today'
+          ? orderedOverdueOrDueToday.map((t) => ({ type: 'task' as const, id: t.id, data: t }))
+          : orderedBecameAvailableToday.map((t) => ({ type: 'task' as const, id: t.id, data: t }))
+
+      // Build current order IDs
+      const currentOrderIds = currentItems.map((item) =>
+        item.type === 'heading' ? toHeadingId(item.id) : item.id
+      )
+
+      // Find indices and apply arrayMove
+      const oldIndex = currentOrderIds.indexOf(activeOrderId)
+      const newIndex = currentOrderIds.indexOf(overOrderId)
+
+      if (oldIndex === -1 || newIndex === -1) return
+
+      const newOrderIds = arrayMove(currentOrderIds, oldIndex, newIndex)
+      setSectionItemOrder(containerId as TodaySectionId, newOrderIds)
+    },
+    [orderedScheduledItems, orderedOverdueOrDueToday, orderedBecameAvailableToday, setSectionItemOrder]
+  )
+
   const handleTitleChange = React.useCallback(
     (taskId: string, newTitle: string) => {
       updateTaskTitle(taskId, newTitle)
@@ -274,6 +330,7 @@ export function TodayView(_props: TodayViewProps) {
       tasksByProject={tasksBySection}
       onTaskMove={handleTaskMove}
       onTasksReorder={handleTasksReorder}
+      onItemsReorder={handleDragItemsReorder}
       getTaskById={getTaskById}
       getHeadingById={getHeadingById}
     >

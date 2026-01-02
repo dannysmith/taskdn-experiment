@@ -190,7 +190,7 @@ export function useTodayOrder(sections: TodaySections) {
       const newHeading: Heading = {
         id: headingId,
         title: '',
-        color: 'gray',
+        color: 'default',
       }
 
       // Add to headings storage
