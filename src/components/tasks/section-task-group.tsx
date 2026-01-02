@@ -1,9 +1,11 @@
 import * as React from 'react'
+import { useDroppable } from '@dnd-kit/core'
 
 import { cn } from '@/lib/utils'
 import type { Task } from '@/types/data'
 import { SectionHeader } from './section-header'
-import { DraggableTaskList } from './task-list'
+import { DraggableTaskList, TaskList } from './task-list'
+import { useTaskDragPreview } from './task-dnd-context'
 
 interface SectionTaskGroupProps {
   /** Unique identifier for this section (used for drag IDs) */
@@ -28,6 +30,11 @@ interface SectionTaskGroupProps {
   showDue?: boolean
   /** Initial expanded state (default: true) */
   defaultExpanded?: boolean
+  /**
+   * When true, uses TaskList instead of DraggableTaskList.
+   * Use this when a parent TaskDndContext handles cross-section dragging.
+   */
+  useExternalDnd?: boolean
   className?: string
 }
 
@@ -49,6 +56,7 @@ export function SectionTaskGroup({
   showScheduled = true,
   showDue = true,
   defaultExpanded = true,
+  useExternalDnd = false,
   className,
 }: SectionTaskGroupProps) {
   const [isExpanded, setIsExpanded] = React.useState(defaultExpanded)
@@ -56,6 +64,9 @@ export function SectionTaskGroup({
   const handleToggleExpand = () => {
     setIsExpanded((prev) => !prev)
   }
+
+  // Choose the appropriate list component based on DnD context
+  const ListComponent = useExternalDnd ? TaskList : DraggableTaskList
 
   return (
     <div className={cn('', className)}>
@@ -71,7 +82,7 @@ export function SectionTaskGroup({
       {isExpanded && (
         <div className="pl-6 pt-1">
           {tasks.length > 0 ? (
-            <DraggableTaskList
+            <ListComponent
               tasks={tasks}
               projectId={sectionId}
               onTasksReorder={onTasksReorder}
@@ -83,6 +94,8 @@ export function SectionTaskGroup({
               showScheduled={showScheduled}
               showDue={showDue}
             />
+          ) : useExternalDnd ? (
+            <EmptySectionDropZone sectionId={sectionId} />
           ) : (
             <div className="text-sm text-muted-foreground py-2 px-2">
               No tasks
@@ -90,6 +103,38 @@ export function SectionTaskGroup({
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * A droppable zone for empty sections.
+ * Shows visual feedback when a task is dragged over it.
+ */
+function EmptySectionDropZone({ sectionId }: { sectionId: string }) {
+  const { dragPreview } = useTaskDragPreview()
+
+  const { setNodeRef, isOver } = useDroppable({
+    id: `empty-section-${sectionId}`,
+    data: {
+      type: 'empty-project',
+      projectId: sectionId,
+    },
+  })
+
+  // Check if we're dragging from a different section
+  const isDraggingFromOtherSection =
+    dragPreview && dragPreview.sourceProjectId !== sectionId
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={cn(
+        'text-sm text-muted-foreground py-2 px-2 rounded-lg transition-colors',
+        isOver && isDraggingFromOtherSection && 'bg-primary/10 text-primary'
+      )}
+    >
+      {isOver && isDraggingFromOtherSection ? 'Drop here' : 'No tasks'}
     </div>
   )
 }

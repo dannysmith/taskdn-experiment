@@ -44,6 +44,7 @@ interface AppDataContextValue {
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
   reorderAreaLooseTasks: (areaId: string, reorderedTaskIds: string[]) => void
   moveTaskToProject: (taskId: string, newProjectId: string) => void
+  moveTaskToLooseTasks: (taskId: string, areaId: string) => void
   // Lookups (derived from data)
   getAreaById: (id: string) => Area | undefined
   getProjectById: (id: string) => Project | undefined
@@ -410,6 +411,51 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     []
   )
 
+  const moveTaskToLooseTasks = useCallback((taskId: string, areaId: string) => {
+    setData((prev) => {
+      const task = prev.tasks.find((t) => t.id === taskId)
+      if (!task) return prev
+
+      // Already a loose task in this area
+      if (!task.projectId && task.areaId === areaId) return prev
+
+      // Remove task from its current position
+      const tasksWithoutMoved = prev.tasks.filter((t) => t.id !== taskId)
+
+      // Find where to insert: after the last loose task in the target area
+      let lastLooseTaskIndex = -1
+      for (let i = tasksWithoutMoved.length - 1; i >= 0; i--) {
+        const t = tasksWithoutMoved[i]
+        if (t.areaId === areaId && !t.projectId) {
+          lastLooseTaskIndex = i
+          break
+        }
+      }
+
+      // Update the task: clear projectId, set areaId
+      const updatedTask: Task = {
+        ...task,
+        projectId: undefined,
+        areaId: areaId,
+        updatedAt: new Date().toISOString(),
+      }
+
+      // Insert after last loose task of target area, or at end if no loose tasks
+      const insertIndex =
+        lastLooseTaskIndex === -1
+          ? tasksWithoutMoved.length
+          : lastLooseTaskIndex + 1
+
+      const newTasks = [
+        ...tasksWithoutMoved.slice(0, insertIndex),
+        updatedTask,
+        ...tasksWithoutMoved.slice(insertIndex),
+      ]
+
+      return { ...prev, tasks: newTasks }
+    })
+  }, [])
+
   // Lookups
   const getAreaById = useCallback(
     (id: string): Area | undefined => {
@@ -542,6 +588,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     reorderProjectTasks,
     reorderAreaLooseTasks,
     moveTaskToProject,
+    moveTaskToLooseTasks,
     getAreaById,
     getProjectById,
     getTaskById,

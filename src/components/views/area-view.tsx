@@ -51,6 +51,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     reorderProjectTasks,
     reorderAreaLooseTasks,
     moveTaskToProject,
+    moveTaskToLooseTasks,
   } = useAppData()
   const { openTask } = useTaskDetailStore()
 
@@ -140,9 +141,8 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
     toProjectId: string
   ) => {
     if (isLooseTasksProjectId(toProjectId)) {
-      // Moving to loose tasks: remove project association
-      // The task already has areaId, just clear projectId
-      updateTaskProject(taskId, undefined)
+      // Moving to loose tasks: clear projectId and ensure areaId is set
+      moveTaskToLooseTasks(taskId, areaId)
     } else {
       // Moving to a project
       moveTaskToProject(taskId, toProjectId)
@@ -198,26 +198,25 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
           >
             <div className="space-y-4">
               {/* Area-direct tasks (tasks in this area but not in any project) */}
-              {areaDirectTasks.length > 0 && (
-                <SectionTaskGroup
-                  sectionId={looseTasksProjectId}
-                  title="Loose Tasks"
-                  icon={<ListTodo className="size-4" />}
-                  tasks={areaDirectTasks}
-                  onTasksReorder={(reorderedTasks) =>
-                    handleTasksReorder(looseTasksProjectId, reorderedTasks)
-                  }
-                  onTaskTitleChange={(taskId, newTitle) =>
-                    updateTaskTitle(taskId, newTitle)
-                  }
-                  onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
-                  onTaskOpenDetail={openTask}
-                  onCreateTask={handleCreateAreaDirectTask}
-                  showScheduled={true}
-                  showDue={true}
-                  defaultExpanded={true}
-                />
-              )}
+              <SectionTaskGroup
+                sectionId={looseTasksProjectId}
+                title="Loose Tasks"
+                icon={<ListTodo className="size-4" />}
+                tasks={areaDirectTasks}
+                onTasksReorder={(reorderedTasks) =>
+                  handleTasksReorder(looseTasksProjectId, reorderedTasks)
+                }
+                onTaskTitleChange={(taskId, newTitle) =>
+                  updateTaskTitle(taskId, newTitle)
+                }
+                onTaskStatusToggle={(taskId) => toggleTaskStatus(taskId)}
+                onTaskOpenDetail={openTask}
+                onCreateTask={handleCreateAreaDirectTask}
+                showScheduled={true}
+                showDue={true}
+                defaultExpanded={true}
+                useExternalDnd={true}
+              />
 
               {projects.map((project) => {
                 const tasks = tasksByProject.get(project.id) ?? []
