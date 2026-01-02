@@ -124,33 +124,34 @@ export function TodayView(_props: TodayViewProps) {
       // Update the scheduled date
       updateTaskScheduled(taskId, today)
 
-      // Update the section order to insert at the correct position
-      const currentOrder = orderedScheduledTasks.map((t) => t.id)
-      let newOrder: string[]
+      // Build current order IDs (preserving headings with their prefix)
+      const currentOrderIds = orderedScheduledItems.map((item) =>
+        item.type === 'heading' ? toHeadingId(item.id) : item.id
+      )
+
+      let newOrderIds: string[]
 
       if (insertBeforeTaskId) {
-        const insertIndex = currentOrder.indexOf(insertBeforeTaskId)
+        // Find where to insert (insertBeforeTaskId is a task ID without prefix)
+        const insertIndex = currentOrderIds.indexOf(insertBeforeTaskId)
         if (insertIndex !== -1) {
-          newOrder = [
-            ...currentOrder.slice(0, insertIndex),
+          newOrderIds = [
+            ...currentOrderIds.slice(0, insertIndex),
             taskId,
-            ...currentOrder.slice(insertIndex),
+            ...currentOrderIds.slice(insertIndex),
           ]
         } else {
-          newOrder = [...currentOrder, taskId]
+          newOrderIds = [...currentOrderIds, taskId]
         }
       } else {
         // Append to end
-        newOrder = [...currentOrder, taskId]
+        newOrderIds = [...currentOrderIds, taskId]
       }
 
-      // Create fake task array with just IDs for the order hook
-      setSectionTaskOrder(
-        'scheduled-today',
-        newOrder.map((id) => ({ id }) as Task)
-      )
+      // Use setSectionItemOrder to preserve headings
+      setSectionItemOrder('scheduled-today', newOrderIds)
     },
-    [updateTaskScheduled, today, orderedScheduledTasks, setSectionTaskOrder]
+    [updateTaskScheduled, today, orderedScheduledItems, setSectionItemOrder]
   )
 
   // Handler for same-section reordering (TaskDndContext callback)
