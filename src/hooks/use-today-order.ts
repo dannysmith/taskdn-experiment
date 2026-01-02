@@ -247,7 +247,8 @@ export function useTodayOrder(sections: TodaySections) {
     (sectionId: TodaySectionId, headingId: string) => {
       // Remove from headings storage
       setHeadings((prev) => {
-        const { [headingId]: _, ...rest } = prev
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { [headingId]: _removed, ...rest } = prev
         return rest
       })
 
