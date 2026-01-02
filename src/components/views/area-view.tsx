@@ -138,14 +138,15 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
   const handleTaskMove = (
     taskId: string,
     _fromProjectId: string,
-    toProjectId: string
+    toProjectId: string,
+    insertBeforeTaskId: string | null
   ) => {
     if (isLooseTasksProjectId(toProjectId)) {
       // Moving to loose tasks: clear projectId and ensure areaId is set
-      moveTaskToLooseTasks(taskId, areaId)
+      moveTaskToLooseTasks(taskId, areaId, insertBeforeTaskId)
     } else {
       // Moving to a project
-      moveTaskToProject(taskId, toProjectId)
+      moveTaskToProject(taskId, toProjectId, insertBeforeTaskId)
     }
   }
 

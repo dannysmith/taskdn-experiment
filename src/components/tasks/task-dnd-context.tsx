@@ -96,11 +96,15 @@ interface TaskDndContextProps {
   children: React.ReactNode
   /** All tasks organized by projectId */
   tasksByProject: Map<string, Task[]>
-  /** Called when a task is moved to a different project */
+  /**
+   * Called when a task is moved to a different project.
+   * @param insertBeforeTaskId - Insert before this task, or null to append at end
+   */
   onTaskMove: (
     taskId: string,
     fromProjectId: string,
-    toProjectId: string
+    toProjectId: string,
+    insertBeforeTaskId: string | null
   ) => void
   /** Called when tasks are reordered within the same project */
   onTasksReorder: (projectId: string, reorderedTasks: Task[]) => void
@@ -221,10 +225,14 @@ export function TaskDndContext({
 
     if (targetProjectId !== dragPreview.sourceProjectId) {
       // Cross-project move (including drops on empty projects)
+      // Pass the overTaskId so the handler can insert at the correct position
+      const insertBeforeTaskId =
+        overData?.type === 'task' ? overData.taskId : null
       onTaskMove(
         dragPreview.taskId,
         dragPreview.sourceProjectId,
-        targetProjectId
+        targetProjectId,
+        insertBeforeTaskId
       )
       setLastDroppedTaskId(dragPreview.taskId)
     } else if (overData?.type === 'task' && active.id !== over.id) {
