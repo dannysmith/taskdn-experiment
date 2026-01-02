@@ -14,7 +14,11 @@ import {
 } from '@/components/tasks/task-dnd-context'
 import { ProjectCard } from '@/components/cards/project-card'
 import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
-import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
+import {
+  AreaKanbanBoard,
+  useAreaCollapsedColumns,
+  LOOSE_TASKS_SWIMLANE_ID,
+} from '@/components/kanban'
 import type { Task, Project } from '@/types/data'
 
 /** Active statuses for project cards grid */
@@ -261,6 +265,45 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
             onColumnCollapseChange={toggleColumn}
             onTaskStatusChange={updateTaskStatus}
             onTaskProjectChange={updateTaskProject}
+            onTasksReorder={(swimlaneId, _status, reorderedColumnTasks) => {
+              // Merge the reordered column tasks back into the full task list
+              // for this swimlane (project or loose tasks)
+              const isLooseTasks = swimlaneId === LOOSE_TASKS_SWIMLANE_ID
+              const allTasks = isLooseTasks
+                ? areaDirectTasks
+                : tasksByProject.get(swimlaneId) ?? []
+
+              const reorderedIds = new Set(
+                reorderedColumnTasks.map((t) => t.id)
+              )
+              const result: Task[] = []
+              let columnIndex = 0
+
+              for (const task of allTasks) {
+                if (reorderedIds.has(task.id)) {
+                  // This task is in the reordered column - use new order
+                  if (columnIndex < reorderedColumnTasks.length) {
+                    result.push(reorderedColumnTasks[columnIndex])
+                    columnIndex++
+                  }
+                } else {
+                  // Task from a different column - preserve position
+                  result.push(task)
+                }
+              }
+
+              if (isLooseTasks) {
+                reorderAreaLooseTasks(
+                  areaId,
+                  result.map((t) => t.id)
+                )
+              } else {
+                reorderProjectTasks(
+                  swimlaneId,
+                  result.map((t) => t.id)
+                )
+              }
+            }}
             getTaskById={getTaskById}
             onTaskTitleChange={updateTaskTitle}
             onTaskScheduledChange={updateTaskScheduled}

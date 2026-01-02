@@ -107,11 +107,29 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             collapsedColumns={collapsedColumns}
             onColumnCollapseChange={toggleColumn}
             onTaskStatusChange={updateTaskStatus}
-            onTasksReorder={(_status, reorderedTasks) => {
-              // For project view, we reorder by project
+            onTasksReorder={(_status, reorderedColumnTasks) => {
+              // Merge the reordered column tasks back into the full project task list
+              // to preserve the order of tasks in other status columns
+              const reorderedIds = new Set(reorderedColumnTasks.map((t) => t.id))
+              const result: Task[] = []
+              let columnIndex = 0
+
+              for (const task of tasks) {
+                if (reorderedIds.has(task.id)) {
+                  // This task is in the reordered column - use new order
+                  if (columnIndex < reorderedColumnTasks.length) {
+                    result.push(reorderedColumnTasks[columnIndex])
+                    columnIndex++
+                  }
+                } else {
+                  // Task from a different column - preserve position
+                  result.push(task)
+                }
+              }
+
               reorderProjectTasks(
                 projectId,
-                reorderedTasks.map((t) => t.id)
+                result.map((t) => t.id)
               )
             }}
             getTaskById={getTaskById}

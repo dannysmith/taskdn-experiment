@@ -35,6 +35,12 @@ interface AreaKanbanBoardProps {
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
   /** Called when a task moves to a different project */
   onTaskProjectChange: (taskId: string, newProjectId: string) => void
+  /** Called when tasks are reordered within a swimlane (project or loose tasks) */
+  onTasksReorder?: (
+    swimlaneId: string,
+    status: TaskStatus,
+    reorderedTasks: Task[]
+  ) => void
   /** Get a task by ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Called when task title changes */
@@ -62,6 +68,7 @@ export function AreaKanbanBoard({
   onColumnCollapseChange,
   onTaskStatusChange,
   onTaskProjectChange,
+  onTasksReorder,
   getTaskById,
   onTaskTitleChange,
   onTaskScheduledChange,
@@ -130,8 +137,17 @@ export function AreaKanbanBoard({
     <KanbanDndContext
       tasksByStatus={tasksByStatus}
       onStatusChange={onTaskStatusChange}
-      onTasksReorder={() => {
-        // Reordering within swim lanes is not implemented yet
+      onTasksReorder={(status, reorderedTasks, swimlaneId) => {
+        if (onTasksReorder && swimlaneId) {
+          // Filter to only tasks in this swimlane and pass to handler
+          const swimlaneTasks = reorderedTasks.filter((t) => {
+            if (swimlaneId === LOOSE_TASKS_SWIMLANE_ID) {
+              return !t.projectId
+            }
+            return t.projectId === swimlaneId
+          })
+          onTasksReorder(swimlaneId, status, swimlaneTasks)
+        }
       }}
       getTaskById={getTaskById}
       onSwimlaneChange={onTaskProjectChange}

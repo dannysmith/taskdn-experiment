@@ -37,8 +37,12 @@ interface KanbanBoardProps {
   onColumnCollapseChange: (status: TaskStatus, collapsed: boolean) => void
   /** Called when a task's status changes */
   onTaskStatusChange: (taskId: string, newStatus: TaskStatus) => void
-  /** Called when tasks are reordered within a column */
-  onTasksReorder?: (status: TaskStatus, reorderedTasks: Task[]) => void
+  /** Called when tasks are reordered within a column (and swimlane if applicable) */
+  onTasksReorder?: (
+    status: TaskStatus,
+    reorderedTasks: Task[],
+    swimlaneId?: string
+  ) => void
   /** Get a task by ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Get project name for a task */
@@ -135,8 +139,12 @@ export function KanbanBoard({
   const displayStatuses = visibleStatuses ?? columnOrder
 
   // Handle task reordering
-  const handleTasksReorder = (status: TaskStatus, reorderedTasks: Task[]) => {
-    onTasksReorder?.(status, reorderedTasks)
+  const handleTasksReorder = (
+    status: TaskStatus,
+    reorderedTasks: Task[],
+    swimlaneId?: string
+  ) => {
+    onTasksReorder?.(status, reorderedTasks, swimlaneId)
   }
 
   return (

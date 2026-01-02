@@ -75,8 +75,12 @@ interface KanbanDndContextProps {
   tasksByStatus: Map<TaskStatus, Task[]>
   /** Called when a task is moved to a different status */
   onStatusChange: (taskId: string, newStatus: TaskStatus) => void
-  /** Called when tasks are reordered within the same status column */
-  onTasksReorder: (status: TaskStatus, reorderedTasks: Task[]) => void
+  /** Called when tasks are reordered within the same status column (and same swimlane if applicable) */
+  onTasksReorder: (
+    status: TaskStatus,
+    reorderedTasks: Task[],
+    swimlaneId?: string
+  ) => void
   /** Get a task by its ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Optional: called when task moves between swimlanes (for area kanban) */
@@ -222,14 +226,20 @@ export function KanbanDndContext({
     if (targetStatus !== dragPreview.sourceStatus) {
       onStatusChange(dragPreview.taskId, targetStatus)
     } else if (overData?.type === 'kanban-task' && active.id !== over.id) {
-      // Same-status reorder
-      const statusTasks = tasksByStatus.get(targetStatus) ?? []
-      const oldIndex = statusTasks.findIndex((t) => t.id === activeData.taskId)
-      const newIndex = statusTasks.findIndex((t) => t.id === overData.taskId)
+      // Same-status reorder - only if swimlane is also the same (or no swimlanes)
+      const sameSwimlane =
+        !dragPreview.sourceSwimlaneId ||
+        targetSwimlaneId === dragPreview.sourceSwimlaneId
 
-      if (oldIndex !== -1 && newIndex !== -1) {
-        const newTasks = arrayMove(statusTasks, oldIndex, newIndex)
-        onTasksReorder(targetStatus, newTasks)
+      if (sameSwimlane) {
+        const statusTasks = tasksByStatus.get(targetStatus) ?? []
+        const oldIndex = statusTasks.findIndex((t) => t.id === activeData.taskId)
+        const newIndex = statusTasks.findIndex((t) => t.id === overData.taskId)
+
+        if (oldIndex !== -1 && newIndex !== -1) {
+          const newTasks = arrayMove(statusTasks, oldIndex, newIndex)
+          onTasksReorder(targetStatus, newTasks, targetSwimlaneId)
+        }
       }
     }
 
