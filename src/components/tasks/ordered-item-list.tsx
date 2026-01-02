@@ -46,6 +46,14 @@ interface OrderedItemListProps {
   /** Whether to show due dates (default: true) */
   showDue?: boolean
 
+  /**
+   * Item ID to auto-select and focus for editing.
+   * Used when a new task/heading is created.
+   */
+  autoEditItemId?: string | null
+  /** Called when auto-edit is consumed (to clear the pending ID) */
+  onAutoEditConsumed?: () => void
+
   className?: string
 }
 
@@ -79,6 +87,8 @@ export function OrderedItemList({
   getContextName,
   showScheduled = true,
   showDue = true,
+  autoEditItemId,
+  onAutoEditConsumed,
   className,
 }: OrderedItemListProps) {
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -134,6 +144,21 @@ export function OrderedItemList({
       containerRef.current.focus()
     }
   }, [selectedIndex, editingItemId])
+
+  // Auto-edit: when autoEditItemId is set, find the item and start editing
+  React.useEffect(() => {
+    if (!autoEditItemId) return
+
+    // Find the item in the list
+    const itemIndex = items.findIndex((item) => item.id === autoEditItemId)
+    if (itemIndex !== -1) {
+      // Select and edit the item
+      setSelectedIndex(itemIndex)
+      setEditingItemId(autoEditItemId)
+      // Notify that we consumed the auto-edit
+      onAutoEditConsumed?.()
+    }
+  }, [autoEditItemId, items, setSelectedIndex, setEditingItemId, onAutoEditConsumed])
 
   // Helper to get the order ID for an item (with prefix for headings)
   const getOrderId = (item: ResolvedOrderedItem): string => {

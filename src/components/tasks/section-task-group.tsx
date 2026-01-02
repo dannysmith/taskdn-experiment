@@ -38,6 +38,13 @@ interface BaseSectionProps {
   useExternalDnd?: boolean
   /** Called when the "+ Task" header button is clicked */
   onAddTask?: () => void
+  /**
+   * Item ID to auto-select and focus for editing.
+   * Used when a new task/heading is created via header buttons.
+   */
+  autoEditItemId?: string | null
+  /** Called when auto-edit is consumed (to clear the pending ID) */
+  onAutoEditConsumed?: () => void
   className?: string
 }
 
@@ -93,6 +100,8 @@ export function SectionTaskGroup(props: SectionTaskGroupProps) {
     defaultExpanded = true,
     useExternalDnd = false,
     onAddTask,
+    autoEditItemId,
+    onAutoEditConsumed,
     className,
   } = props
 
@@ -147,6 +156,8 @@ export function SectionTaskGroup(props: SectionTaskGroupProps) {
                 getContextName={getContextName}
                 showScheduled={showScheduled}
                 showDue={showDue}
+                autoEditItemId={autoEditItemId}
+                onAutoEditConsumed={onAutoEditConsumed}
               />
             ) : useExternalDnd ? (
               // Task-only mode with external DnD

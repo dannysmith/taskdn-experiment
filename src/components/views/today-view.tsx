@@ -30,6 +30,9 @@ export function TodayView(_props: TodayViewProps) {
   } = useAppData()
   const { openTask } = useTaskDetailStore()
 
+  // State for auto-editing newly created items
+  const [pendingEditItemId, setPendingEditItemId] = React.useState<string | null>(null)
+
   // Get today's date in ISO format (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0]
 
@@ -268,14 +271,22 @@ export function TodayView(_props: TodayViewProps) {
   // Add task from header button
   const handleAddScheduledTask = React.useCallback(() => {
     const newTaskId = createTask({ scheduled: today })
-    // Could optionally focus/edit the new task here
+    // Trigger auto-edit for the new task
+    setPendingEditItemId(newTaskId)
     return newTaskId
   }, [createTask, today])
 
   // Heading handlers for Scheduled section
   const handleAddHeading = React.useCallback(() => {
-    createHeading('scheduled-today')
+    const headingId = createHeading('scheduled-today')
+    // Trigger auto-edit for the new heading
+    setPendingEditItemId(headingId)
   }, [createHeading])
+
+  // Clear pending edit after it's consumed
+  const handleAutoEditConsumed = React.useCallback(() => {
+    setPendingEditItemId(null)
+  }, [])
 
   const handleHeadingTitleChange = React.useCallback(
     (headingId: string, newTitle: string) => {
@@ -356,6 +367,8 @@ export function TodayView(_props: TodayViewProps) {
           showScheduled={false}
           showDue={true}
           defaultExpanded={true}
+          autoEditItemId={pendingEditItemId}
+          onAutoEditConsumed={handleAutoEditConsumed}
         />
 
         {/* Overdue or Due Today - task only */}
