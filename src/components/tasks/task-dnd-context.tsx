@@ -81,7 +81,8 @@ interface TaskDndContextValue {
   clearLastDroppedTaskId: () => void
 }
 
-const TaskDndReactContext = React.createContext<TaskDndContextValue>({
+// Exported for reuse by other DnD contexts (e.g., TodayDndContext)
+export const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   dragPreview: null,
   lastDroppedTaskId: null,
   clearLastDroppedTaskId: () => {},
@@ -287,6 +288,13 @@ export function TaskDndContext({
 // Helper: Check if a task should show a drop indicator
 // -----------------------------------------------------------------------------
 
+// Today view section IDs that have restricted drop targets
+const TODAY_SECTION_IDS = new Set([
+  'scheduled-today',
+  'overdue-due-today',
+  'became-available-today',
+])
+
 /**
  * Returns whether to show a drop indicator above this task.
  * Used for visual feedback during cross-project drag.
@@ -301,6 +309,11 @@ export function shouldShowDropIndicator(
 
   // Only show indicator if dragging to a different project
   if (dragPreview.sourceProjectId === dragPreview.currentProjectId) return false
+
+  // For Today view: only show indicator when target is "scheduled-today"
+  if (TODAY_SECTION_IDS.has(dragPreview.sourceProjectId)) {
+    if (dragPreview.currentProjectId !== 'scheduled-today') return false
+  }
 
   // Show indicator on the task we're hovering over in the target project
   return (

@@ -6,6 +6,7 @@ import { useAppData } from '@/context/app-data-context'
 import { useTaskDetailStore } from '@/store/task-detail-store'
 import { useTodayOrder, type TodaySectionId } from '@/hooks/use-today-order'
 import { SectionTaskGroup } from '@/components/tasks/section-task-group'
+import { TaskDndContext } from '@/components/tasks/task-dnd-context'
 import { isOverdue, isToday } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
 
@@ -20,8 +21,10 @@ export function TodayView(_props: TodayViewProps) {
     data,
     createTask,
     updateTaskTitle,
+    updateTaskScheduled,
     toggleTaskStatus,
     getTaskContextName,
+    getTaskById,
   } = useAppData()
   const { openTask } = useTaskDetailStore()
 
@@ -73,6 +76,66 @@ export function TodayView(_props: TodayViewProps) {
   const orderedScheduledToday = getOrderedTasks('scheduled-today')
   const orderedOverdueOrDueToday = getOrderedTasks('overdue-due-today')
   const orderedBecameAvailableToday = getOrderedTasks('became-available-today')
+
+  // Create tasksByProject map for TaskDndContext (sections act as "projects")
+  const tasksBySection = React.useMemo(() => {
+    const map = new Map<string, Task[]>()
+    map.set('scheduled-today', orderedScheduledToday)
+    map.set('overdue-due-today', orderedOverdueOrDueToday)
+    map.set('became-available-today', orderedBecameAvailableToday)
+    return map
+  }, [orderedScheduledToday, orderedOverdueOrDueToday, orderedBecameAvailableToday])
+
+  // Handler for cross-section task move (TaskDndContext callback)
+  const handleTaskMove = React.useCallback(
+    (
+      taskId: string,
+      _fromSectionId: string,
+      toSectionId: string,
+      insertBeforeTaskId: string | null
+    ) => {
+      // Only allow moving TO "scheduled-today"
+      if (toSectionId !== 'scheduled-today') return
+
+      // Update the scheduled date
+      updateTaskScheduled(taskId, today)
+
+      // Update the section order to insert at the correct position
+      const currentOrder = orderedScheduledToday.map((t) => t.id)
+      let newOrder: string[]
+
+      if (insertBeforeTaskId) {
+        const insertIndex = currentOrder.indexOf(insertBeforeTaskId)
+        if (insertIndex !== -1) {
+          newOrder = [
+            ...currentOrder.slice(0, insertIndex),
+            taskId,
+            ...currentOrder.slice(insertIndex),
+          ]
+        } else {
+          newOrder = [...currentOrder, taskId]
+        }
+      } else {
+        // Append to end
+        newOrder = [...currentOrder, taskId]
+      }
+
+      // Create fake task array with just IDs for the order hook
+      setSectionTaskOrder(
+        'scheduled-today',
+        newOrder.map((id) => ({ id }) as Task)
+      )
+    },
+    [updateTaskScheduled, today, orderedScheduledToday, setSectionTaskOrder]
+  )
+
+  // Handler for same-section reordering (TaskDndContext callback)
+  const handleTasksReorder = React.useCallback(
+    (sectionId: string, reorderedTasks: Task[]) => {
+      setSectionTaskOrder(sectionId as TodaySectionId, reorderedTasks)
+    },
+    [setSectionTaskOrder]
+  )
 
   // Factory for reorder handlers
   const makeReorderHandler = React.useCallback(
@@ -143,9 +206,14 @@ export function TodayView(_props: TodayViewProps) {
     orderedBecameAvailableToday.length > 0
 
   return (
-    <div className="space-y-6">
-      {/* Scheduled for Today */}
-      {orderedScheduledToday.length > 0 && (
+    <TaskDndContext
+      tasksByProject={tasksBySection}
+      onTaskMove={handleTaskMove}
+      onTasksReorder={handleTasksReorder}
+      getTaskById={getTaskById}
+    >
+      <div className="space-y-6">
+        {/* Scheduled for Today */}
         <SectionTaskGroup
           sectionId="scheduled-today"
           title="Scheduled for Today"
@@ -160,56 +228,59 @@ export function TodayView(_props: TodayViewProps) {
           showScheduled={false}
           showDue={true}
           defaultExpanded={true}
+          useExternalDnd={true}
         />
-      )}
 
-      {/* Overdue or Due Today */}
-      {orderedOverdueOrDueToday.length > 0 && (
-        <SectionTaskGroup
-          sectionId="overdue-due-today"
-          title="Overdue or Due Today"
-          icon={<Flag className="size-4" />}
-          tasks={orderedOverdueOrDueToday}
-          onTasksReorder={makeReorderHandler('overdue-due-today')}
-          onTaskTitleChange={handleTitleChange}
-          onTaskStatusToggle={handleStatusToggle}
-          onTaskOpenDetail={handleOpenDetail}
-          onCreateTask={handleCreateDueTask}
-          getContextName={getTaskContextName}
-          showScheduled={true}
-          showDue={true}
-          defaultExpanded={true}
-        />
-      )}
+        {/* Overdue or Due Today */}
+        {orderedOverdueOrDueToday.length > 0 && (
+          <SectionTaskGroup
+            sectionId="overdue-due-today"
+            title="Overdue or Due Today"
+            icon={<Flag className="size-4" />}
+            tasks={orderedOverdueOrDueToday}
+            onTasksReorder={makeReorderHandler('overdue-due-today')}
+            onTaskTitleChange={handleTitleChange}
+            onTaskStatusToggle={handleStatusToggle}
+            onTaskOpenDetail={handleOpenDetail}
+            onCreateTask={handleCreateDueTask}
+            getContextName={getTaskContextName}
+            showScheduled={true}
+            showDue={true}
+            defaultExpanded={true}
+            useExternalDnd={true}
+          />
+        )}
 
-      {/* Became Available Today */}
-      {orderedBecameAvailableToday.length > 0 && (
-        <SectionTaskGroup
-          sectionId="became-available-today"
-          title="Became Available Today"
-          icon={<Sunrise className="size-4" />}
-          tasks={orderedBecameAvailableToday}
-          onTasksReorder={makeReorderHandler('became-available-today')}
-          onTaskTitleChange={handleTitleChange}
-          onTaskStatusToggle={handleStatusToggle}
-          onTaskOpenDetail={handleOpenDetail}
-          onCreateTask={handleCreateAvailableTask}
-          getContextName={getTaskContextName}
-          showScheduled={true}
-          showDue={true}
-          defaultExpanded={true}
-        />
-      )}
+        {/* Became Available Today */}
+        {orderedBecameAvailableToday.length > 0 && (
+          <SectionTaskGroup
+            sectionId="became-available-today"
+            title="Became Available Today"
+            icon={<Sunrise className="size-4" />}
+            tasks={orderedBecameAvailableToday}
+            onTasksReorder={makeReorderHandler('became-available-today')}
+            onTaskTitleChange={handleTitleChange}
+            onTaskStatusToggle={handleStatusToggle}
+            onTaskOpenDetail={handleOpenDetail}
+            onCreateTask={handleCreateAvailableTask}
+            getContextName={getTaskContextName}
+            showScheduled={true}
+            showDue={true}
+            defaultExpanded={true}
+            useExternalDnd={true}
+          />
+        )}
 
-      {/* Empty state */}
-      {!hasAnyTasks && (
-        <div className="py-12 text-center">
-          <p className="text-muted-foreground">Nothing scheduled for today.</p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Schedule tasks to see them here.
-          </p>
-        </div>
-      )}
-    </div>
+        {/* Empty state */}
+        {!hasAnyTasks && (
+          <div className="py-12 text-center">
+            <p className="text-muted-foreground">Nothing scheduled for today.</p>
+            <p className="text-sm text-muted-foreground/70 mt-1">
+              Schedule tasks to see them here.
+            </p>
+          </div>
+        )}
+      </div>
+    </TaskDndContext>
   )
 }
