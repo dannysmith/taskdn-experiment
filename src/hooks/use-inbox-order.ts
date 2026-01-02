@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import type { Task } from '@/types/data'
 
 /**
@@ -15,43 +15,31 @@ import type { Task } from '@/types/data'
  * @returns Object with ordered data and reorder functions
  */
 export function useInboxOrder(tasks: Task[]) {
-  // Initialize order from current task list
-  const [orderedIds, setOrderedIds] = useState<string[]>(() =>
+  // Track manual reorder state - stores user's preferred order
+  const [manualOrder, setManualOrder] = useState<string[]>(() =>
     tasks.map((t) => t.id)
   )
 
-  // Sync order when tasks change (added/removed)
-  useEffect(() => {
-    setOrderedIds((prev) => {
-      const currentTaskIds = new Set(tasks.map((t) => t.id))
+  // Derive the effective ordered IDs by syncing manualOrder with current tasks
+  const orderedIds = useMemo(() => {
+    const currentTaskIds = new Set(tasks.map((t) => t.id))
 
-      // Keep existing order for tasks that still exist
-      const preservedOrder = prev.filter((id) => currentTaskIds.has(id))
+    // Keep existing order for tasks that still exist
+    const preservedOrder = manualOrder.filter((id) => currentTaskIds.has(id))
 
-      // Find new tasks not in order yet
-      const existingIds = new Set(prev)
-      const newTaskIds = tasks
-        .filter((t) => !existingIds.has(t.id))
-        .map((t) => t.id)
+    // Find new tasks not in order yet
+    const existingIds = new Set(manualOrder)
+    const newTaskIds = tasks
+      .filter((t) => !existingIds.has(t.id))
+      .map((t) => t.id)
 
-      // Append new tasks to end
-      const finalOrder = [...preservedOrder, ...newTaskIds]
-
-      // Only update if order actually changed
-      if (
-        finalOrder.length !== prev.length ||
-        !finalOrder.every((id, i) => id === prev[i])
-      ) {
-        return finalOrder
-      }
-
-      return prev
-    })
-  }, [tasks])
+    // Append new tasks to end
+    return [...preservedOrder, ...newTaskIds]
+  }, [tasks, manualOrder])
 
   // Set the new order directly (from reordered tasks array)
   const setOrder = useCallback((reorderedTasks: Task[]) => {
-    setOrderedIds(reorderedTasks.map((t) => t.id))
+    setManualOrder(reorderedTasks.map((t) => t.id))
   }, [])
 
   // Get ordered task IDs

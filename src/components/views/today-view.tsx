@@ -31,7 +31,9 @@ export function TodayView(_props: TodayViewProps) {
   const { openTask } = useTaskDetailStore()
 
   // State for auto-editing newly created items
-  const [pendingEditItemId, setPendingEditItemId] = React.useState<string | null>(null)
+  const [pendingEditItemId, setPendingEditItemId] = React.useState<
+    string | null
+  >(null)
 
   // Get today's date in ISO format (YYYY-MM-DD)
   const today = new Date().toISOString().split('T')[0]
@@ -100,7 +102,10 @@ export function TodayView(_props: TodayViewProps) {
 
   // Also need task-only version for TaskDndContext compatibility
   const orderedScheduledTasks = React.useMemo(
-    () => orderedScheduledItems.filter((item) => item.type === 'task').map((item) => item.data as Task),
+    () =>
+      orderedScheduledItems
+        .filter((item) => item.type === 'task')
+        .map((item) => item.data as Task),
     [orderedScheduledItems]
   )
 
@@ -111,7 +116,11 @@ export function TodayView(_props: TodayViewProps) {
     map.set('overdue-due-today', orderedOverdueOrDueToday)
     map.set('became-available-today', orderedBecameAvailableToday)
     return map
-  }, [orderedScheduledTasks, orderedOverdueOrDueToday, orderedBecameAvailableToday])
+  }, [
+    orderedScheduledTasks,
+    orderedOverdueOrDueToday,
+    orderedBecameAvailableToday,
+  ])
 
   // Handler for cross-section task move (TaskDndContext callback)
   const handleTaskMove = React.useCallback(
@@ -187,7 +196,9 @@ export function TodayView(_props: TodayViewProps) {
     (containerId: string, activeDragId: string, overDragId: string) => {
       // Parse drag ID to extract type and item ID
       // Drag ID format: "type-containerId-itemId"
-      const parseDragId = (dragId: string): { type: 'heading' | 'task'; id: string } | null => {
+      const parseDragId = (
+        dragId: string
+      ): { type: 'heading' | 'task'; id: string } | null => {
         const headingPrefix = `heading-${containerId}-`
         if (dragId.startsWith(headingPrefix)) {
           return { type: 'heading', id: dragId.slice(headingPrefix.length) }
@@ -200,7 +211,10 @@ export function TodayView(_props: TodayViewProps) {
       }
 
       // Convert parsed drag ID to order ID format
-      const toOrderId = (parsed: { type: 'heading' | 'task'; id: string }): string => {
+      const toOrderId = (parsed: {
+        type: 'heading' | 'task'
+        id: string
+      }): string => {
         return parsed.type === 'heading' ? toHeadingId(parsed.id) : parsed.id
       }
 
@@ -213,11 +227,20 @@ export function TodayView(_props: TodayViewProps) {
       const overOrderId = toOrderId(overParsed)
 
       // Get current order for the section
-      const currentItems = containerId === 'scheduled-today'
-        ? orderedScheduledItems
-        : containerId === 'overdue-due-today'
-          ? orderedOverdueOrDueToday.map((t) => ({ type: 'task' as const, id: t.id, data: t }))
-          : orderedBecameAvailableToday.map((t) => ({ type: 'task' as const, id: t.id, data: t }))
+      const currentItems =
+        containerId === 'scheduled-today'
+          ? orderedScheduledItems
+          : containerId === 'overdue-due-today'
+            ? orderedOverdueOrDueToday.map((t) => ({
+                type: 'task' as const,
+                id: t.id,
+                data: t,
+              }))
+            : orderedBecameAvailableToday.map((t) => ({
+                type: 'task' as const,
+                id: t.id,
+                data: t,
+              }))
 
       // Build current order IDs
       const currentOrderIds = currentItems.map((item) =>
@@ -233,7 +256,12 @@ export function TodayView(_props: TodayViewProps) {
       const newOrderIds = arrayMove(currentOrderIds, oldIndex, newIndex)
       setSectionItemOrder(containerId as TodaySectionId, newOrderIds)
     },
-    [orderedScheduledItems, orderedOverdueOrDueToday, orderedBecameAvailableToday, setSectionItemOrder]
+    [
+      orderedScheduledItems,
+      orderedOverdueOrDueToday,
+      orderedBecameAvailableToday,
+      setSectionItemOrder,
+    ]
   )
 
   const handleTitleChange = React.useCallback(
@@ -414,7 +442,9 @@ export function TodayView(_props: TodayViewProps) {
         {/* Empty state */}
         {!hasAnyItems && (
           <div className="py-12 text-center">
-            <p className="text-muted-foreground">Nothing scheduled for today.</p>
+            <p className="text-muted-foreground">
+              Nothing scheduled for today.
+            </p>
             <p className="text-sm text-muted-foreground/70 mt-1">
               Schedule tasks to see them here.
             </p>

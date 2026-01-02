@@ -159,7 +159,10 @@ export function HeadingListItem({
         />
       ) : (
         <span
-          className={cn('flex-1 text-sm font-semibold truncate', colorConfig.textClass)}
+          className={cn(
+            'flex-1 text-sm font-semibold truncate',
+            colorConfig.textClass
+          )}
         >
           {heading.title || (
             <span className="text-muted-foreground italic">Untitled</span>
@@ -179,9 +182,7 @@ export function HeadingListItem({
             'shrink-0 p-1 -m-0.5 rounded text-muted-foreground',
             'hover:text-destructive hover:bg-destructive/10',
             'transition-opacity duration-100',
-            isSelected
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100'
+            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
           )}
           title="Delete heading"
         >

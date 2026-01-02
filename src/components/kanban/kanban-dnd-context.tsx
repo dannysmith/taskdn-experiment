@@ -233,7 +233,9 @@ export function KanbanDndContext({
 
       if (sameSwimlane) {
         const statusTasks = tasksByStatus.get(targetStatus) ?? []
-        const oldIndex = statusTasks.findIndex((t) => t.id === activeData.taskId)
+        const oldIndex = statusTasks.findIndex(
+          (t) => t.id === activeData.taskId
+        )
         const newIndex = statusTasks.findIndex((t) => t.id === overData.taskId)
 
         if (oldIndex !== -1 && newIndex !== -1) {

@@ -17,9 +17,15 @@ export function HeadingDragPreview({ heading }: HeadingDragPreviewProps) {
         colorConfig.borderClass
       )}
     >
-      <div className={cn('size-4 rounded-full shrink-0', colorConfig.dotClass)} />
-      <span className={cn('text-sm font-medium truncate', colorConfig.textClass)}>
-        {heading.title || <span className="text-muted-foreground italic">Untitled</span>}
+      <div
+        className={cn('size-4 rounded-full shrink-0', colorConfig.dotClass)}
+      />
+      <span
+        className={cn('text-sm font-medium truncate', colorConfig.textClass)}
+      >
+        {heading.title || (
+          <span className="text-muted-foreground italic">Untitled</span>
+        )}
       </span>
     </div>
   )

@@ -158,7 +158,13 @@ export function OrderedItemList({
       // Notify that we consumed the auto-edit
       onAutoEditConsumed?.()
     }
-  }, [autoEditItemId, items, setSelectedIndex, setEditingItemId, onAutoEditConsumed])
+  }, [
+    autoEditItemId,
+    items,
+    setSelectedIndex,
+    setEditingItemId,
+    onAutoEditConsumed,
+  ])
 
   // Helper to get the order ID for an item (with prefix for headings)
   const getOrderId = (item: ResolvedOrderedItem): string => {

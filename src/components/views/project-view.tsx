@@ -110,7 +110,9 @@ export function ProjectView({ projectId }: ProjectViewProps) {
             onTasksReorder={(_status, reorderedColumnTasks) => {
               // Merge the reordered column tasks back into the full project task list
               // to preserve the order of tasks in other status columns
-              const reorderedIds = new Set(reorderedColumnTasks.map((t) => t.id))
+              const reorderedIds = new Set(
+                reorderedColumnTasks.map((t) => t.id)
+              )
               const result: Task[] = []
               let columnIndex = 0
 

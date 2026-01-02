@@ -271,7 +271,7 @@ export function AreaView({ areaId, onNavigateToProject }: AreaViewProps) {
               const isLooseTasks = swimlaneId === LOOSE_TASKS_SWIMLANE_ID
               const allTasks = isLooseTasks
                 ? areaDirectTasks
-                : tasksByProject.get(swimlaneId) ?? []
+                : (tasksByProject.get(swimlaneId) ?? [])
 
               const reorderedIds = new Set(
                 reorderedColumnTasks.map((t) => t.id)

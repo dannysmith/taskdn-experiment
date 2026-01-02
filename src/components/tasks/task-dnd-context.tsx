@@ -132,7 +132,11 @@ interface TaskDndContextProps {
    * Called when items (tasks or headings) are reordered within a container.
    * Passes the drag IDs so the caller can calculate the new order.
    */
-  onItemsReorder?: (containerId: string, activeId: string, overId: string) => void
+  onItemsReorder?: (
+    containerId: string,
+    activeId: string,
+    overId: string
+  ) => void
   /** Get a task by its ID */
   getTaskById: (taskId: string) => Task | undefined
   /** Get a heading by its ID (optional, for heading drag preview) */
@@ -265,7 +269,7 @@ export function TaskDndContext({
       const targetContainerId =
         overData?.type === 'heading'
           ? overData.containerId
-          : overData?.projectId ?? dragPreview.containerId
+          : (overData?.projectId ?? dragPreview.containerId)
 
       // Headings can only reorder within their own container
       if (
@@ -273,7 +277,11 @@ export function TaskDndContext({
         active.id !== over.id &&
         onItemsReorder
       ) {
-        onItemsReorder(dragPreview.containerId, String(active.id), String(over.id))
+        onItemsReorder(
+          dragPreview.containerId,
+          String(active.id),
+          String(over.id)
+        )
       }
 
       setDragPreview(null)
@@ -294,7 +302,7 @@ export function TaskDndContext({
     const targetProjectId =
       overData?.type === 'heading'
         ? overData.containerId
-        : overData?.projectId ?? dragPreview.sourceProjectId
+        : (overData?.projectId ?? dragPreview.sourceProjectId)
 
     if (targetProjectId !== dragPreview.sourceProjectId) {
       // Cross-project move (including drops on empty projects)
@@ -317,7 +325,9 @@ export function TaskDndContext({
       } else if (overData?.type === 'task') {
         // Fall back to task-only reorder
         const projectTasks = tasksByProject.get(targetProjectId) ?? []
-        const oldIndex = projectTasks.findIndex((t) => t.id === activeData.taskId)
+        const oldIndex = projectTasks.findIndex(
+          (t) => t.id === activeData.taskId
+        )
         const newIndex = projectTasks.findIndex((t) => t.id === overData.taskId)
 
         if (oldIndex !== -1 && newIndex !== -1) {

@@ -112,7 +112,8 @@ export function SectionTaskGroup(props: SectionTaskGroupProps) {
   }
 
   // Determine which mode we're in
-  const isMixedItemsMode = 'orderedItems' in props && props.orderedItems !== undefined
+  const isMixedItemsMode =
+    'orderedItems' in props && props.orderedItems !== undefined
 
   // Get item count for header
   const itemCount = isMixedItemsMode
