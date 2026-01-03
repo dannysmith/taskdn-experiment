@@ -61,6 +61,7 @@ import {
 } from './draggable-project'
 // TODO(tauri-integration): Migrate to TanStack Query (via useSidebarOrder)
 import type { Selection, NavId } from '@/types/navigation'
+import appIcon from '@/assets/icon-1024-trans.png'
 import { getDragId, ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
 import type { DragItem } from '@/types/sidebar-order'
 
@@ -224,9 +225,10 @@ export function AppSidebar({
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader className="h-14 flex-row items-center justify-between border-b border-sidebar-border px-4">
-        <span className="font-semibold text-lg group-data-[collapsible=icon]:hidden">
-          Taskdn
-        </span>
+        <div className="flex items-center gap-2 group-data-[collapsible=icon]:hidden">
+          <img src={appIcon} alt="Taskdn" className="size-7 shrink-0" />
+          <span className="font-semibold text-lg">Taskdn</span>
+        </div>
         <button
           onClick={toggleSidebar}
           className="size-8 flex items-center justify-center rounded-md hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors"
