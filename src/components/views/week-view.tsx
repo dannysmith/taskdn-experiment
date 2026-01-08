@@ -31,6 +31,7 @@ export function WeekView({
     updateTaskTitle,
     updateTaskScheduled,
     updateTaskDue,
+    reorderTasksByIds,
   } = useAppData()
   const { openTask } = useTaskDetailStore()
 
@@ -42,14 +43,6 @@ export function WeekView({
     const interval = { start: weekStart, end: weekEnd }
 
     return data.tasks.filter((task) => {
-      // Exclude done and dropped tasks from Kanban (but calendar may still show them)
-      if (
-        viewMode === 'kanban' &&
-        (task.status === 'done' || task.status === 'dropped')
-      ) {
-        return false
-      }
-
       // Check if scheduled date is within this week
       if (task.scheduled) {
         try {
@@ -76,7 +69,7 @@ export function WeekView({
 
       return false
     })
-  }, [data.tasks, viewMode])
+  }, [data.tasks])
 
   // Get context (project/area names and IDs) for a task
   const getTaskContext = React.useCallback(
@@ -151,6 +144,13 @@ export function WeekView({
     [openTask]
   )
 
+  const handleTasksReorder = React.useCallback(
+    (_status: TaskStatus, reorderedTasks: Task[]) => {
+      reorderTasksByIds(reorderedTasks.map((t) => t.id))
+    },
+    [reorderTasksByIds]
+  )
+
   return (
     <div className="h-full flex flex-col">
       {viewMode === 'calendar' ? (
@@ -176,6 +176,7 @@ export function WeekView({
           collapsedColumns={collapsedColumns}
           onColumnCollapseChange={toggleColumn}
           onTaskStatusChange={handleStatusChange}
+          onTasksReorder={handleTasksReorder}
           getTaskById={getTaskById}
           getProjectName={(projectId) => getProjectById(projectId)?.title}
           getAreaName={(areaId) => getAreaById(areaId)?.title}

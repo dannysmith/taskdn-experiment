@@ -59,8 +59,9 @@ export function HeadingColorPicker({
                 type="button"
                 onClick={() => handleColorSelect(c)}
                 className={cn(
-                  'size-6 rounded-full flex items-center justify-center transition-transform',
-                  'hover:scale-110 focus-visible:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+                  'size-6 rounded-full flex items-center justify-center',
+                  'hover:ring-2 hover:ring-ring hover:ring-offset-1',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
                   config.dotClass
                 )}
                 title={config.label}

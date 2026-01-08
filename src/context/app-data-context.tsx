@@ -43,6 +43,7 @@ interface AppDataContextValue {
   toggleTaskStatus: (taskId: string) => void
   reorderProjectTasks: (projectId: string, reorderedTaskIds: string[]) => void
   reorderAreaLooseTasks: (areaId: string, reorderedTaskIds: string[]) => void
+  reorderTasksByIds: (reorderedTaskIds: string[]) => void
   moveTaskToProject: (
     taskId: string,
     newProjectId: string,
@@ -376,6 +377,36 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     []
   )
 
+  const reorderTasksByIds = useCallback((reorderedTaskIds: string[]) => {
+    setData((prev) => {
+      // Create a set of IDs being reordered for quick lookup
+      const reorderSet = new Set(reorderedTaskIds)
+
+      // Get the tasks being reordered in their new order
+      const reorderedTasks = reorderedTaskIds
+        .map((id) => prev.tasks.find((t) => t.id === id))
+        .filter((t): t is Task => t !== undefined)
+
+      // Rebuild the array: for each task in the original order,
+      // if it's being reordered, take the next task from reorderedTasks instead
+      const result: Task[] = []
+      let reorderIndex = 0
+
+      for (const task of prev.tasks) {
+        if (reorderSet.has(task.id)) {
+          if (reorderIndex < reorderedTasks.length) {
+            result.push(reorderedTasks[reorderIndex])
+            reorderIndex++
+          }
+        } else {
+          result.push(task)
+        }
+      }
+
+      return { ...prev, tasks: result }
+    })
+  }, [])
+
   const moveTaskToProject = useCallback(
     (
       taskId: string,
@@ -622,6 +653,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     toggleTaskStatus,
     reorderProjectTasks,
     reorderAreaLooseTasks,
+    reorderTasksByIds,
     moveTaskToProject,
     moveTaskToLooseTasks,
     getAreaById,

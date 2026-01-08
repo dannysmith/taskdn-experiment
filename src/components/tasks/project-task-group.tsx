@@ -110,7 +110,7 @@ function EmptyProjectDropZone({ projectId }: { projectId: string }) {
   const isDraggingFromOtherProject =
     dragPreview &&
     dragPreview.type === 'task' &&
-    dragPreview.sourceProjectId !== projectId
+    dragPreview.sourceContainerId !== projectId
 
   return (
     <div

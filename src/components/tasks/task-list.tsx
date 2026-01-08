@@ -11,7 +11,6 @@ import {
   type DragEndEvent,
   type DropAnimation,
 } from '@dnd-kit/core'
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -20,7 +19,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import type { Task } from '@/types/data'
-import { TaskListItem } from './task-list-item'
+import { SortableTaskItem } from './sortable-task-item'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 import { useTaskDragPreview } from './task-dnd-context'
 
@@ -110,8 +109,17 @@ export function TaskList({
       : internalEditingTaskId
   const setEditingTaskId = onEditingTaskIdChange ?? setInternalEditingTaskId
 
-  // Get drag context to check for dropped task
-  const { lastDroppedTaskId, clearLastDroppedTaskId } = useTaskDragPreview()
+  // Get drag context for dropped task selection and cross-container gap animation
+  const {
+    lastDroppedTaskId,
+    clearLastDroppedTaskId,
+    crossContainerHover,
+    clearCrossContainerHover,
+  } = useTaskDragPreview()
+
+  // Check if the dropped task has appeared in this list
+  const droppedTaskInList =
+    lastDroppedTaskId !== null && tasks.some((t) => t.id === lastDroppedTaskId)
 
   // Select the dropped task after a drag ends, or clear selection if task went to another list
   React.useEffect(() => {
@@ -120,13 +128,29 @@ export function TaskList({
       if (droppedIndex !== -1) {
         // This list contains the dropped task - select it
         setSelectedIndex(droppedIndex)
-        clearLastDroppedTaskId()
       } else {
         // This list doesn't contain the dropped task - clear selection
         setSelectedIndex(null)
       }
     }
-  }, [lastDroppedTaskId, tasks, setSelectedIndex, clearLastDroppedTaskId])
+  }, [lastDroppedTaskId, tasks, setSelectedIndex])
+
+  // Clean up cross-container hover state once the dropped task appears
+  React.useEffect(() => {
+    if (
+      droppedTaskInList &&
+      crossContainerHover?.targetContainerId === projectId
+    ) {
+      clearLastDroppedTaskId()
+      clearCrossContainerHover()
+    }
+  }, [
+    droppedTaskInList,
+    crossContainerHover?.targetContainerId,
+    projectId,
+    clearLastDroppedTaskId,
+    clearCrossContainerHover,
+  ])
 
   // Keep selection valid when tasks change
   React.useEffect(() => {
@@ -253,7 +277,17 @@ export function TaskList({
   }
 
   // Generate drag IDs with project prefix for uniqueness across containers
-  const dragIds = tasks.map((t) => `task-${projectId}-${t.id}`)
+  const dragIds = React.useMemo(
+    () => tasks.map((t) => `task-${projectId}-${t.id}`),
+    [tasks, projectId]
+  )
+
+  // Check if we should show a trailing gap (cross-container drag, append at end)
+  // Don't show gap once the dropped task has appeared in this container
+  const showTrailingGap =
+    crossContainerHover?.targetContainerId === projectId &&
+    crossContainerHover?.insertBeforeId === null &&
+    !droppedTaskInList
 
   if (tasks.length === 0) {
     return (
@@ -287,17 +321,20 @@ export function TaskList({
       <SortableContext items={dragIds} strategy={verticalListSortingStrategy}>
         <div className="space-y-0.5">
           {tasks.map((task, index) => (
-            <TaskListItem
+            <SortableTaskItem
               key={task.id}
               task={task}
-              dragId={`task-${projectId}-${task.id}`}
-              projectId={projectId}
+              dragId={dragIds[index]}
+              containerId={projectId}
+              droppedTaskInList={droppedTaskInList}
               isSelected={selectedIndex === index}
               isEditing={editingTaskId === task.id}
               onSelect={() => handleSelect(index)}
               onStartEdit={() => handleStartEdit(task.id)}
               onEndEdit={handleEndEdit}
-              onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
+              onTitleChange={(newTitle) =>
+                onTaskTitleChange(task.id, newTitle)
+              }
               onStatusToggle={() => onTaskStatusToggle(task.id)}
               onOpenDetail={
                 onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
@@ -307,6 +344,13 @@ export function TaskList({
               showDue={showDue}
             />
           ))}
+          {/* Trailing gap for cross-container drag (append at end) */}
+          <div
+            className={cn(
+              'transition-[height] duration-150 ease-out',
+              showTrailingGap ? 'h-10' : 'h-0'
+            )}
+          />
         </div>
       </SortableContext>
     </div>
@@ -412,7 +456,6 @@ export function DraggableTaskList({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      modifiers={[restrictToVerticalAxis]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
