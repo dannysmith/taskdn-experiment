@@ -257,6 +257,13 @@ export function TaskList({
     [tasks, projectId]
   )
 
+  // Check if we should show a trailing gap (cross-container drag, append at end)
+  const { crossContainerHover, dragPreview } = useTaskDragPreview()
+  const showTrailingGap =
+    crossContainerHover?.targetContainerId === projectId &&
+    crossContainerHover?.insertBeforeId === null &&
+    dragPreview?.type === 'task'
+
   if (tasks.length === 0) {
     return (
       <div
@@ -311,6 +318,13 @@ export function TaskList({
               showDue={showDue}
             />
           ))}
+          {/* Trailing gap for cross-container drag (append at end) */}
+          <div
+            className={cn(
+              'transition-[height] duration-150 ease-out',
+              showTrailingGap ? 'h-10' : 'h-0'
+            )}
+          />
         </div>
       </SortableContext>
     </div>

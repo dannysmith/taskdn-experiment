@@ -9,6 +9,7 @@ import {
   defaultDropAnimationSideEffects,
   type DragStartEvent,
   type DragEndEvent,
+  type DragOverEvent,
   type DropAnimation,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
@@ -91,10 +92,26 @@ interface HeadingDragPreviewState {
 
 type DragPreviewState = TaskDragPreviewState | HeadingDragPreviewState
 
+/**
+ * Cross-container hover state for CSS gap animation.
+ * Only set when dragging over a DIFFERENT container than the source.
+ */
+interface CrossContainerHoverState {
+  /** The container being hovered over */
+  targetContainerId: string
+  /** Insert before this task ID, or null to append at end */
+  insertBeforeId: string | null
+}
+
 interface TaskDndContextValue {
   dragPreview: DragPreviewState | null
   lastDroppedTaskId: string | null
   clearLastDroppedTaskId: () => void
+  /**
+   * Cross-container hover state for CSS gap animation.
+   * Only set when hovering over a different container than the source.
+   */
+  crossContainerHover: CrossContainerHoverState | null
   /**
    * @deprecated Visual items are no longer tracked during drag.
    * SortableContext should use entity-derived items directly.
@@ -108,6 +125,7 @@ export const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   dragPreview: null,
   lastDroppedTaskId: null,
   clearLastDroppedTaskId: () => {},
+  crossContainerHover: null,
   getVisualItems: () => null,
 })
 
@@ -175,6 +193,8 @@ export function TaskDndContext({
   const [lastDroppedTaskId, setLastDroppedTaskId] = React.useState<
     string | null
   >(null)
+  const [crossContainerHover, setCrossContainerHover] =
+    React.useState<CrossContainerHoverState | null>(null)
 
   const clearLastDroppedTaskId = React.useCallback(() => {
     setLastDroppedTaskId(null)
@@ -231,8 +251,58 @@ export function TaskDndContext({
     }
   }
 
-  // No handleDragOver needed - we determine drop target from over.data in handleDragEnd
-  // This follows the Kanban pattern which is simpler and more reliable
+  // Track cross-container hover for CSS gap animation
+  const handleDragOver = (event: DragOverEvent) => {
+    if (!dragPreview || dragPreview.type !== 'task') {
+      return
+    }
+
+    const { over } = event
+
+    if (!over) {
+      // Not over anything - clear hover state
+      setCrossContainerHover(null)
+      return
+    }
+
+    const overData = over.data.current as DropTargetData | undefined
+
+    // Determine which container we're hovering over
+    const targetContainerId =
+      overData?.type === 'heading'
+        ? overData.containerId
+        : overData?.type === 'empty-project'
+          ? overData.projectId
+          : overData?.type === 'task'
+            ? overData.projectId
+            : null
+
+    if (!targetContainerId) {
+      setCrossContainerHover(null)
+      return
+    }
+
+    // Only track cross-container hover (not same-container)
+    if (targetContainerId === dragPreview.sourceContainerId) {
+      setCrossContainerHover(null)
+      return
+    }
+
+    // Determine insertion point
+    const insertBeforeId =
+      overData?.type === 'task' ? overData.taskId : null
+
+    // Only update if changed (avoid unnecessary re-renders)
+    setCrossContainerHover((prev) => {
+      if (
+        prev?.targetContainerId === targetContainerId &&
+        prev?.insertBeforeId === insertBeforeId
+      ) {
+        return prev
+      }
+      return { targetContainerId, insertBeforeId }
+    })
+  }
 
   const handleDragEnd = (event: DragEndEvent) => {
     if (!dragPreview) {
@@ -330,16 +400,19 @@ export function TaskDndContext({
     }
 
     setDragPreview(null)
+    setCrossContainerHover(null)
   }
 
   const handleDragCancel = () => {
     setDragPreview(null)
+    setCrossContainerHover(null)
   }
 
   const contextValue: TaskDndContextValue = {
     dragPreview,
     lastDroppedTaskId,
     clearLastDroppedTaskId,
+    crossContainerHover,
     getVisualItems,
   }
 
@@ -349,6 +422,7 @@ export function TaskDndContext({
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >

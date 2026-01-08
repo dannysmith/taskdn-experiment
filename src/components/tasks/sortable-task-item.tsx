@@ -4,6 +4,7 @@ import { CSS } from '@dnd-kit/utilities'
 
 import { cn } from '@/lib/utils'
 import { TaskItem, type TaskItemProps } from './task-item'
+import { useTaskDragPreview } from './task-dnd-context'
 
 export interface SortableTaskItemProps extends Omit<TaskItemProps, 'className'> {
   /** Unique drag ID for this item (should be unique across all containers) */
@@ -41,6 +42,12 @@ export function SortableTaskItem({
     },
   })
 
+  // Check if we should show a gap before this item (cross-container drag)
+  const { crossContainerHover } = useTaskDragPreview()
+  const showGapBefore =
+    crossContainerHover?.targetContainerId === containerId &&
+    crossContainerHover?.insertBeforeId === task.id
+
   const style: React.CSSProperties = {
     // Always apply transforms - no suppression during cross-container drag
     transform: CSS.Transform.toString(transform),
@@ -55,7 +62,13 @@ export function SortableTaskItem({
       ref={setNodeRef}
       style={style}
       {...dragProps}
-      className={cn('touch-manipulation', isDragging && 'opacity-50', className)}
+      className={cn(
+        'touch-manipulation',
+        isDragging && 'opacity-50',
+        // CSS gap animation for cross-container drag
+        showGapBefore && 'mt-10 transition-[margin] duration-150 ease-out',
+        className
+      )}
     >
       <TaskItem
         task={task}
