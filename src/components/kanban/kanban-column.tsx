@@ -109,7 +109,7 @@ export function KanbanColumn({
         {tasks.length > 0 && (
           <span
             className={cn(
-              'mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium',
+              'mt-2 px-1.5 py-0.5 rounded-full text-2xs font-medium',
               config.color
             )}
           >

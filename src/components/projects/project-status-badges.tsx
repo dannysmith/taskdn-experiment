@@ -35,7 +35,7 @@ export function ProjectStatusBadges({
           <span
             key={status}
             className={cn(
-              'text-[10px] font-medium h-5 px-1.5 rounded-full inline-flex items-center gap-1',
+              'text-2xs font-medium h-5 px-1.5 rounded-full inline-flex items-center gap-1',
               config.color
             )}
           >

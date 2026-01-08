@@ -64,7 +64,7 @@ export function MonthDayCell({
       )}
     >
       {/* Day header */}
-      <div className="group/header px-1 py-0.5 @[80px]:px-1.5 @[80px]:py-1 flex justify-between items-center">
+      <div className="group/header px-1 py-0.5 @4xs:px-1.5 @4xs:py-1 flex justify-between items-center">
         {/* Add task button - shown on hover */}
         {onCreateTask && (
           <button
@@ -79,7 +79,7 @@ export function MonthDayCell({
         {/* Date number - consistent size container */}
         <span
           className={cn(
-            'size-5 @[80px]:size-6 flex items-center justify-center text-[10px] @[80px]:text-xs tabular-nums rounded-full',
+            'size-5 @4xs:size-6 flex items-center justify-center text-2xs @4xs:text-xs tabular-nums rounded-full',
             isCurrentDay
               ? 'bg-primary text-primary-foreground font-semibold'
               : isCurrentMonth
@@ -122,7 +122,7 @@ export function MonthDayCell({
         {tasks.length === 0 && (
           <div
             className={cn(
-              'h-full min-h-[40px] rounded border border-dashed border-transparent transition-colors',
+              'h-full min-h-10 rounded border border-dashed border-transparent transition-colors',
               (isOver || isDropTarget) && 'border-primary/30'
             )}
           />

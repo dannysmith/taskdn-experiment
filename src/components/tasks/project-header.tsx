@@ -73,7 +73,7 @@ export function ProjectHeader({
       {/* Status badge */}
       <span
         className={cn(
-          'shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center',
+          'shrink-0 text-2xs font-medium h-5 px-2 rounded-full inline-flex items-center',
           config.color
         )}
       >

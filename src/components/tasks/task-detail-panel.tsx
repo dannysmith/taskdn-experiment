@@ -178,13 +178,13 @@ export function TaskDetailPanel() {
       </div>
 
       {/* Footer - Metadata */}
-      <div className="px-4 py-2 flex flex-wrap gap-x-2 @[280px]:gap-x-4 gap-y-0.5 text-[10px] @[280px]:text-xs text-muted-foreground">
+      <div className="px-4 py-2 flex flex-wrap gap-x-2 @[280px]:gap-x-4 gap-y-0.5 text-2xs @[280px]:text-xs text-muted-foreground">
         <span>Created {formatShortDate(task.createdAt)}</span>
         <span>Updated {formatShortDate(task.updatedAt)}</span>
         {task.completedAt && (
           <span>Completed {formatShortDate(task.completedAt)}</span>
         )}
-        <span className="font-mono opacity-50 truncate max-w-[80px] @[320px]:max-w-none">{task.id}</span>
+        <span className="font-mono opacity-50 truncate max-w-20 @xs:max-w-none">{task.id}</span>
       </div>
     </div>
   )

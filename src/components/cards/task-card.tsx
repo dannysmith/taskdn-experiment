@@ -226,7 +226,7 @@ export function TaskCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       className={cn(
-        '@container group rounded-xl border p-2.5 @[140px]:p-3.5 transition-all outline-none',
+        '@container group rounded-xl border p-2.5 @6xs:p-3.5 transition-all outline-none',
         'hover:shadow-md hover:shadow-black/5',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         // Variant styles
@@ -244,10 +244,10 @@ export function TaskCard({
       )}
     >
       {/* Title row */}
-      <div className="flex items-start gap-1.5 @[140px]:gap-2">
+      <div className="flex items-start gap-1.5 @6xs:gap-2">
         {/* Deferred indicator */}
         {variant === 'deferred' && !isEditing && (
-          <Hourglass className="size-3 @[140px]:size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+          <Hourglass className="size-3 @6xs:size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         )}
         {isEditing ? (
           <textarea
@@ -256,7 +256,7 @@ export function TaskCard({
             onChange={handleTextareaInput}
             onBlur={handleInputBlur}
             onKeyDown={handleTextareaKeyDown}
-            className="flex-1 text-xs @[140px]:text-sm font-medium bg-transparent outline-none resize-none overflow-hidden leading-snug"
+            className="flex-1 text-xs @6xs:text-sm font-medium bg-transparent outline-none resize-none overflow-hidden leading-snug"
             placeholder="Task title..."
             rows={1}
           />
@@ -264,7 +264,7 @@ export function TaskCard({
           <>
             <span
               className={cn(
-                'flex-1 text-xs @[140px]:text-sm font-medium leading-snug',
+                'flex-1 text-xs @6xs:text-sm font-medium leading-snug',
                 isCompleted && 'line-through text-muted-foreground'
               )}
             >
@@ -278,14 +278,14 @@ export function TaskCard({
                   onEditClick()
                 }}
                 className={cn(
-                  'shrink-0 p-1 @[140px]:p-1.5 -m-1 rounded-full text-primary/70',
+                  'shrink-0 p-1 @6xs:p-1.5 -m-1 rounded-full text-primary/70',
                   'opacity-0 group-hover:opacity-100 transition-opacity',
                   'hover:text-primary hover:bg-primary/10',
                   isSelected && 'opacity-100'
                 )}
                 title="Open details"
               >
-                <CircleChevronRight className="size-3.5 @[140px]:size-4" />
+                <CircleChevronRight className="size-3.5 @6xs:size-4" />
               </button>
             )}
           </>
@@ -295,7 +295,7 @@ export function TaskCard({
       {/* Footer: status pill + dates + context - stacks vertically on narrow, horizontal on wider */}
       <div
         className={cn(
-          'mt-2 @[140px]:mt-3 flex flex-col @[120px]:flex-row @[120px]:flex-wrap @[120px]:items-center gap-1.5 @[120px]:gap-x-3 @[120px]:gap-y-1.5 text-[10px] @[140px]:text-xs',
+          'mt-2 @6xs:mt-3 flex flex-col @5xs:flex-row @5xs:flex-wrap @5xs:items-center gap-1.5 @5xs:gap-x-3 @5xs:gap-y-1.5 text-2xs @6xs:text-xs',
           isCompleted && 'opacity-60'
         )}
       >
@@ -305,7 +305,7 @@ export function TaskCard({
         {/* Dates - stack with other metadata when narrow */}
         <DatePickerButton
           date={scheduledDate}
-          icon={<Calendar className="size-2.5 @[140px]:size-3" />}
+          icon={<Calendar className="size-2.5 @6xs:size-3" />}
           open={scheduledOpen}
           onOpenChange={setScheduledOpen}
           onSelect={handleScheduledSelect}
@@ -315,7 +315,7 @@ export function TaskCard({
 
         <DatePickerButton
           date={dueDate}
-          icon={<Flag className="size-2.5 @[140px]:size-3" />}
+          icon={<Flag className="size-2.5 @6xs:size-3" />}
           open={dueOpen}
           onOpenChange={setDueOpen}
           onSelect={handleDueSelect}

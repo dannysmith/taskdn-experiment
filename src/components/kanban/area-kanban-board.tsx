@@ -266,7 +266,7 @@ function AreaKanbanColumn({
         {totalTasks > 0 && (
           <span
             className={cn(
-              'mt-2 px-1.5 py-0.5 rounded-full text-[10px] font-medium',
+              'mt-2 px-1.5 py-0.5 rounded-full text-2xs font-medium',
               config.color
             )}
           >
@@ -397,7 +397,7 @@ function ProjectSwimlane({
           {project.title}
         </span>
         {tasks.length > 0 && (
-          <span className="text-[10px] text-muted-foreground/70">
+          <span className="text-2xs text-muted-foreground/70">
             {tasks.length}
           </span>
         )}
@@ -420,7 +420,7 @@ function ProjectSwimlane({
       <div
         ref={setDroppableRef}
         className={cn(
-          'p-2 space-y-2 min-h-[48px]',
+          'p-2 space-y-2 min-h-12',
           isOver && tasks.length === 0 && 'bg-primary/5'
         )}
       >
@@ -462,7 +462,7 @@ function ProjectSwimlane({
         {tasks.length === 0 && (
           <div
             className={cn(
-              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-[10px] text-muted-foreground/50',
+              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-2xs text-muted-foreground/50',
               isOver && 'border-primary/30'
             )}
           >
@@ -520,7 +520,7 @@ function LooseTasksSwimlane({
           Loose Tasks
         </span>
         {tasks.length > 0 && (
-          <span className="text-[10px] text-muted-foreground/70">
+          <span className="text-2xs text-muted-foreground/70">
             {tasks.length}
           </span>
         )}
@@ -530,7 +530,7 @@ function LooseTasksSwimlane({
       <div
         ref={setDroppableRef}
         className={cn(
-          'p-2 space-y-2 min-h-[48px]',
+          'p-2 space-y-2 min-h-12',
           isOver && tasks.length === 0 && 'bg-primary/5'
         )}
       >
@@ -572,7 +572,7 @@ function LooseTasksSwimlane({
         {tasks.length === 0 && (
           <div
             className={cn(
-              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-[10px] text-muted-foreground/50',
+              'flex items-center justify-center h-8 rounded border-2 border-dashed border-transparent text-2xs text-muted-foreground/50',
               isOver && 'border-primary/30'
             )}
           >

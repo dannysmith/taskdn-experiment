@@ -150,6 +150,18 @@
 
 @theme inline {
   --font-sans: 'Inter Variable', sans-serif;
+
+  /* Custom text size for small UI elements (badges, labels, metadata) */
+  --text-2xs: 0.625rem; /* 10px */
+  --text-2xs--line-height: 1rem;
+
+  /* Custom container breakpoints for compact card layouts
+     These handle responsive card layouts at sizes smaller than @3xs (256px) */
+  --container-4xs: 5rem;      /* 80px - ultra-compact (calendar cells) */
+  --container-5xs: 7.5rem;    /* 120px - task card row layout */
+  --container-6xs: 8.75rem;   /* 140px - task card compact threshold */
+  --container-7xs: 11.25rem;  /* 180px - area/project cards expand */
+  --container-8xs: 12.5rem;   /* 200px - area/project cards row layout */
   --color-icon-today: var(--icon-today);
   --color-icon-week: var(--icon-week);
   --color-icon-inbox: var(--icon-inbox);
