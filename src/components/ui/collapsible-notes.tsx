@@ -30,7 +30,7 @@ export function CollapsibleNotesSection({
     <section className="bg-muted/30 rounded-lg border border-border/50">
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-muted/50 transition-colors rounded-lg"
+        className="w-full flex items-center gap-2 px-4 py-3 text-start hover:bg-muted/50 transition-colors rounded-lg"
       >
         <ChevronDown
           className={cn(

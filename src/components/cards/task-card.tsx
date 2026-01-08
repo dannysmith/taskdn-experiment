@@ -330,7 +330,7 @@ export function TaskCard({
             type="button"
             onClick={handleContextClick}
             className={cn(
-              'truncate max-w-full text-muted-foreground text-left',
+              'truncate max-w-full text-muted-foreground text-start',
               hasContextClick && 'hover:text-foreground hover:underline'
             )}
           >
@@ -432,7 +432,7 @@ function DatePickerButton({
                 className="w-full justify-start text-muted-foreground"
                 onClick={handleClear}
               >
-                <X className="size-3 mr-2" />
+                <X className="size-3 me-2" />
                 Clear {label.toLowerCase()} date
               </Button>
             </div>

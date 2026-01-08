@@ -37,7 +37,7 @@ export function ViewHeader({
       )}
       {/* View mode toggle - pushed to right */}
       {viewModeKey && (
-        <div className="ml-auto shrink-0">
+        <div className="ms-auto shrink-0">
           <HeaderViewToggle viewModeKey={viewModeKey} />
         </div>
       )}

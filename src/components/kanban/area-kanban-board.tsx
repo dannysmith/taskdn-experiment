@@ -299,7 +299,7 @@ function AreaKanbanColumn({
           {config.label}
         </span>
         <span className="text-xs text-muted-foreground">{totalTasks}</span>
-        <ChevronRight className="size-4 text-muted-foreground ml-auto rotate-90" />
+        <ChevronRight className="size-4 text-muted-foreground ms-auto rotate-90" />
       </button>
 
       {/* Swim Lanes */}

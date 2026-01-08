@@ -348,7 +348,7 @@
 /* Lists */
 .milkdown-editor .ProseMirror ul,
 .milkdown-editor .ProseMirror ol {
-  padding-left: 1em;
+  padding-inline-start: 1em;
 }
 
 .milkdown-editor .ProseMirror ul {
@@ -385,7 +385,7 @@
 .milkdown-editor .milkdown-list-item-block ul,
 .milkdown-editor .milkdown-list-item-block ol {
   list-style: none;
-  padding-left: 0.75em;
+  padding-inline-start: 0.75em;
 }
 
 /* Bullet/ordered list labels */
@@ -468,8 +468,8 @@
 
 /* Blockquotes */
 .milkdown-editor .ProseMirror blockquote {
-  padding-left: 1em;
-  border-left: 2px solid var(--border);
+  padding-inline-start: 1em;
+  border-inline-start: 2px solid var(--border);
   color: var(--muted-foreground);
 }
 
@@ -526,7 +526,7 @@
 .markdown-preview ul,
 .markdown-preview ol {
   margin: 0.5em 0;
-  padding-left: 1.5em;
+  padding-inline-start: 1.5em;
 }
 
 .markdown-preview ul {
@@ -564,8 +564,8 @@
 }
 
 .markdown-preview blockquote {
-  padding-left: 1em;
-  border-left: 2px solid var(--border);
+  padding-inline-start: 1em;
+  border-inline-start: 2px solid var(--border);
   color: var(--muted-foreground);
   margin: 0.5em 0;
 }

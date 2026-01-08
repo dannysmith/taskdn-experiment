@@ -68,7 +68,7 @@ export function ProjectTaskGroup({
 
       {/* Collapsible task list */}
       {isExpanded && (
-        <div className="pl-6 pt-1">
+        <div className="ps-6 pt-1">
           {tasks.length > 0 ? (
             <TaskList
               tasks={tasks}

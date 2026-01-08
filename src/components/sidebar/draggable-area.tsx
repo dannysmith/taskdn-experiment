@@ -82,7 +82,7 @@ export function DraggableArea({
             <span className="truncate">{area.title}</span>
             {/* Wrapper div stops propagation so clicking chevron doesn't select area */}
             <div
-              className="ml-auto"
+              className="ms-auto"
               onClick={(e) => e.stopPropagation()}
               onPointerDown={(e) => e.stopPropagation()}
             >

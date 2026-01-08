@@ -182,7 +182,7 @@ export function DayColumn({
               key={task.id}
               type="button"
               onClick={() => onTaskOpenDetail?.(task.id)}
-              className="flex items-center gap-1 w-full text-left text-xs text-date-due hover:text-date-overdue transition-colors"
+              className="flex items-center gap-1 w-full text-start text-xs text-date-due hover:text-date-overdue transition-colors"
             >
               <Flag className="size-3 shrink-0" />
               <span className="truncate">{task.title}</span>

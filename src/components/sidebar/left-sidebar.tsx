@@ -442,7 +442,7 @@ function DragPreview({ item }: { item: DragItem }) {
         <SidebarGroupLabel className="gap-2 text-sm font-semibold">
           <FolderIcon className="text-icon-folder" />
           <span className="truncate">{area.title}</span>
-          <ChevronRight className="ml-auto" />
+          <ChevronRight className="ms-auto" />
         </SidebarGroupLabel>
       </div>
     )
@@ -456,7 +456,7 @@ function DragPreview({ item }: { item: DragItem }) {
 
     return (
       <div className="bg-sidebar rounded-md shadow-lg border border-border">
-        <SidebarMenuButton className="pl-7">
+        <SidebarMenuButton className="ps-7">
           <ProjectStatusIndicator
             status={project.status}
             completion={completion}

@@ -124,7 +124,7 @@ export function DraggableProject({
       {...listeners}
     >
       <SidebarMenuButton
-        className="pl-7 select-none"
+        className="ps-7 select-none"
         tooltip={project.title}
         isActive={isSelected}
         onClick={onSelect}

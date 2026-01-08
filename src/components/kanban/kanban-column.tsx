@@ -143,7 +143,7 @@ export function KanbanColumn({
           {config.label}
         </span>
         <span className="text-xs text-muted-foreground tabular-nums shrink-0">{tasks.length}</span>
-        <ChevronRight className="size-4 text-muted-foreground ml-auto rotate-90 shrink-0" />
+        <ChevronRight className="size-4 text-muted-foreground ms-auto rotate-90 shrink-0" />
       </button>
 
       {/* Column Content */}

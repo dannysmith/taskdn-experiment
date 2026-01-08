@@ -116,7 +116,7 @@ export function SearchableSelect({
                   {icon}
                   {option.label}
                   {value === option.value && (
-                    <Check className="ml-auto size-4" />
+                    <Check className="ms-auto size-4" />
                   )}
                 </CommandItem>
               ))}

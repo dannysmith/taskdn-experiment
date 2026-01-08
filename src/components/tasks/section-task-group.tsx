@@ -139,7 +139,7 @@ export function SectionTaskGroup(props: SectionTaskGroupProps) {
 
       {/* Collapsible content */}
       {isExpanded && (
-        <div className="pl-6 pt-1">
+        <div className="ps-6 pt-1">
           {hasItems ? (
             isMixedItemsMode ? (
               // Mixed items mode: use OrderedItemList
