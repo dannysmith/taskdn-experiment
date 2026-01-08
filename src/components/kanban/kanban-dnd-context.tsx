@@ -17,6 +17,21 @@ import { arrayMove } from '@dnd-kit/sortable'
 import type { Task, TaskStatus } from '@/types/data'
 import { TaskCard } from '@/components/cards/task-card'
 
+/**
+ * KanbanDndContext - Drag-and-drop context for Kanban boards.
+ *
+ * Wraps KanbanBoard/AreaKanbanBoard to handle:
+ * - Status changes: Dropping a task in a different column updates its status
+ * - Reordering: Dropping a task on another task in the same column reorders
+ * - Swimlane changes: For AreaKanbanBoard, moving between project swimlanes
+ *
+ * Uses dnd-kit with PointerSensor. Shows TaskCard as DragOverlay during drag.
+ * Visual column highlighting uses dragPreview state exposed via context.
+ *
+ * Also exports helper functions for creating drag data:
+ * - createKanbanTaskData, createEmptyColumnData, createEmptySwimlaneData
+ */
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

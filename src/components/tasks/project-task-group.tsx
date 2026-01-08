@@ -7,6 +7,16 @@ import { ProjectHeader } from './project-header'
 import { TaskList } from './task-list'
 import { useTaskDragPreview } from './task-dnd-context'
 
+/**
+ * ProjectTaskGroup - Collapsible project header with its task list underneath.
+ *
+ * Used in AreaView (list mode) to show each project with its tasks.
+ * The header shows project title, completion progress circle, and an
+ * arrow to open the full ProjectView.
+ *
+ * Tasks can be dragged between project groups when wrapped in TaskDndContext.
+ * Empty projects show a droppable zone with visual feedback.
+ */
 interface ProjectTaskGroupProps {
   project: Project
   tasks: Task[]

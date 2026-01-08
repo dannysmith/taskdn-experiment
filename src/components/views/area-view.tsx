@@ -21,6 +21,23 @@ import {
 } from '@/components/kanban'
 import type { Task, Project } from '@/types/data'
 
+/**
+ * AreaView - Shows all projects and tasks within a life area.
+ *
+ * Areas represent ongoing life responsibilities (e.g., "Health", "Finance",
+ * "Work"). This view displays:
+ * 1. Area notes (collapsible) - background info about this life area
+ * 2. Active Projects grid - cards for in-progress/ready/planning/blocked projects
+ * 3. All Projects list OR Kanban - depends on view mode toggle
+ *
+ * Supports two view modes (toggled via ViewHeader):
+ * - "list" → Collapsible project groups with task lists + loose tasks section
+ * - "kanban" → AreaKanbanBoard with swimlanes per project, tasks by status
+ *
+ * Tasks can be dragged between projects in list mode. "Loose tasks" are tasks
+ * directly under the area without a project.
+ */
+
 /** Active statuses for project cards grid */
 const ACTIVE_STATUSES: Project['status'][] = [
   'in-progress',

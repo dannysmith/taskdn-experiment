@@ -7,6 +7,16 @@ import type { Project, ProjectStatus } from '@/types/data'
 import { projectStatusConfig } from '@/config/status'
 import { ProgressCircle } from '@/components/ui/progress-circle'
 
+/**
+ * ProjectCard - Summary card showing project status and progress.
+ *
+ * Used in AreaView to display "Active Projects" as a grid of cards.
+ * Shows project title, status badge, progress bar, task counts, and optional
+ * end date. Clicking navigates to the ProjectView for that project.
+ *
+ * The progress bar visualizes completion percentage based on done/dropped
+ * tasks. Uses container queries for responsive behavior in grid layouts.
+ */
 export interface ProjectCardProps {
   project: Project
   /** Completion percentage (0-100) */
@@ -25,11 +35,6 @@ export interface ProjectCardProps {
   isSelected?: boolean
   className?: string
 }
-
-/**
- * A card representation of a project.
- * Used in area views, dashboards, and project grids.
- */
 export function ProjectCard({
   project,
   completion,
@@ -131,10 +136,11 @@ export function ProjectCard({
   )
 }
 
-// -----------------------------------------------------------------------------
-// Project Status Badge
-// -----------------------------------------------------------------------------
-
+/**
+ * ProjectStatusBadge - Colored pill showing project status.
+ * Internal component used within ProjectCard. For standalone status display,
+ * use ProjectStatusPill from projects/project-status-pill.tsx instead.
+ */
 function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   const config = projectStatusConfig[status]
 

@@ -10,6 +10,21 @@ import {
 } from '@/components/ui/popover'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 
+/**
+ * DateButton - Compact date display with calendar popover for editing.
+ *
+ * Used in TaskDetailPanel for scheduled, due, and deferUntil dates.
+ * Shows an icon + formatted date (or placeholder when empty). Click opens
+ * a calendar picker. Has a "Clear date" button when a date is set.
+ *
+ * Three visual variants with different color schemes:
+ * - scheduled: Neutral gray (most common, non-urgent)
+ * - due: Red-tinted (deadline indicator)
+ * - defer: Blue-tinted (matches icebox/deferred styling)
+ *
+ * Uses container queries for responsive sizing (height, padding, text size).
+ */
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

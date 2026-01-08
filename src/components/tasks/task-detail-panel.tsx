@@ -21,10 +21,20 @@ import { TaskStatusCheckbox } from './task-status-checkbox'
 import { TaskStatusPill } from './task-status-pill'
 import { LazyMilkdownEditor } from './lazy-milkdown-editor'
 
-// -----------------------------------------------------------------------------
-// Main Component
-// -----------------------------------------------------------------------------
-
+/**
+ * TaskDetailPanel - Full task editing interface in the right sidebar.
+ *
+ * Opens when clicking a task anywhere in the app (lists, kanban, calendars).
+ * Lives inside DetailSideBar and is controlled by task-detail-store.
+ *
+ * Sections:
+ * - Header: Status checkbox, title (editable), close button
+ * - Metadata: Project selector, area selector, status pill, date buttons
+ * - Notes: Full markdown editor (LazyMilkdownEditor)
+ * - Footer: Created/updated timestamps, task ID
+ *
+ * All changes save immediately - no explicit save button needed.
+ */
 export function TaskDetailPanel() {
   const { openTaskId, closeTask } = useTaskDetailStore()
   const {

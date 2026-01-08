@@ -14,6 +14,24 @@ import { TaskListItem } from './task-list-item'
 import { HeadingListItem } from '@/components/headings'
 import { useTaskDragPreview } from './task-dnd-context'
 
+/**
+ * OrderedItemList - Mixed list of tasks and inline headings with drag-and-drop.
+ *
+ * Used in TodayView's "Scheduled for Today" section where users can add
+ * headings to organize their daily tasks into groups.
+ *
+ * Items come from useTodayOrder hook which maintains a separate display order
+ * that includes both tasks and heading IDs. The order is persisted separately
+ * from task entity data.
+ *
+ * Keyboard shortcuts:
+ * - Arrow keys: Navigate selection
+ * - Enter: Edit selected item (title for tasks/headings)
+ * - Space: Toggle task status (tasks only)
+ * - Delete/Backspace: Delete heading (headings only)
+ * - Cmd/Ctrl+N: Create new task after selection
+ * - Cmd/Ctrl+Arrow: Reorder selected item
+ */
 interface OrderedItemListProps {
   /** Ordered items (tasks and headings) from getOrderedItems() */
   items: ResolvedOrderedItem[]

@@ -8,6 +8,21 @@ import { useInboxOrder } from '@/hooks/use-inbox-order'
 import { DraggableTaskList } from '@/components/tasks/task-list'
 import { EmptyState } from '@/components/ui/empty-state'
 
+/**
+ * InboxView - Displays all tasks with "inbox" status.
+ *
+ * The inbox is the capture point for new, unprocessed tasks. Tasks land here
+ * when created via quick-add and haven't yet been triaged into a project,
+ * given a due date, or moved to another status.
+ *
+ * Users process the inbox by opening each task and either:
+ * - Assigning it to a project/area
+ * - Setting dates (scheduled, due, deferUntil)
+ * - Changing status to "next", "waiting", etc.
+ * - Completing or dropping it
+ *
+ * Display order is managed by useInboxOrder hook, separate from entity data.
+ */
 export function InboxView() {
   const {
     data,

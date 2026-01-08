@@ -5,6 +5,21 @@ import type { Task, TaskStatus } from '@/types/data'
 import { KanbanColumn } from './kanban-column'
 import { KanbanDndContext } from './kanban-dnd-context'
 
+/**
+ * KanbanBoard - Horizontal board with status columns for task management.
+ *
+ * Used in ProjectView and WeekView (kanban mode). Displays tasks grouped by
+ * status, with drag-and-drop to change task status or reorder within a column.
+ *
+ * Columns can be collapsed into thin strips to save horizontal space.
+ * By default, "inbox" and "icebox" are collapsed since they're less common.
+ *
+ * Also exports:
+ * - DEFAULT_STATUS_ORDER: Standard column ordering
+ * - DEFAULT_EXPANDED_STATUSES: Which columns start expanded
+ * - useCollapsedColumns hook: Manages column collapse state
+ */
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

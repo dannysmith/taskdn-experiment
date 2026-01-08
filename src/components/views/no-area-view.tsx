@@ -11,6 +11,17 @@ import { TaskDndContext } from '@/components/tasks/task-dnd-context'
 import { AreaKanbanBoard, useAreaCollapsedColumns } from '@/components/kanban'
 import type { Task } from '@/types/data'
 
+/**
+ * NoAreaView - Shows orphan projects and tasks that aren't assigned to any area.
+ *
+ * This view appears when clicking the "No Area" item in the sidebar. It displays:
+ * - Projects that have no areaId set
+ * - "Loose tasks" that have neither projectId nor areaId
+ *
+ * Supports the same view modes as AreaView (list and kanban). In list mode,
+ * tasks can be dragged between orphan projects. This view helps users find
+ * and organize items that haven't been assigned to a life area yet.
+ */
 interface NoAreaViewProps {
   onNavigateToProject: (projectId: string) => void
 }

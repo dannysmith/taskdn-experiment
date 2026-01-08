@@ -3,6 +3,17 @@ import { Folder, FolderOpen } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { Area } from '@/types/data'
 
+/**
+ * AreaCard - Summary card showing a life area.
+ *
+ * Areas are ongoing life responsibilities (e.g., "Health", "Career", "Family").
+ * This card displays the area title, optional type badge, description, and
+ * project counts.
+ *
+ * Currently not used in the main app views, but designed for a future
+ * dashboard or "all areas" overview grid. Uses container queries for
+ * responsive behavior.
+ */
 export interface AreaCardProps {
   area: Area
   /** Number of projects in this area */
@@ -14,11 +25,6 @@ export interface AreaCardProps {
   isSelected?: boolean
   className?: string
 }
-
-/**
- * A card representation of an area.
- * Used in dashboards and area overview grids.
- */
 export function AreaCard({
   area,
   projectCount,
@@ -88,9 +94,13 @@ export function AreaCard({
   )
 }
 
-// -----------------------------------------------------------------------------
-// Area Type Badge
-// -----------------------------------------------------------------------------
+/**
+ * AreaTypeBadge - Colored label for area categories.
+ *
+ * Area types are user-defined categories like "personal", "work", "family".
+ * Colors are automatically assigned using a hash function, so the same type
+ * string always gets the same color. There are 6 color slots that cycle.
+ */
 
 // 6 color slots for user-defined area types
 const typeColorClasses = [

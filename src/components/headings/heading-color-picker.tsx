@@ -10,6 +10,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 
+/**
+ * HeadingColorPicker - Small colored dot that opens a color palette popover.
+ *
+ * Used in HeadingListItem to let users change the heading's accent color.
+ * Shows available colors as clickable dots with a checkmark on the selected one.
+ * There are 6 heading colors: stone, red, orange, green, blue, purple.
+ */
 interface HeadingColorPickerProps {
   color: HeadingColor
   onColorChange: (color: HeadingColor) => void

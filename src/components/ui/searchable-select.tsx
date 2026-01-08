@@ -17,6 +17,19 @@ import {
   CommandList,
 } from '@/components/ui/command'
 
+/**
+ * SearchableSelect - Combobox-style dropdown with search filtering.
+ *
+ * Used in TaskDetailPanel for selecting project and area. Shows a trigger
+ * button with icon + label, opens a searchable dropdown powered by cmdk.
+ *
+ * Features:
+ * - Type to filter options
+ * - Checkmark on selected option
+ * - "Clear selection" option when a value is selected
+ * - Customizable empty state text
+ */
+
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------

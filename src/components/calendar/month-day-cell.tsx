@@ -9,6 +9,17 @@ import { getCalendarTaskDragId } from '@/types/calendar-order'
 import { SortableTaskCard } from './draggable-task-card'
 import type { TaskCardVariant } from '@/components/cards/task-card'
 
+/**
+ * MonthDayCell - Single day cell in the month calendar grid.
+ *
+ * Compact cell designed to fit many in a row. Shows:
+ * - Date number (highlighted if today)
+ * - Compact TaskCards for scheduled tasks
+ * - Hidden "+" button on hover to create new task
+ *
+ * Acts as a droppable zone for drag-and-drop scheduling.
+ * Uses container queries for responsive sizing within the grid.
+ */
 interface MonthDayCellProps {
   date: Date
   tasks: Task[]

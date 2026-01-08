@@ -6,6 +6,17 @@ import { cn } from '@/lib/utils'
 import { TaskItem, type TaskItemProps } from './task-item'
 import { useTaskDragPreview } from './task-dnd-context'
 
+/**
+ * SortableTaskItem - TaskItem wrapped with dnd-kit sortable for drag-and-drop.
+ *
+ * Used inside TaskList when TaskDndContext is the parent. Provides:
+ * - Drag handle behavior (whole row is draggable)
+ * - Transform/transition during drag
+ * - Cross-container gap animation (shows space where item will land)
+ *
+ * The gap animation uses crossContainerHover from TaskDndContext to show a
+ * margin-top when another container's task is being dragged above this item.
+ */
 export interface SortableTaskItemProps extends Omit<TaskItemProps, 'className'> {
   /** Unique drag ID for this item (should be unique across all containers) */
   dragId: string

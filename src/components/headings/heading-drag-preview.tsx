@@ -2,6 +2,12 @@ import { cn } from '@/lib/utils'
 import type { Heading } from '@/types/headings'
 import { headingColorConfig } from '@/config/heading-colors'
 
+/**
+ * HeadingDragPreview - Visual preview shown in DragOverlay when dragging a heading.
+ *
+ * Used by TaskDndContext to show a floating card representing the heading
+ * being dragged. Matches the visual style of HeadingListItem but simplified.
+ */
 interface HeadingDragPreviewProps {
   heading: Heading
 }

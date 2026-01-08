@@ -9,6 +9,21 @@ import { CollapsibleNotesSection } from '@/components/ui/collapsible-notes'
 import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
 import type { Task } from '@/types/data'
 
+/**
+ * ProjectView - Shows all tasks within a single project.
+ *
+ * Projects are finishable efforts with a clear outcome (e.g., "Launch website",
+ * "Plan vacation"). This view displays:
+ * 1. Project notes (collapsible) - goals, context, reference material
+ * 2. Tasks section - all tasks belonging to this project
+ *
+ * Supports two view modes (toggled via ViewHeader):
+ * - "list" → DraggableTaskList with inline editing and reordering
+ * - "kanban" → KanbanBoard with tasks grouped by status columns
+ *
+ * The project status pill in ViewHeader allows changing project status
+ * (planning, ready, in-progress, blocked, done, dropped).
+ */
 interface ProjectViewProps {
   projectId: string
 }

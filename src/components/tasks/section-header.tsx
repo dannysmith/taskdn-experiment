@@ -2,6 +2,19 @@ import { ChevronRight, Plus, PlusCircle } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 
+/**
+ * SectionHeader - Collapsible header for grouping tasks in list views.
+ *
+ * Used by SectionTaskGroup for sections like "Scheduled for Today", "Overdue",
+ * "Became Available Today", and "Loose Tasks". Provides:
+ * - Expand/collapse toggle (chevron rotates when expanded)
+ * - Optional icon before title
+ * - Task count badge on the right
+ * - Optional "+ Task" and "+ Heading" action buttons
+ *
+ * Click anywhere on the header to expand/collapse. Action buttons stop
+ * propagation so they don't trigger collapse.
+ */
 interface SectionHeaderProps {
   title: string
   /** Optional icon to display before the title */

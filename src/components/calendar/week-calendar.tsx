@@ -39,6 +39,21 @@ import type { TaskCardVariant } from '@/components/cards/task-card'
 import { DayColumn } from './day-column'
 import { TaskCardDragPreview } from './draggable-task-card'
 
+/**
+ * WeekCalendar - 7-day column layout with drag-and-drop scheduling.
+ *
+ * Used in WeekView (calendar mode). Shows Mon-Sun columns where:
+ * - Each column displays tasks scheduled for that day (full TaskCards)
+ * - Tasks can be dragged between days to reschedule
+ * - Tasks can be reordered within a day
+ * - Bottom section shows tasks DUE on that day (even if scheduled elsewhere)
+ *
+ * More detailed than MonthCalendar - shows full TaskCards with metadata,
+ * context names, and inline editing. Weekend columns have subtle shading.
+ *
+ * Order persistence uses useCalendarOrder hook.
+ */
+
 interface DragState {
   taskId: string
   task: Task

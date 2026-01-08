@@ -2,6 +2,17 @@ import { cn } from '@/lib/utils'
 import type { ProjectStatus } from '@/types/data'
 import { projectStatusConfig } from '@/config/status'
 
+/**
+ * ProjectStatusBadges - Compact status breakdown for area views.
+ *
+ * Shows colored badges with counts for each project status in an area.
+ * Used in ViewHeader when viewing an area to provide at-a-glance project
+ * health information. Only shows badges for statuses with count > 0.
+ *
+ * Order is: blocked → in-progress → ready → planning → paused → done
+ * (most urgent/active statuses first).
+ */
+
 // Display order for status badges
 const statusOrder: ProjectStatus[] = [
   'blocked',
@@ -16,11 +27,6 @@ interface ProjectStatusBadgesProps {
   counts: Record<string, number>
   className?: string
 }
-
-/**
- * Displays compact badges showing project counts by status.
- * Used in the header bar when viewing an area.
- */
 export function ProjectStatusBadges({
   counts,
   className,

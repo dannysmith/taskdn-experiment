@@ -14,6 +14,27 @@ import { Button } from '@/components/ui/button'
 import { TaskStatusPill } from '@/components/tasks/task-status-pill'
 import { TaskStatusCheckbox } from '@/components/tasks/task-status-checkbox'
 
+/**
+ * TaskCard - Visual card representation of a task.
+ *
+ * Used in multiple contexts throughout the app:
+ * - Kanban boards (KanbanColumn) - default size with full metadata
+ * - Month calendar (MonthDayCell) - compact size, just checkbox + title
+ * - Week calendar (DayColumn) - default size
+ *
+ * Two size variants:
+ * - "default" - Full card with status pill, dates, context, and edit button
+ * - "compact" - Minimal card with just checkbox + title (for tight spaces)
+ *
+ * Four visual variants based on task state:
+ * - "default" - Normal card background
+ * - "overdue" - Red-tinted for past-due tasks
+ * - "deferred" - Muted/dashed border for deferred tasks
+ * - "done" - Green-tinted for completed tasks
+ *
+ * Supports inline title editing via double-click or Enter key when selected.
+ * Uses container queries for responsive behavior at different card widths.
+ */
 export type TaskCardVariant = 'default' | 'overdue' | 'deferred' | 'done'
 export type TaskCardSize = 'default' | 'compact'
 
@@ -50,10 +71,6 @@ export interface TaskCardProps {
   className?: string
 }
 
-/**
- * A card representation of a task.
- * Used in Kanban boards, calendar views, and dashboards.
- */
 export function TaskCard({
   task,
   variant = 'default',
@@ -342,10 +359,13 @@ export function TaskCard({
   )
 }
 
-// -----------------------------------------------------------------------------
-// Date Picker Button
-// -----------------------------------------------------------------------------
-
+/**
+ * DatePickerButton - Inline date picker for task cards.
+ *
+ * Shows a date icon + formatted date that opens a calendar popover on click.
+ * When no date is set but canEdit is true, shows a muted icon to add a date.
+ * Includes a "Clear date" button inside the popover to remove the date.
+ */
 interface DatePickerButtonProps {
   date: Date | undefined
   icon: React.ReactNode

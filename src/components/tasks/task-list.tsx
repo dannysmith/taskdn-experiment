@@ -23,6 +23,25 @@ import { SortableTaskItem } from './sortable-task-item'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 import { useTaskDragPreview } from './task-dnd-context'
 
+/**
+ * Task List Components
+ *
+ * Two variants for displaying lists of tasks with drag-and-drop:
+ *
+ * 1. TaskList - For use inside a parent TaskDndContext (e.g., AreaView)
+ *    Expects external DndContext, handles only same-container reordering.
+ *    Used when multiple lists need cross-container drag support.
+ *
+ * 2. DraggableTaskList - Standalone with its own DndContext (e.g., ProjectView)
+ *    Self-contained drag-and-drop. Use when there's only one list.
+ *
+ * Both provide:
+ * - Keyboard navigation (arrows, Enter to edit, Space to toggle status)
+ * - Cmd/Ctrl+N to create new task after selection
+ * - Cmd/Ctrl+Arrow to reorder selected task
+ * - Visual selection and inline title editing
+ */
+
 // -----------------------------------------------------------------------------
 // Shared Props
 // -----------------------------------------------------------------------------

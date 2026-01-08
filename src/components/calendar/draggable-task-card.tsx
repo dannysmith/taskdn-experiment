@@ -14,6 +14,16 @@ import {
   type TaskCardSize,
 } from '@/components/cards/task-card'
 
+/**
+ * SortableTaskCard - TaskCard with dnd-kit sortable for calendar views.
+ *
+ * Wraps TaskCard with drag-and-drop capabilities. Used in both MonthDayCell
+ * and DayColumn. The drag ID encodes both the date and task ID so the
+ * calendar DnD context can determine source/target days.
+ *
+ * Also exports TaskCardDragPreview for use in DragOverlay.
+ * DraggableTaskCard is a legacy alias for backwards compatibility.
+ */
 interface SortableTaskCardProps {
   task: Task
   date: string

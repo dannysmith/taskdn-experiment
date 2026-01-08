@@ -10,6 +10,20 @@ import { DraggableTaskList, TaskList } from './task-list'
 import { OrderedItemList } from './ordered-item-list'
 import { useTaskDragPreview } from './task-dnd-context'
 
+/**
+ * SectionTaskGroup - Collapsible section with a task list (and optional headings).
+ *
+ * Used in TodayView for sections like "Scheduled for Today", "Overdue", etc.
+ * Also used in AreaView/NoAreaView for the "Loose Tasks" section.
+ *
+ * Two modes:
+ * 1. Task-only: Pass `tasks` + `onTasksReorder` for simple task list
+ * 2. Mixed items: Pass `orderedItems` + `onItemsReorder` to support inline
+ *    headings for manual organization within the section
+ *
+ * The section header shows expand/collapse chevron, optional icon, title,
+ * task count, and optional "+ Task" / "+ Heading" buttons.
+ */
 interface BaseSectionProps {
   /** Unique identifier for this section (used for drag IDs) */
   sectionId: string

@@ -9,6 +9,18 @@ import { getCalendarTaskDragId } from '@/types/calendar-order'
 import { SortableTaskCard } from './draggable-task-card'
 import type { TaskCardVariant } from '@/components/cards/task-card'
 
+/**
+ * DayColumn - Single day column in the week calendar.
+ *
+ * Taller than MonthDayCell, designed to show more task detail. Shows:
+ * - Day header (sticky) with day name and date number
+ * - Full TaskCards for scheduled tasks with metadata
+ * - "+" button to create new task
+ * - Bottom section with tasks DUE on this day (not necessarily scheduled here)
+ *
+ * The "due on this day" section helps users see deadlines even when the
+ * task is scheduled for an earlier day. Acts as a droppable zone for DnD.
+ */
 interface TaskContext {
   projectName?: string
   areaName?: string

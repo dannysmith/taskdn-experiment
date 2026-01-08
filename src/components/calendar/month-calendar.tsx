@@ -41,6 +41,22 @@ import type { TaskCardVariant } from '@/components/cards/task-card'
 import { MonthDayCell } from './month-day-cell'
 import { TaskCardDragPreview } from './draggable-task-card'
 
+/**
+ * MonthCalendar - Full month grid view with drag-and-drop scheduling.
+ *
+ * Used in CalendarView. Shows a traditional month calendar where:
+ * - Each day cell displays tasks scheduled for that day (compact TaskCards)
+ * - Tasks can be dragged between days to reschedule
+ * - Tasks can be reordered within a day
+ * - Click + on a day to create a new task scheduled for that date
+ *
+ * Shows overflow days from adjacent months (grayed out). Weekend days have
+ * subtle shading. Today is highlighted with a primary-colored date badge.
+ *
+ * Order persistence uses useCalendarOrder hook to maintain display order
+ * separate from task entity data.
+ */
+
 interface DragState {
   taskId: string
   task: Task

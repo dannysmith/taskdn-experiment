@@ -13,6 +13,20 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { toHeadingId, type HeadingColor } from '@/types/headings'
 import { arrayMove } from '@dnd-kit/sortable'
 
+/**
+ * TodayView - Shows tasks that need attention today.
+ *
+ * This is the primary "daily focus" view. It displays three sections:
+ * 1. "Scheduled for Today" - Tasks explicitly scheduled for today's date
+ * 2. "Overdue or Due Today" - Tasks whose due date has passed or is today
+ * 3. "Became Available Today" - Tasks whose deferUntil date is today
+ *
+ * The "Scheduled for Today" section supports inline headings for manual
+ * organization. Tasks can be dragged between sections (only TO scheduled).
+ * Tasks can also be reordered within sections.
+ *
+ * Display order is managed by useTodayOrder hook, separate from entity data.
+ */
 interface TodayViewProps {
   onNavigateToProject?: (projectId: string) => void
   onNavigateToArea?: (areaId: string) => void

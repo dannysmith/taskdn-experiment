@@ -4,6 +4,19 @@ import { ProjectStatusBadges } from '@/components/projects/project-status-badges
 import { ProjectStatusPill } from '@/components/projects/project-status-pill'
 import { ViewToggle } from '@/components/ui/view-toggle'
 
+/**
+ * ViewHeader - Top header bar for all main content views.
+ *
+ * Displays the view title on the left, optional contextual information in the
+ * middle (project status counts for area views, or a status pill for project
+ * views), and a view mode toggle on the right (list/kanban/calendar).
+ *
+ * Usage:
+ * - Every view component renders this at the top of its content area
+ * - Pass `projectStatusCounts` when viewing an area (shows badge breakdown)
+ * - Pass `currentProject` when viewing a single project (shows editable status)
+ * - Pass `viewModeKey` to enable the list/kanban/calendar toggle
+ */
 interface ViewHeaderProps {
   title: string
   projectStatusCounts?: Record<string, number> | null

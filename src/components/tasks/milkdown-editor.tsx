@@ -20,6 +20,22 @@ import { cn } from '@/lib/utils'
 // Import minimal ProseMirror base styles
 import '@milkdown/kit/prose/view/style/prosemirror.css'
 
+/**
+ * MilkdownEditor - Rich markdown editor for task notes.
+ *
+ * Built on Milkdown (which uses ProseMirror under the hood). Supports:
+ * - CommonMark and GFM (tables, strikethrough, task lists)
+ * - Interactive checkboxes via listItemBlockComponent
+ * - Undo/redo via history plugin
+ *
+ * Custom enhancements:
+ * - "[] " at start of line creates a task list item (checkbox)
+ * - Pasting URL over selected text creates a markdown link
+ * - Cmd/Ctrl+Click on links opens them in new tab
+ *
+ * Styling is in src/index.css under .milkdown-editor.
+ */
+
 // -----------------------------------------------------------------------------
 // Custom Editor Enhancements Plugin
 // -----------------------------------------------------------------------------

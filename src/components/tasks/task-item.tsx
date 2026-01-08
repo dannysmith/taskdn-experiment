@@ -6,6 +6,20 @@ import { formatRelativeDate, isOverdue } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 
+/**
+ * TaskItem - Pure presentational component for a task row in list views.
+ *
+ * Displays: status checkbox, title (inline-editable), open-detail button,
+ * and right-aligned metadata (context name, scheduled date, due date).
+ *
+ * This is the base visual component - no drag-and-drop awareness.
+ * Wrap with SortableTaskItem or TaskListItem for DnD support.
+ *
+ * States:
+ * - Selected: Blue background, immediate visibility of open-detail button
+ * - Editing: Thin primary border, title becomes input field
+ * - Done/Dropped: Strikethrough title, muted colors
+ */
 export interface TaskItemProps {
   task: Task
   isSelected: boolean

@@ -8,6 +8,19 @@ import {
 import type { Project } from '@/types/data'
 import { projectStatusConfig } from '@/config/status'
 
+/**
+ * ProjectHeader - Collapsible header row for a project in list views.
+ *
+ * Used by ProjectTaskGroup in AreaView. Shows:
+ * - Expand/collapse chevron
+ * - Status indicator (progress circle or done/blocked icons)
+ * - Project title
+ * - Status badge
+ *
+ * Interactions:
+ * - Single click: Toggle expand/collapse
+ * - Double click: Navigate to full ProjectView
+ */
 interface ProjectHeaderProps {
   project: Project
   completion: number

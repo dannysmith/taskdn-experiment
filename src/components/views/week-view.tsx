@@ -9,6 +9,19 @@ import { WeekCalendar } from '@/components/calendar/week-calendar'
 import { KanbanBoard, useCollapsedColumns } from '@/components/kanban'
 import type { Task, TaskStatus } from '@/types/data'
 
+/**
+ * WeekView - Shows tasks scheduled or due within the current week.
+ *
+ * Supports two view modes (toggled via ViewHeader):
+ * - "calendar" → WeekCalendar (7-day column layout with drag-drop scheduling)
+ * - "kanban" → KanbanBoard (tasks grouped by status)
+ *
+ * In calendar mode, tasks can be dragged to different days to reschedule.
+ * In kanban mode, tasks can be moved between status columns.
+ *
+ * Filters tasks where scheduled OR due date falls within Monday-Sunday of
+ * the current week.
+ */
 interface WeekViewProps {
   onNavigateToProject?: (projectId: string) => void
   onNavigateToArea?: (areaId: string) => void

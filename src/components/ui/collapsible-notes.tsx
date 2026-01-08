@@ -4,6 +4,15 @@ import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MarkdownPreview } from '@/components/ui/markdown-preview'
 
+/**
+ * CollapsibleNotesSection - Expandable notes panel for areas and projects.
+ *
+ * Used at the top of AreaView and ProjectView to show descriptive notes.
+ * When collapsed, shows first 1-2 lines of content as a teaser. When
+ * expanded, renders full markdown content.
+ *
+ * The collapse state is local (not persisted). Click the header to toggle.
+ */
 interface CollapsibleNotesSectionProps {
   notes: string
   title?: string

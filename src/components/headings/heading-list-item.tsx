@@ -8,6 +8,21 @@ import type { Heading, HeadingColor } from '@/types/headings'
 import { headingColorConfig } from '@/config/heading-colors'
 import { HeadingColorPicker } from './heading-color-picker'
 
+/**
+ * HeadingListItem - Inline heading row for organizing tasks in lists.
+ *
+ * Used in TodayView's "Scheduled for Today" section via OrderedItemList.
+ * Headings help users visually group their daily tasks into categories.
+ *
+ * Features:
+ * - Click to select, double-click to edit title
+ * - Color picker dot on the right (6 accent colors)
+ * - Colored bottom border matching the accent color
+ * - Delete button (minus icon) on hover/selection
+ * - Drag-and-drop for reordering among tasks
+ *
+ * Keyboard: Enter commits edit, Escape cancels, Delete removes heading.
+ */
 export interface HeadingListItemProps {
   heading: Heading
   isSelected: boolean

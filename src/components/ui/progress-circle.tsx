@@ -1,5 +1,15 @@
 import { cn } from '@/lib/utils'
 
+/**
+ * ProgressCircle - SVG circular progress indicator.
+ *
+ * Used in the sidebar (via ProjectStatusIndicator) to show project completion
+ * percentage. Also used in ProjectCard. Renders as an SVG with two circles:
+ * a faint background track and a colored progress arc.
+ *
+ * Color comes from currentColor (controlled via Tailwind text-* classes).
+ * Animation is CSS transition on stroke-dashoffset.
+ */
 interface ProgressCircleProps {
   value: number // 0-100
   size?: number

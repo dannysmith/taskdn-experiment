@@ -10,6 +10,21 @@ import type { Project, ProjectStatus } from '@/types/data'
 import { getDragId } from '@/types/sidebar-order'
 import type { DragItem } from '@/types/sidebar-order'
 
+/**
+ * DraggableProject - Project row in the sidebar with drag-drop support.
+ *
+ * Displays a project with status indicator and title. Draggable for:
+ * - Reordering within an area
+ * - Moving to a different area
+ * - Moving to/from "No Area"
+ *
+ * Also exports:
+ * - ProjectStatusIndicator: Shows progress circle or status icon
+ * - getProjectTitleClass: Returns muted class for done/paused projects
+ *
+ * ProjectStatusIndicator is also reused in ProjectHeader and ProjectCard.
+ */
+
 // -----------------------------------------------------------------------------
 // Status Indicator
 // -----------------------------------------------------------------------------

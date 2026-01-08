@@ -1,15 +1,17 @@
 import { cn } from '@/lib/utils'
 import { LazyMilkdownPreview } from '@/components/tasks/lazy-milkdown-editor'
 
+/**
+ * MarkdownPreview - Read-only markdown renderer using Milkdown.
+ *
+ * Shares the same lazy-loaded chunk as MilkdownEditor (via LazyMilkdownPreview)
+ * so there's no extra bundle cost. Used in CollapsibleNotesSection for
+ * displaying area/project notes.
+ */
 interface MarkdownPreviewProps {
   content: string
   className?: string
 }
-
-/**
- * Read-only markdown renderer using Milkdown in read-only mode.
- * Shares the same lazy-loaded chunk as the editor.
- */
 export function MarkdownPreview({ content, className }: MarkdownPreviewProps) {
   return (
     <LazyMilkdownPreview

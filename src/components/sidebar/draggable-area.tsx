@@ -18,6 +18,18 @@ import type { Area } from '@/types/data'
 import { getDragId } from '@/types/sidebar-order'
 import type { DragItem } from '@/types/sidebar-order'
 
+/**
+ * DraggableArea - Collapsible area section in the sidebar with drag-drop.
+ *
+ * Represents a life area (e.g., "Health", "Work") that can contain projects.
+ * Features:
+ * - Draggable header for reordering areas
+ * - Collapsible to hide/show projects
+ * - Click header to navigate to AreaView
+ * - Drop target for projects (moving between areas)
+ *
+ * Children are typically a list of DraggableProject components.
+ */
 interface DraggableAreaProps {
   area: Area
   isSelected: boolean

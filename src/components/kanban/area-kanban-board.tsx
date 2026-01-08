@@ -14,6 +14,25 @@ import {
 } from './kanban-dnd-context'
 import { DEFAULT_STATUS_ORDER } from './kanban-board'
 
+/**
+ * AreaKanbanBoard - Kanban board with project swimlanes for area views.
+ *
+ * Unlike KanbanBoard which just has status columns, this adds horizontal
+ * swimlanes within each column - one per project plus a "Loose Tasks" lane
+ * for tasks directly under the area (no project).
+ *
+ * Used in AreaView (kanban mode). Supports:
+ * - Drag between swimlanes to change task's project
+ * - Drag between columns to change status
+ * - Reorder within a swimlane
+ *
+ * Hides "done" and "dropped" columns by default to reduce clutter.
+ *
+ * Also exports:
+ * - LOOSE_TASKS_SWIMLANE_ID: Pseudo-project ID for area-direct tasks
+ * - useAreaCollapsedColumns: Hook with area-specific default collapsed columns
+ */
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

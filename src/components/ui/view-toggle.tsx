@@ -3,6 +3,15 @@ import { List, Columns3, Calendar } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
+/**
+ * ViewToggle - Icon toggle group for switching between list/kanban/calendar views.
+ *
+ * Used in ViewHeader to let users choose how they want to see their tasks.
+ * Available modes are configurable - not all views support all modes.
+ *
+ * View mode state is managed by view-mode-store (Zustand) with separate
+ * state per view type (e.g., AreaView can be list while WeekView is calendar).
+ */
 export type ViewMode = 'list' | 'kanban' | 'calendar'
 
 interface ViewToggleProps {

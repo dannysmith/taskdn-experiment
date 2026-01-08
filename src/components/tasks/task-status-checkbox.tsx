@@ -4,6 +4,22 @@ import { Check, X, Snowflake, Inbox } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { TaskStatus } from '@/types/data'
 
+/**
+ * TaskStatusCheckbox - Visual status indicator styled like Things 3.
+ *
+ * Used everywhere a task appears (lists, cards, detail panel). Shows the
+ * task's status via color and icon:
+ * - ready: Empty grey square (default state)
+ * - done: Green filled with checkmark
+ * - in-progress: Amber border with inner dot
+ * - blocked: Red filled with X
+ * - icebox: Light blue border with snowflake
+ * - inbox: Blue border with inbox icon
+ * - dropped: Light red filled with X
+ *
+ * Clicking toggles between done/ready (the most common action).
+ * For other status changes, use TaskStatusPill dropdown.
+ */
 interface TaskStatusCheckboxProps {
   status: TaskStatus
   onToggle: () => void

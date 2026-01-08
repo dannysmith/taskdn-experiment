@@ -2,6 +2,18 @@ import * as React from 'react'
 import { lazy, Suspense, Component } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 
+/**
+ * LazyMilkdownEditor - Code-split wrapper for the Milkdown markdown editor.
+ *
+ * Milkdown is a heavyweight dependency, so it's loaded lazily to improve
+ * initial page load. This component provides:
+ * - React.lazy loading with Suspense fallback (skeleton UI)
+ * - Error boundary for graceful failure recovery
+ *
+ * Used in TaskDetailPanel for the notes field. The editorKey prop ensures
+ * the editor remounts when switching between tasks (necessary because
+ * Milkdown doesn't support controlled value changes well).
+ */
 const MilkdownEditor = lazy(() =>
   import('./milkdown-editor').then((mod) => ({ default: mod.MilkdownEditor }))
 )

@@ -65,6 +65,25 @@ import appIcon from '@/assets/icon-1024-trans.png'
 import { getDragId, ORPHAN_CONTAINER_ID } from '@/types/sidebar-order'
 import type { DragItem } from '@/types/sidebar-order'
 
+/**
+ * AppSidebar (left-sidebar.tsx) - Main navigation sidebar for the app.
+ *
+ * The left sidebar contains:
+ * 1. App branding + collapse toggle button
+ * 2. Fixed navigation items: Today, This Week, Inbox, Calendar
+ * 3. Draggable Area sections (collapsible, contain projects)
+ * 4. "No Area" section for orphan projects
+ *
+ * Supports drag-and-drop for:
+ * - Reordering areas relative to each other
+ * - Reordering projects within an area
+ * - Moving projects between areas (cross-container)
+ * - Moving projects to/from "No Area"
+ *
+ * Display order is managed by useSidebarOrder hook, persisted separately
+ * from entity data.
+ */
+
 // -----------------------------------------------------------------------------
 // Nav Items
 // -----------------------------------------------------------------------------

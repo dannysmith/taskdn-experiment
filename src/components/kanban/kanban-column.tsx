@@ -18,6 +18,19 @@ import {
   useKanbanDragPreview,
 } from './kanban-dnd-context'
 
+/**
+ * KanbanColumn - A single status column in a Kanban board.
+ *
+ * Two visual states:
+ * - Expanded: Shows column header, task cards, and "Add task" button
+ * - Collapsed: Thin vertical strip with rotated label and task count
+ *
+ * Tasks are rendered as TaskCards wrapped in SortableKanbanCard for drag-drop.
+ * Empty columns show a dashed drop zone for visual feedback.
+ *
+ * Also exports SortableKanbanCard - the draggable TaskCard wrapper.
+ */
+
 // -----------------------------------------------------------------------------
 // Types
 // -----------------------------------------------------------------------------

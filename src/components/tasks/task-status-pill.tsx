@@ -16,6 +16,18 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 
+/**
+ * TaskStatusPill - Colored status badge with optional dropdown to change status.
+ *
+ * Used in TaskCard footer and TaskDetailPanel metadata. Shows the current status
+ * as a colored pill. When onStatusChange is provided, clicking opens a dropdown
+ * to select a new status.
+ *
+ * Statuses are split into primary (ready, in-progress, blocked, done, dropped)
+ * and secondary (inbox, icebox) with a separator in the dropdown.
+ *
+ * Uses responsive text sizing via container queries (2xs → xs).
+ */
 export interface TaskStatusPillProps {
   status: TaskStatus
   onStatusChange?: (newStatus: TaskStatus) => void

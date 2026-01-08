@@ -19,6 +19,22 @@ import type { Heading } from '@/types/headings'
 import { TaskDragPreview } from './task-list'
 import { HeadingDragPreview } from '@/components/headings'
 
+/**
+ * TaskDndContext - Shared drag-and-drop context for cross-container task movement.
+ *
+ * Wraps multiple TaskList components to enable dragging tasks between them.
+ * Used in AreaView and TodayView where tasks can move between projects/sections.
+ *
+ * Key behaviors:
+ * - Cross-container drag: Moving a task from one project/section to another
+ * - Same-container reorder: Reordering tasks within a single list
+ * - Visual feedback: Shows gap where task will drop (via crossContainerHover state)
+ * - Heading support: Can also drag headings within their container
+ *
+ * Each TaskList renders with a projectId/sectionId that becomes the container ID.
+ * Drag IDs include the container prefix to ensure uniqueness across lists.
+ */
+
 // -----------------------------------------------------------------------------
 // Loose Tasks Helpers
 // -----------------------------------------------------------------------------

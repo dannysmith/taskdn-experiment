@@ -16,6 +16,16 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 
+/**
+ * ProjectStatusPill - Colored badge showing project status with optional dropdown.
+ *
+ * Used in ViewHeader when viewing a project to show/change its status.
+ * When onStatusChange is provided, shows a dropdown chevron and becomes
+ * interactive. When read-only, just shows the colored badge.
+ *
+ * Statuses are split into primary (planning, ready, in-progress, blocked)
+ * and secondary (paused, done) with a separator in the dropdown.
+ */
 export interface ProjectStatusPillProps {
   status: ProjectStatus
   onStatusChange?: (newStatus: ProjectStatus) => void
