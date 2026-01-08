@@ -407,9 +407,9 @@ function DatePickerButton({
           'flex items-center gap-1 transition-colors',
           canEdit && 'hover:text-foreground',
           isOverdue
-            ? 'text-red-500 dark:text-red-400'
+            ? 'text-date-overdue'
             : label === 'Due'
-              ? 'text-red-400/70 dark:text-red-400/60'
+              ? 'text-date-due/70'
               : 'text-muted-foreground'
         )}
       >

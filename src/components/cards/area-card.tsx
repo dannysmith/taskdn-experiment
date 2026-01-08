@@ -92,15 +92,28 @@ export function AreaCard({
 // Area Type Badge
 // -----------------------------------------------------------------------------
 
-const typeColors: Record<string, string> = {
-  'life-area': 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-  work: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-  client: 'bg-purple-500/10 text-purple-600 dark:text-purple-400',
-  personal: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
+// 6 color slots for user-defined area types
+const typeColorClasses = [
+  'bg-area-type-1/15 text-area-type-1',
+  'bg-area-type-2/15 text-area-type-2',
+  'bg-area-type-3/15 text-area-type-3',
+  'bg-area-type-4/15 text-area-type-4',
+  'bg-area-type-5/15 text-area-type-5',
+  'bg-area-type-6/15 text-area-type-6',
+]
+
+// Simple hash function to consistently map type strings to color indices
+function getTypeColorIndex(type: string): number {
+  let hash = 0
+  for (let i = 0; i < type.length; i++) {
+    hash = (hash << 5) - hash + type.charCodeAt(i)
+    hash |= 0
+  }
+  return Math.abs(hash) % typeColorClasses.length
 }
 
 function AreaTypeBadge({ type }: { type: string }) {
-  const colorClass = typeColors[type] ?? 'bg-muted text-muted-foreground'
+  const colorClass = typeColorClasses[getTypeColorIndex(type)]
   const displayType = type.replace(/-/g, ' ')
 
   return (

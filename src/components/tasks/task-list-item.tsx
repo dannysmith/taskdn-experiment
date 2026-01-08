@@ -300,8 +300,8 @@ function TaskMetadata({
           className={cn(
             'flex items-center gap-0.5 whitespace-nowrap shrink-0',
             isOverdue(due) && !isDone
-              ? 'text-red-500 dark:text-red-400'
-              : 'text-red-400/80 dark:text-red-400/70'
+              ? 'text-date-overdue'
+              : 'text-date-due/80'
           )}
         >
           <Flag className="size-3" />

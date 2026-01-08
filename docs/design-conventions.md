@@ -79,6 +79,26 @@ A single actionable item.
 | Project | Purple | Subtle tint on project UI elements |
 | Area    | Teal   | Subtle tint on area UI elements    |
 
+### Date Colors
+
+| Token         | Color    | Usage                              |
+| ------------- | -------- | ---------------------------------- |
+| date-due      | Soft red | Due dates (not overdue)            |
+| date-overdue  | Dark red | Overdue due dates, hover state     |
+
+### Area Type Colors
+
+Six color slots for user-defined area types. Colors are assigned automatically via hash of the type string.
+
+| Token        | Color  |
+| ------------ | ------ |
+| area-type-1  | Green  |
+| area-type-2  | Blue   |
+| area-type-3  | Purple |
+| area-type-4  | Amber  |
+| area-type-5  | Red    |
+| area-type-6  | Teal   |
+
 ### UI Colors
 
 | Purpose             | Color      |
