@@ -109,8 +109,17 @@ export function TaskList({
       : internalEditingTaskId
   const setEditingTaskId = onEditingTaskIdChange ?? setInternalEditingTaskId
 
-  // Get drag context to check for dropped task
-  const { lastDroppedTaskId, clearLastDroppedTaskId } = useTaskDragPreview()
+  // Get drag context for dropped task selection and cross-container gap animation
+  const {
+    lastDroppedTaskId,
+    clearLastDroppedTaskId,
+    crossContainerHover,
+    clearCrossContainerHover,
+  } = useTaskDragPreview()
+
+  // Check if the dropped task has appeared in this list
+  const droppedTaskInList =
+    lastDroppedTaskId !== null && tasks.some((t) => t.id === lastDroppedTaskId)
 
   // Select the dropped task after a drag ends, or clear selection if task went to another list
   React.useEffect(() => {
@@ -119,13 +128,29 @@ export function TaskList({
       if (droppedIndex !== -1) {
         // This list contains the dropped task - select it
         setSelectedIndex(droppedIndex)
-        clearLastDroppedTaskId()
       } else {
         // This list doesn't contain the dropped task - clear selection
         setSelectedIndex(null)
       }
     }
-  }, [lastDroppedTaskId, tasks, setSelectedIndex, clearLastDroppedTaskId])
+  }, [lastDroppedTaskId, tasks, setSelectedIndex])
+
+  // Clean up cross-container hover state once the dropped task appears
+  React.useEffect(() => {
+    if (
+      droppedTaskInList &&
+      crossContainerHover?.targetContainerId === projectId
+    ) {
+      clearLastDroppedTaskId()
+      clearCrossContainerHover()
+    }
+  }, [
+    droppedTaskInList,
+    crossContainerHover?.targetContainerId,
+    projectId,
+    clearLastDroppedTaskId,
+    clearCrossContainerHover,
+  ])
 
   // Keep selection valid when tasks change
   React.useEffect(() => {
@@ -258,11 +283,11 @@ export function TaskList({
   )
 
   // Check if we should show a trailing gap (cross-container drag, append at end)
-  const { crossContainerHover, dragPreview } = useTaskDragPreview()
+  // Don't show gap once the dropped task has appeared in this container
   const showTrailingGap =
     crossContainerHover?.targetContainerId === projectId &&
     crossContainerHover?.insertBeforeId === null &&
-    dragPreview?.type === 'task'
+    !droppedTaskInList
 
   if (tasks.length === 0) {
     return (
@@ -301,6 +326,7 @@ export function TaskList({
               task={task}
               dragId={dragIds[index]}
               containerId={projectId}
+              droppedTaskInList={droppedTaskInList}
               isSelected={selectedIndex === index}
               isEditing={editingTaskId === task.id}
               onSelect={() => handleSelect(index)}

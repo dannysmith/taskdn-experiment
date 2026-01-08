@@ -11,6 +11,8 @@ export interface SortableTaskItemProps extends Omit<TaskItemProps, 'className'> 
   dragId: string
   /** Container ID for cross-container drag detection */
   containerId: string
+  /** Whether the dropped task has appeared in this container (suppresses gap) */
+  droppedTaskInList?: boolean
   className?: string
 }
 
@@ -22,6 +24,7 @@ export function SortableTaskItem({
   task,
   dragId,
   containerId,
+  droppedTaskInList,
   className,
   isEditing,
   ...taskItemProps
@@ -43,10 +46,12 @@ export function SortableTaskItem({
   })
 
   // Check if we should show a gap before this item (cross-container drag)
+  // Don't show gap once the dropped task has appeared in this container
   const { crossContainerHover } = useTaskDragPreview()
   const showGapBefore =
     crossContainerHover?.targetContainerId === containerId &&
-    crossContainerHover?.insertBeforeId === task.id
+    crossContainerHover?.insertBeforeId === task.id &&
+    !droppedTaskInList
 
   const style: React.CSSProperties = {
     // Always apply transforms - no suppression during cross-container drag

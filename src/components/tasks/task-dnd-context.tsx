@@ -113,6 +113,11 @@ interface TaskDndContextValue {
    */
   crossContainerHover: CrossContainerHoverState | null
   /**
+   * Clear the cross-container hover state.
+   * Called by TaskList when drop completes (task appears in target list).
+   */
+  clearCrossContainerHover: () => void
+  /**
    * @deprecated Visual items are no longer tracked during drag.
    * SortableContext should use entity-derived items directly.
    * Always returns null.
@@ -126,6 +131,7 @@ export const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   lastDroppedTaskId: null,
   clearLastDroppedTaskId: () => {},
   crossContainerHover: null,
+  clearCrossContainerHover: () => {},
   getVisualItems: () => null,
 })
 
@@ -198,6 +204,10 @@ export function TaskDndContext({
 
   const clearLastDroppedTaskId = React.useCallback(() => {
     setLastDroppedTaskId(null)
+  }, [])
+
+  const clearCrossContainerHover = React.useCallback(() => {
+    setCrossContainerHover(null)
   }, [])
 
   // No longer tracking visual items during drag - always return null
@@ -377,30 +387,38 @@ export function TaskDndContext({
         insertBeforeTaskId
       )
       setLastDroppedTaskId(dragPreview.taskId)
-    } else if (active.id !== over.id) {
-      // Same-container reorder
-      if (onItemsReorder) {
-        // Use items reorder callback (for mixed containers with headings)
-        onItemsReorder(targetContainerId, String(active.id), String(over.id))
-        setLastDroppedTaskId(activeData.taskId)
-      } else if (overData?.type === 'task') {
-        // Fall back to task-only reorder using entity data
-        const projectTasks = tasksByProject.get(targetContainerId) ?? []
-        const oldIndex = projectTasks.findIndex(
-          (t) => t.id === activeData.taskId
-        )
-        const newIndex = projectTasks.findIndex((t) => t.id === overData.taskId)
-
-        if (oldIndex !== -1 && newIndex !== -1) {
-          const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
-          onTasksReorder(targetContainerId, newTasks)
+      // DON'T clear crossContainerHover here - let TaskList do it when the
+      // dropped task appears in the target list. This prevents the visual jump
+      // where the gap disappears before the item appears.
+      setDragPreview(null)
+    } else {
+      // Same-container operation
+      if (active.id !== over.id) {
+        // Same-container reorder
+        if (onItemsReorder) {
+          // Use items reorder callback (for mixed containers with headings)
+          onItemsReorder(targetContainerId, String(active.id), String(over.id))
           setLastDroppedTaskId(activeData.taskId)
+        } else if (overData?.type === 'task') {
+          // Fall back to task-only reorder using entity data
+          const projectTasks = tasksByProject.get(targetContainerId) ?? []
+          const oldIndex = projectTasks.findIndex(
+            (t) => t.id === activeData.taskId
+          )
+          const newIndex = projectTasks.findIndex(
+            (t) => t.id === overData.taskId
+          )
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
+            onTasksReorder(targetContainerId, newTasks)
+            setLastDroppedTaskId(activeData.taskId)
+          }
         }
       }
+      setDragPreview(null)
+      setCrossContainerHover(null)
     }
-
-    setDragPreview(null)
-    setCrossContainerHover(null)
   }
 
   const handleDragCancel = () => {
@@ -413,6 +431,7 @@ export function TaskDndContext({
     lastDroppedTaskId,
     clearLastDroppedTaskId,
     crossContainerHover,
+    clearCrossContainerHover,
     getVisualItems,
   }
 
