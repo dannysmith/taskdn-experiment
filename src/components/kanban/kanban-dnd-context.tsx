@@ -15,7 +15,7 @@ import {
 import { arrayMove } from '@dnd-kit/sortable'
 
 import type { Task, TaskStatus } from '@/types/data'
-import { TaskDragPreview } from '@/components/tasks/task-list'
+import { TaskCard } from '@/components/cards/task-card'
 
 // -----------------------------------------------------------------------------
 // Types
@@ -270,7 +270,7 @@ export function KanbanDndContext({
 
         {/* Drag Overlay */}
         <DragOverlay dropAnimation={dropAnimation}>
-          {dragPreview && <TaskDragPreview task={dragPreview.task} />}
+          {dragPreview && <TaskCard task={dragPreview.task} />}
         </DragOverlay>
       </DndContext>
     </KanbanDndReactContext.Provider>
