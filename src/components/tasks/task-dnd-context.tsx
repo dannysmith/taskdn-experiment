@@ -11,7 +11,6 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
-  type UniqueIdentifier,
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
 
@@ -117,12 +116,6 @@ interface TaskDndContextValue {
    * Called by TaskList when drop completes (task appears in target list).
    */
   clearCrossContainerHover: () => void
-  /**
-   * @deprecated Visual items are no longer tracked during drag.
-   * SortableContext should use entity-derived items directly.
-   * Always returns null.
-   */
-  getVisualItems: (containerId: string) => UniqueIdentifier[] | null
 }
 
 // Exported for reuse by other DnD contexts (e.g., TodayDndContext)
@@ -132,7 +125,6 @@ export const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   clearLastDroppedTaskId: () => {},
   crossContainerHover: null,
   clearCrossContainerHover: () => {},
-  getVisualItems: () => null,
 })
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -209,15 +201,6 @@ export function TaskDndContext({
   const clearCrossContainerHover = React.useCallback(() => {
     setCrossContainerHover(null)
   }, [])
-
-  // No longer tracking visual items during drag - always return null
-  // SortableContexts should use entity-derived items directly
-  const getVisualItems = React.useCallback(
-    (_containerId: string): UniqueIdentifier[] | null => {
-      return null
-    },
-    []
-  )
 
   // Sensors for drag and drop - only PointerSensor
   const sensors = useSensors(
@@ -432,7 +415,6 @@ export function TaskDndContext({
     clearLastDroppedTaskId,
     crossContainerHover,
     clearCrossContainerHover,
-    getVisualItems,
   }
 
   return (
@@ -459,20 +441,4 @@ export function TaskDndContext({
       </DndContext>
     </TaskDndReactContext.Provider>
   )
-}
-
-// -----------------------------------------------------------------------------
-// Deprecated - kept for backward compatibility during migration
-// -----------------------------------------------------------------------------
-
-/**
- * @deprecated No longer needed - transforms are always applied now.
- */
-// eslint-disable-next-line react-refresh/only-export-components
-export function shouldShowDropIndicator(
-  _taskId: string,
-  _projectId: string,
-  _dragPreview: DragPreviewState | null
-): boolean {
-  return false
 }

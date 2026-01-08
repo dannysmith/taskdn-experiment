@@ -1,30 +1,22 @@
 # Drag-and-Drop Refactor Plan
 
-This document outlines the plan to improve the feel and smoothness of drag-and-drop in task lists and sidebar, bringing them up to the quality of the Kanban and Calendar views.
+This document outlines the work done to improve the feel and smoothness of drag-and-drop in task lists and sidebar, bringing them up to the quality of the Kanban and Calendar views.
 
-## Quick Summary (For New Sessions)
+## Quick Summary
 
-**Problem:** Task list drag-and-drop feels janky compared to Kanban/Calendar.
+**Problem:** Task list drag-and-drop felt janky compared to Kanban/Calendar.
 
 **Root cause:** Transform suppression during cross-container drag, plus per-item state calculations.
 
-**Current status (as of Jan 2025):**
-- ✅ Phase 1 complete: New component architecture (`TaskItem`, `SortableTaskItem`)
-- ✅ Reliable drops working: Within-container and cross-container drops work correctly
-- ✅ Simplified architecture: Following Kanban pattern (no visual state during drag)
-- ⚠️ Outstanding issue: Cross-container drags don't show "making room" animation in target
+**Final solution:** CSS gap animation approach - track hover position during drag, apply margin to create visual gap in target container.
 
-**Key files modified:**
-- `src/components/tasks/task-dnd-context.tsx` - Simplified to Kanban pattern
-- `src/components/tasks/task-item.tsx` - New presentational component
-- `src/components/tasks/sortable-task-item.tsx` - New sortable wrapper
-- `src/components/tasks/task-list.tsx` - Updated to use new components
+**Status: Complete (Jan 2025)**
 
 ---
 
-## What's Been Completed
+## What's Been Implemented
 
-### ✅ Phase 1: New Component Architecture
+### Phase 1: New Component Architecture
 
 1. **Created `TaskItem` component** (`task-item.tsx`)
    - Pure presentational component with no DnD awareness
@@ -34,42 +26,60 @@ This document outlines the plan to improve the feel and smoothness of drag-and-d
    - Wrapper following `SortableKanbanCard` pattern
    - Always applies transforms (no suppression)
    - Simple `opacity-50` when dragging
+   - Shows CSS gap when it's the cross-container insertion point
 
 3. **Updated `TaskList`** (`task-list.tsx`)
    - Uses `SortableTaskItem` instead of old `TaskListItem`
-   - Simplified - no longer tracks visual items during drag
+   - Handles trailing gap for "append at end" drops
+   - Cleans up hover state when dropped task appears
 
-4. **Updated `TaskListItem`** (`task-list-item.tsx`)
-   - Now a thin wrapper for backward compatibility
-   - Re-exports `TaskItem` for existing imports
+4. **Simplified `TaskDndContext`** (`task-dnd-context.tsx`)
+   - Uses `over.data.current` directly to determine drop target
+   - Tracks `crossContainerHover` state for CSS gap animation
+   - No complex visual state management during drag
 
-### ✅ Simplified TaskDndContext (Kanban Pattern)
+### Phase 2: Cross-Container "Making Room" Animation
 
-After discovering issues with the `visualItemsByContainer` approach (see lessons learned below), we simplified to follow the Kanban pattern:
+The key challenge was showing items shift to "make room" when dragging across containers.
 
-**Current implementation:**
-- No `handleDragOver` - we don't update SortableContext items during drag
-- `handleDragEnd` uses `over.data.current` directly to determine drop target
-- SortableContext items are always derived from entity data
-- Simple and reliable
+**Implementation (CSS Gap Approach):**
 
-**What works now:**
-- ✅ Within-container reordering (items shift naturally)
-- ✅ Cross-container drops (task moves to correct project)
-- ✅ Empty container drops (via `EmptyProjectDropZone`)
-- ✅ Selection preserved after drop
-- ✅ Keyboard navigation works
+1. `handleDragOver` tracks cross-container hover state:
+   - `targetContainerId`: which container the cursor is over
+   - `insertBeforeId`: which task to insert before (null = append)
 
-**What doesn't work yet:**
-- ❌ Cross-container "making room" animation (items in target don't shift during drag)
+2. `SortableTaskItem` applies `mt-10` margin when it's the insertion point
+
+3. `TaskList` shows a trailing gap div for append-at-end cases
+
+4. State cleanup happens when the dropped task appears in the target list (prevents visual jump)
+
+**Key files:**
+- `src/components/tasks/task-dnd-context.tsx` - Hover tracking and state management
+- `src/components/tasks/sortable-task-item.tsx` - Gap rendering via CSS margin
+- `src/components/tasks/task-list.tsx` - Trailing gap and cleanup logic
 
 ---
 
-## Lessons Learned: Why visualItemsByContainer Failed
+## What Works
 
-We attempted to implement dnd-kit's official multi-container pattern (updating SortableContext items during drag), but encountered fundamental issues:
+- Within-container reordering (items shift naturally via dnd-kit)
+- Cross-container drops (task moves to correct project)
+- Cross-container "making room" animation (CSS gap)
+- Empty container drops (via `EmptyProjectDropZone`)
+- Selection preserved after drop
+- Keyboard navigation works
+- Smooth drop animation
 
-### Issue 1: Collision Detection is Global
+---
+
+## Lessons Learned: Failed Approaches
+
+### Failed Approach 1: visualItemsByContainer
+
+We attempted to implement dnd-kit's official multi-container pattern (updating SortableContext items during drag). This failed for three reasons:
+
+#### Issue 1: Collision Detection is Global
 
 `closestCenter` collision detection considers ALL sortable items across ALL containers. When containers are stacked vertically, items near the boundary can "leak" into collision detection for adjacent containers.
 
@@ -77,7 +87,7 @@ We attempted to implement dnd-kit's official multi-container pattern (updating S
 - Visual state to think item moved to Project2
 - Drop detection to fail (indices don't match)
 
-### Issue 2: Adding Unrendered Items Breaks Transforms
+#### Issue 2: Adding Unrendered Items Breaks Transforms
 
 When we add a drag ID to a container's SortableContext items but there's no corresponding DOM element (because TaskList doesn't have that task's data), dnd-kit's transform calculations break:
 - Items overlap incorrectly
@@ -86,247 +96,136 @@ When we add a drag ID to a container's SortableContext items but there's no corr
 
 **The fundamental problem:** Each TaskList only has data for ITS tasks. When we add a foreign drag ID to its SortableContext, there's no element to render for it.
 
-### Issue 3: Visual State Diverges from Drop Target
+#### Issue 3: Visual State Diverges from Drop Target
 
 React state updates are asynchronous. When `handleDragEnd` fires, `visualItemsByContainer` may have stale data from rapid `handleDragOver` updates. This caused drops to go to wrong containers or fail entirely.
 
-### The Solution: Trust over.data.current
+### Failed Approach 2: Placeholder Element
 
-Instead of maintaining complex visual state, we now use `over.data.current` directly in `handleDragEnd` to determine the drop target. This is exactly what Kanban does, and it works reliably.
+We considered adding a real placeholder element to the target container's SortableContext. This would work because the placeholder DOES have a DOM element. However:
 
----
-
-## Critical Corrections (Review Findings)
-
-After deeper analysis, several claims in the original plan were incorrect or incomplete:
-
-### Correction 1: Kanban Does NOT Use Dynamic SortableContext Items
-
-**Original claim:** "Kanban uses dynamic SortableContext items during drag"
-
-**Reality:** Kanban does NOT update items during drag. Each column's `SortableContext` items stay constant. Kanban feels smooth because:
-1. Transforms are always applied (no suppression)
-2. Cross-column drops don't need to show exact insertion position within target column
-3. Visual feedback is just column highlight + semi-transparent dragged card
-
-**Implication:** The Kanban pattern is simpler and more reliable. We're now following it.
-
-### Correction 2: The visualItemsByContainer Pattern Has Architectural Issues
-
-**Original claim:** "Update SortableContext items in onDragOver for smooth cross-container animations"
-
-**Reality:** This pattern doesn't work well when:
-1. Each container renders from its own task data (can't render foreign items)
-2. Collision detection is global (returns items from wrong containers)
-3. State updates are async (stale data at drop time)
-
-**Implication:** A different approach is needed for cross-container "making room" animations.
-
-### Correction 3: Package Installed
-
-The `@dnd-kit/helpers` package is now installed (provides `move` helper), but we're not currently using it since we simplified to the Kanban pattern.
+- More complex state management
+- Need to coordinate placeholder position with collision detection
+- Risk of oscillation at container boundaries
+- Decided CSS gap was simpler and sufficient
 
 ---
 
-## Current Architecture
+## Why the CSS Gap Approach Works
 
-### TaskDndContext (Simplified)
+The CSS gap approach sidesteps the fundamental issues:
 
-```tsx
-// No visual state during drag
-// No handleDragOver
+1. **No SortableContext manipulation** - We never modify which items are in each container's SortableContext during drag. They always reflect the actual task data.
 
-handleDragEnd = (event) => {
-  const { active, over } = event
-  const overData = over.data.current
+2. **Visual-only gap** - The margin creates a visual gap without confusing dnd-kit's transform calculations.
 
-  // Determine target directly from what we dropped on
-  const targetContainerId = overData?.projectId ?? sourceContainerId
+3. **Drop timing fix** - We don't clear the gap state until the dropped task actually appears in the target list, preventing the "jump up then down" visual glitch.
 
-  if (targetContainerId !== sourceContainerId) {
-    // Cross-container move
-    onTaskMove(taskId, sourceContainerId, targetContainerId, insertBeforeTaskId)
-  } else {
-    // Same-container reorder
-    onTasksReorder(containerId, reorderedTasks)
-  }
-}
-```
+**Trade-offs:**
+- Gap doesn't animate items naturally (it's a CSS margin, not dnd-kit transforms)
+- But it's simple, reliable, and feels good enough
+
+---
+
+## Architecture Reference
 
 ### Component Hierarchy
 
 ```
-TaskDndContext (provides DndContext)
+TaskDndContext (provides DndContext + hover state)
 ├── SectionTaskGroup (Loose Tasks)
 │   └── TaskList
 │       └── SortableContext
-│           └── SortableTaskItem
+│           └── SortableTaskItem (shows gap via margin)
 │               └── TaskItem (presentational)
 ├── ProjectTaskGroup (per project)
 │   └── TaskList
 │       └── SortableContext
-│           └── SortableTaskItem
+│           └── SortableTaskItem (shows gap via margin)
 │               └── TaskItem (presentational)
 ```
 
-### Visual States (Simplified)
+### State Flow
 
-**SortableTaskItem:**
-- Normal: no special styles
-- Dragging: `opacity-50`
+```
+1. User starts dragging task from Container A
+   → dragPreview set with source info
 
-**Container (ProjectTaskGroup/SectionTaskGroup):**
-- Normal: no special styles
-- Empty + drag over: shows "Drop here" text (via EmptyProjectDropZone)
+2. User hovers over Container B
+   → handleDragOver detects cross-container
+   → crossContainerHover = { targetContainerId: B, insertBeforeId: X }
 
----
+3. SortableTaskItem in Container B sees it's the insertion point
+   → Applies mt-10 margin (gap appears)
 
-## Testing Checklist
+4. User drops
+   → onTaskMove called
+   → lastDroppedTaskId set
+   → crossContainerHover NOT cleared yet
 
-### AreaView
-- [x] Drag task within a project (reorder) - ✅ Works
-- [x] Drag task to a different project - ✅ Works
-- [x] Drag task to loose tasks section - ✅ Works
-- [x] Drag task from loose tasks to a project - ✅ Works
-- [ ] Visual feedback when hovering over target container - ⚠️ Only for empty containers
-- [x] Keyboard navigation still works - ✅ Works
-- [x] Selection preserved after drop - ✅ Works
-- [x] Creating new tasks works - ✅ Works
+5. Data updates, task appears in Container B
+   → TaskList detects droppedTaskInList
+   → Gap hidden (droppedTaskInList check)
+   → Cleanup effect clears crossContainerHover and lastDroppedTaskId
+```
 
-### TodayView
-- [x] Drag task within scheduled-today section - ✅ Works
-- [x] Drag task from overdue to scheduled-today - ✅ Works
-- [x] Drag task from became-available to scheduled-today - ✅ Works
-
-### ProjectView / InboxView
-- [x] Drag to reorder tasks - ✅ Works (uses DraggableTaskList)
-- [x] Keyboard reordering (Cmd+Arrow) - ✅ Works
-
-### General
-- [x] Drop animation feels smooth - ✅ Works
-- [x] Dragged item opacity is consistent (50%) - ✅ Works
-- [x] Auto-selection of dropped task works - ✅ Works
-
----
-
-## Reference: Current DnD File Locations
+### Key Files
 
 ```
 src/components/tasks/
-├── task-dnd-context.tsx     # Cross-project DnD context (SIMPLIFIED)
-├── task-list.tsx            # Task list with keyboard nav
-├── task-item.tsx            # Presentational component (NEW)
-├── sortable-task-item.tsx   # Sortable wrapper (NEW)
+├── task-dnd-context.tsx     # Cross-project DnD context, hover tracking
+├── task-list.tsx            # Task list with keyboard nav, trailing gap
+├── task-item.tsx            # Presentational component
+├── sortable-task-item.tsx   # Sortable wrapper with CSS gap
 ├── task-list-item.tsx       # Backward compatibility wrapper
 ├── ordered-item-list.tsx    # Mixed tasks + headings list
 ├── section-task-group.tsx   # Collapsible section wrapper
 ├── project-task-group.tsx   # Project section wrapper
 
 src/components/kanban/
-├── kanban-dnd-context.tsx   # Status-based DnD (REFERENCE - pattern we followed)
-├── kanban-column.tsx        # Column with SortableKanbanCard (REFERENCE)
+├── kanban-dnd-context.tsx   # Status-based DnD (reference implementation)
+├── kanban-column.tsx        # Column with SortableKanbanCard
 ```
 
 ---
 
-# NEXT STEPS: Cross-Container "Making Room" Animation
+## Testing Checklist
 
-The remaining issue is that during cross-container drag, items in the target container don't shift to "make room" for the dragged item. This works within containers (SortableContext handles it), but not across containers.
+### AreaView
+- [x] Drag task within a project (reorder)
+- [x] Drag task to a different project
+- [x] Drag task to loose tasks section
+- [x] Drag task from loose tasks to a project
+- [x] Visual gap appears when hovering over target container
+- [x] Keyboard navigation still works
+- [x] Selection preserved after drop
+- [x] Creating new tasks works
 
-## The Problem
+### TodayView
+- [x] Drag task within scheduled-today section
+- [x] Drag task from overdue to scheduled-today
+- [x] Drag task from became-available to scheduled-today
 
-When dragging from Project1 to Project2:
-1. Project1's items shift naturally (within-container, handled by SortableContext)
-2. Project2's items do NOT shift to show where the drop will occur
-3. Drop works correctly, but there's no visual preview of insertion position
+### ProjectView / InboxView
+- [x] Drag to reorder tasks (uses DraggableTaskList)
+- [x] Keyboard reordering (Cmd+Arrow)
 
-## Why It's Hard
+### General
+- [x] Drop animation feels smooth
+- [x] Dragged item opacity is consistent (50%)
+- [x] Auto-selection of dropped task works
+- [x] No visual jump on drop (gap closes as item appears)
 
-The fundamental challenge: each TaskList only has data for ITS tasks. To show an item "making room" in Project2, we need Project2's SortableContext to know about the incoming item. But:
+---
 
-1. **Can't add foreign drag IDs to SortableContext** - No DOM element to render, breaks transforms
-2. **Collision detection is global** - Can return wrong container's items
-3. **State sync issues** - Visual state diverges from collision detection results
+## Potential Future Improvements
 
-## Possible Approaches to Investigate
+If the CSS gap approach ever feels insufficient:
 
-### Approach 1: CSS-Only Gap Animation
+1. **Custom collision detection** - Create a container-aware algorithm that first identifies which container bounds contain the cursor, then finds closest item within that container only. Would reduce boundary oscillation.
 
-Instead of updating SortableContext items, use CSS to create a visual gap:
+2. **Placeholder element approach** - More complex but would give true "items shifting" animation. Would need to carefully manage when placeholder appears/disappears.
 
-1. Track `overContainerId` in drag preview state (via `handleDragOver`)
-2. When dragging over a container that's not the source:
-   - Add a CSS class to that container
-   - Use CSS to create a gap at the hover position (pseudo-element or margin)
-3. The gap is purely visual - SortableContext items stay unchanged
+3. **Top-level item ownership** - Major refactor where TaskDndContext owns all items and passes them to TaskLists. Would allow true multi-container SortableContext behavior but significant architectural change.
 
-**Pros:** No SortableContext manipulation, simpler
-**Cons:** Gap won't animate items naturally, needs custom position tracking
-
-### Approach 2: Placeholder Element
-
-Add a placeholder element to the target container:
-
-1. When `handleDragOver` detects cross-container hover, add a placeholder task to the target's task data
-2. The placeholder renders as an empty space with the same height
-3. On drop, replace placeholder with actual task
-4. On cancel/leave, remove placeholder
-
-**Pros:** Uses natural SortableContext behavior
-**Cons:** Requires modifying task data during drag, complex state management
-
-### Approach 3: Portal + Transform Override
-
-Keep the dragged item in its original container's DOM, but use portals/transforms:
-
-1. Don't update SortableContext items
-2. Use `handleDragOver` to track exact drop position in target
-3. Apply CSS transforms to target container's items to create visual gap
-4. The transforms are independent of SortableContext
-
-**Pros:** Doesn't break SortableContext
-**Cons:** Complex transform calculations, might conflict with dnd-kit's transforms
-
-### Approach 4: Top-Level Item Ownership
-
-Change architecture so items aren't "owned" by individual TaskLists:
-
-1. TaskDndContext maintains ALL items for ALL containers
-2. Each TaskList receives items from context, not from props
-3. When dragging, context updates which container "has" each item
-4. All TaskLists re-render with new items
-
-**Pros:** Clean ownership model, natural SortableContext behavior
-**Cons:** Major architectural change, performance implications
-
-### Approach 5: Accept Kanban-Style UX
-
-The Kanban doesn't show "making room" in target columns during drag, and users said it feels smooth. Maybe task lists don't need it either:
-
-1. Keep current implementation
-2. Add container highlighting when hovering (border/background change)
-3. Accept that cross-container drops don't preview exact position
-
-**Pros:** Already working, simple
-**Cons:** Different UX than within-container drag
-
-## Recommended Investigation Order
-
-1. **Start with Approach 5** - Add container highlighting, see if that's "good enough"
-2. **Try Approach 1** - CSS gap is simplest real solution
-3. **Consider Approach 2** - Placeholder might work with careful implementation
-4. **Approach 4 as last resort** - Major refactor, only if others fail
-
-## Key Questions to Answer
-
-1. Does the Kanban feel good WITHOUT cross-column item shifting? (User said yes)
-2. Is container highlighting sufficient visual feedback?
-3. If we need item shifting, can we do it with CSS transforms alone?
-4. Is the placeholder approach viable without breaking selection/editing?
-
-## Files to Modify for Next Phase
-
-- `task-dnd-context.tsx` - Add `handleDragOver` back for tracking hover position
-- `project-task-group.tsx` - Add container highlight styles
-- `section-task-group.tsx` - Add container highlight styles
-- Possibly: `task-list.tsx` - For CSS gap or placeholder approaches
+For now, the CSS gap approach is working well.
