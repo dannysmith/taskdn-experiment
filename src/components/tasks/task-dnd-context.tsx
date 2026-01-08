@@ -9,7 +9,6 @@ import {
   defaultDropAnimationSideEffects,
   type DragStartEvent,
   type DragEndEvent,
-  type DragOverEvent,
   type DropAnimation,
   type UniqueIdentifier,
 } from '@dnd-kit/core'
@@ -97,9 +96,9 @@ interface TaskDndContextValue {
   lastDroppedTaskId: string | null
   clearLastDroppedTaskId: () => void
   /**
-   * Get the visual order of items for a container during drag.
-   * Returns drag IDs (not task IDs) for use with SortableContext.
-   * Falls back to null when not dragging (caller should use entity data).
+   * @deprecated Visual items are no longer tracked during drag.
+   * SortableContext should use entity-derived items directly.
+   * Always returns null.
    */
   getVisualItems: (containerId: string) => UniqueIdentifier[] | null
 }
@@ -149,20 +148,6 @@ interface TaskDndContextProps {
 }
 
 // -----------------------------------------------------------------------------
-// Helper: Generate drag ID from container and task ID
-// -----------------------------------------------------------------------------
-
-function makeDragId(containerId: string, taskId: string): string {
-  return `task-${containerId}-${taskId}`
-}
-
-function extractTaskIdFromDragId(dragId: string): string | null {
-  // Format: task-{containerId}-{taskId}
-  const match = dragId.match(/^task-.+-(.+)$/)
-  return match ? match[1] : null
-}
-
-// -----------------------------------------------------------------------------
 // TaskDndContext - Shared context for cross-project drag
 // -----------------------------------------------------------------------------
 
@@ -170,9 +155,10 @@ function extractTaskIdFromDragId(dragId: string): string | null {
  * A shared DndContext for multiple project task lists.
  * Handles both same-project reordering and cross-project moves.
  *
- * Key improvement: Uses visual order state during drag to enable smooth
- * cross-container animations. Items shift naturally between containers
- * instead of using transform suppression.
+ * Follows the Kanban pattern: uses over.data.current directly to determine
+ * the drop target, rather than maintaining complex visual state during drag.
+ * This provides reliable drop behavior at the cost of not showing items
+ * shifting between containers during drag (use container highlighting instead).
  */
 export function TaskDndContext({
   children,
@@ -190,23 +176,17 @@ export function TaskDndContext({
     string | null
   >(null)
 
-  // Visual order state during drag: Map<containerId, dragId[]>
-  // This is separate from entity data and only exists during drag
-  const [visualItemsByContainer, setVisualItemsByContainer] = React.useState<
-    Map<string, UniqueIdentifier[]> | null
-  >(null)
-
   const clearLastDroppedTaskId = React.useCallback(() => {
     setLastDroppedTaskId(null)
   }, [])
 
-  // Get visual items for a container (used by SortableContexts)
+  // No longer tracking visual items during drag - always return null
+  // SortableContexts should use entity-derived items directly
   const getVisualItems = React.useCallback(
-    (containerId: string): UniqueIdentifier[] | null => {
-      if (!visualItemsByContainer) return null
-      return visualItemsByContainer.get(containerId) ?? null
+    (_containerId: string): UniqueIdentifier[] | null => {
+      return null
     },
-    [visualItemsByContainer]
+    []
   )
 
   // Sensors for drag and drop - only PointerSensor
@@ -237,16 +217,6 @@ export function TaskDndContext({
           task,
           sourceContainerId: data.projectId,
         })
-
-        // Initialize visual order from entity data
-        const initialVisualOrder = new Map<string, UniqueIdentifier[]>()
-        for (const [containerId, tasks] of tasksByProject) {
-          initialVisualOrder.set(
-            containerId,
-            tasks.map((t) => makeDragId(containerId, t.id))
-          )
-        }
-        setVisualItemsByContainer(initialVisualOrder)
       }
     } else if (data?.type === 'heading' && getHeadingById) {
       const heading = getHeadingById(data.headingId)
@@ -261,94 +231,11 @@ export function TaskDndContext({
     }
   }
 
-  const handleDragOver = (event: DragOverEvent) => {
-    if (!dragPreview || dragPreview.type !== 'task') return
-    if (!visualItemsByContainer) return
-
-    const { active, over } = event
-    if (!over) return
-
-    const activeData = active.data.current as TaskDragData | undefined
-    const overData = over.data.current as DropTargetData | undefined
-    if (!activeData || activeData.type !== 'task') return
-    if (!overData) return
-
-    // Determine target container
-    const targetContainerId =
-      overData.type === 'heading' ? overData.containerId : overData.projectId
-    const sourceContainerId = dragPreview.sourceContainerId
-
-    // Find current container of the dragged item (may have moved during drag)
-    let currentContainerId = sourceContainerId
-    for (const [containerId, items] of visualItemsByContainer) {
-      if (items.includes(active.id)) {
-        currentContainerId = containerId
-        break
-      }
-    }
-
-    // If moving to a different container, update visual order
-    if (currentContainerId !== targetContainerId) {
-      setVisualItemsByContainer((prev) => {
-        if (!prev) return prev
-
-        const newMap = new Map(prev)
-
-        // Remove from current container
-        const currentItems = newMap.get(currentContainerId) ?? []
-        const filteredCurrentItems = currentItems.filter(
-          (id) => id !== active.id
-        )
-        newMap.set(currentContainerId, filteredCurrentItems)
-
-        // Add to target container
-        const targetItems = [...(newMap.get(targetContainerId) ?? [])]
-
-        // Find insertion position
-        // IMPORTANT: Use active.id (the original drag ID), NOT a new drag ID.
-        // active.id never changes during drag - dnd-kit tracks items by this ID.
-        if (overData.type === 'task') {
-          // Insert at the position of the hovered task
-          const targetDragId = makeDragId(targetContainerId, overData.taskId)
-          const overIndex = targetItems.indexOf(targetDragId)
-          if (overIndex !== -1) {
-            targetItems.splice(overIndex, 0, active.id)
-          } else {
-            // Fallback: append at end
-            targetItems.push(active.id)
-          }
-        } else {
-          // Empty container or heading - append at end
-          targetItems.push(active.id)
-        }
-
-        newMap.set(targetContainerId, targetItems)
-        return newMap
-      })
-    } else if (overData.type === 'task') {
-      // Same container - reorder within
-      const overDragId = makeDragId(targetContainerId, overData.taskId)
-      if (active.id !== overDragId) {
-        setVisualItemsByContainer((prev) => {
-          if (!prev) return prev
-
-          const newMap = new Map(prev)
-          const items = [...(newMap.get(targetContainerId) ?? [])]
-          const oldIndex = items.indexOf(active.id)
-          const newIndex = items.indexOf(overDragId)
-
-          if (oldIndex !== -1 && newIndex !== -1) {
-            newMap.set(targetContainerId, arrayMove(items, oldIndex, newIndex))
-          }
-          return newMap
-        })
-      }
-    }
-  }
+  // No handleDragOver needed - we determine drop target from over.data in handleDragEnd
+  // This follows the Kanban pattern which is simpler and more reliable
 
   const handleDragEnd = (event: DragEndEvent) => {
     if (!dragPreview) {
-      setVisualItemsByContainer(null)
       return
     }
 
@@ -356,7 +243,6 @@ export function TaskDndContext({
 
     if (!over) {
       setDragPreview(null)
-      setVisualItemsByContainer(null)
       return
     }
 
@@ -364,7 +250,7 @@ export function TaskDndContext({
     if (dragPreview.type === 'heading') {
       const overData = over.data.current as DropTargetData | undefined
 
-      // Determine target container from where we dropped
+      // Determine target container from the element we dropped on
       const targetContainerId =
         overData?.type === 'heading'
           ? overData.containerId
@@ -384,7 +270,6 @@ export function TaskDndContext({
       }
 
       setDragPreview(null)
-      setVisualItemsByContainer(null)
       return
     }
 
@@ -394,38 +279,31 @@ export function TaskDndContext({
 
     if (!activeData || activeData.type !== 'task') {
       setDragPreview(null)
-      setVisualItemsByContainer(null)
       return
     }
 
-    // Find final container of the dragged item from visual state
-    // Since we keep active.id consistent, we can search for it directly
-    let finalContainerId = dragPreview.sourceContainerId
-    if (visualItemsByContainer) {
-      for (const [containerId, items] of visualItemsByContainer) {
-        if (items.includes(active.id)) {
-          finalContainerId = containerId
-          break
-        }
-      }
-    }
+    // Determine target container directly from over.data.current
+    // This is the key simplification: we trust the collision detection result
+    // rather than maintaining complex visual state during drag
+    const targetContainerId =
+      overData?.type === 'heading'
+        ? overData.containerId
+        : overData?.type === 'empty-project'
+          ? overData.projectId
+          : overData?.type === 'task'
+            ? overData.projectId
+            : dragPreview.sourceContainerId
 
-    // Determine insertion position from final visual order
-    const finalItems = visualItemsByContainer?.get(finalContainerId) ?? []
-    const draggedIndex = finalItems.findIndex((id) => id === active.id)
-    let insertBeforeTaskId: string | null = null
-    if (draggedIndex !== -1 && draggedIndex < finalItems.length - 1) {
-      insertBeforeTaskId = extractTaskIdFromDragId(
-        String(finalItems[draggedIndex + 1])
-      )
-    }
-
-    if (finalContainerId !== dragPreview.sourceContainerId) {
+    if (targetContainerId !== dragPreview.sourceContainerId) {
       // Cross-project move
+      // Insert before the task we dropped on, or null to append at end
+      const insertBeforeTaskId =
+        overData?.type === 'task' ? overData.taskId : null
+
       onTaskMove(
         dragPreview.taskId,
         dragPreview.sourceContainerId,
-        finalContainerId,
+        targetContainerId,
         insertBeforeTaskId
       )
       setLastDroppedTaskId(dragPreview.taskId)
@@ -433,11 +311,11 @@ export function TaskDndContext({
       // Same-container reorder
       if (onItemsReorder) {
         // Use items reorder callback (for mixed containers with headings)
-        onItemsReorder(finalContainerId, String(active.id), String(over.id))
+        onItemsReorder(targetContainerId, String(active.id), String(over.id))
         setLastDroppedTaskId(activeData.taskId)
       } else if (overData?.type === 'task') {
-        // Fall back to task-only reorder
-        const projectTasks = tasksByProject.get(finalContainerId) ?? []
+        // Fall back to task-only reorder using entity data
+        const projectTasks = tasksByProject.get(targetContainerId) ?? []
         const oldIndex = projectTasks.findIndex(
           (t) => t.id === activeData.taskId
         )
@@ -445,19 +323,17 @@ export function TaskDndContext({
 
         if (oldIndex !== -1 && newIndex !== -1) {
           const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
-          onTasksReorder(finalContainerId, newTasks)
+          onTasksReorder(targetContainerId, newTasks)
           setLastDroppedTaskId(activeData.taskId)
         }
       }
     }
 
     setDragPreview(null)
-    setVisualItemsByContainer(null)
   }
 
   const handleDragCancel = () => {
     setDragPreview(null)
-    setVisualItemsByContainer(null)
   }
 
   const contextValue: TaskDndContextValue = {
@@ -472,9 +348,7 @@ export function TaskDndContext({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        // Removed restrictToVerticalAxis - items move freely for better UX
         onDragStart={handleDragStart}
-        onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
@@ -500,7 +374,6 @@ export function TaskDndContext({
 
 /**
  * @deprecated No longer needed - transforms are always applied now.
- * The visual order state in TaskDndContext handles cross-container moves.
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function shouldShowDropIndicator(
@@ -508,6 +381,5 @@ export function shouldShowDropIndicator(
   _projectId: string,
   _dragPreview: DragPreviewState | null
 ): boolean {
-  // Always return false - natural item shifting replaces drop indicators
   return false
 }
