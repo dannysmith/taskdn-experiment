@@ -122,11 +122,7 @@ export function HeadingListItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'group relative flex items-center gap-2 px-2 pt-3 pb-1.5 cursor-default transition-all',
-        'select-none',
-        // Bottom border - blue when editing, otherwise heading's color with opacity
-        'border-b',
-        isEditing ? 'border-primary' : colorConfig.borderClass,
+        'group relative cursor-default transition-all select-none',
         // Selected but not editing
         isSelected && !isEditing && !isDragging && 'bg-primary/10',
         // Hover state
@@ -141,60 +137,71 @@ export function HeadingListItem({
       data-heading-id={heading.id}
       {...dragProps}
     >
-      {/* Title - editable or display */}
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleInputBlur}
-          onKeyDown={handleInputKeyDown}
-          className={cn(
-            'flex-1 bg-transparent outline-none text-sm font-semibold',
-            'placeholder:text-muted-foreground',
-            colorConfig.textClass
-          )}
-          placeholder="Heading title..."
+      {/* Content row */}
+      <div className="flex items-center gap-2 px-2 pt-3 pb-1.5">
+        {/* Title - editable or display */}
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleInputBlur}
+            onKeyDown={handleInputKeyDown}
+            className={cn(
+              'flex-1 bg-transparent outline-none text-sm font-semibold',
+              'placeholder:text-muted-foreground',
+              colorConfig.textClass
+            )}
+            placeholder="Heading title..."
+          />
+        ) : (
+          <span
+            className={cn(
+              'flex-1 text-sm font-semibold truncate',
+              colorConfig.textClass
+            )}
+          >
+            {heading.title || (
+              <span className="text-muted-foreground italic">Untitled</span>
+            )}
+          </span>
+        )}
+
+        {/* Delete button - visible on hover/selection */}
+        {!isEditing && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onDelete()
+            }}
+            className={cn(
+              'shrink-0 p-1 -m-0.5 rounded text-muted-foreground',
+              'hover:text-destructive hover:bg-destructive/10',
+              'transition-opacity duration-100',
+              isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            )}
+            title="Delete heading"
+          >
+            <Minus className="size-3.5" />
+          </button>
+        )}
+
+        {/* Color picker dot - on the right */}
+        <HeadingColorPicker
+          color={heading.color}
+          onColorChange={onColorChange}
+          disabled={isEditing}
         />
-      ) : (
-        <span
-          className={cn(
-            'flex-1 text-sm font-semibold truncate',
-            colorConfig.textClass
-          )}
-        >
-          {heading.title || (
-            <span className="text-muted-foreground italic">Untitled</span>
-          )}
-        </span>
-      )}
+      </div>
 
-      {/* Delete button - visible on hover/selection */}
-      {!isEditing && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onDelete()
-          }}
-          className={cn(
-            'shrink-0 p-1 -m-0.5 rounded text-muted-foreground',
-            'hover:text-destructive hover:bg-destructive/10',
-            'transition-opacity duration-100',
-            isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-          )}
-          title="Delete heading"
-        >
-          <Minus className="size-3.5" />
-        </button>
-      )}
-
-      {/* Color picker dot - on the right */}
-      <HeadingColorPicker
-        color={heading.color}
-        onColorChange={onColorChange}
-        disabled={isEditing}
+      {/* Bottom border - aligned with content (inside padding) */}
+      <div
+        className={cn(
+          'mx-2 border-b',
+          isEditing ? 'border-primary' : colorConfig.borderClass
+        )}
       />
     </div>
   )
