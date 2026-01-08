@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { arrayMove } from '@dnd-kit/sortable'
 import type { Task } from '@/types/data'
 import type { CalendarOrder } from '@/types/calendar-order'
@@ -39,31 +39,38 @@ export function useCalendarOrder({
   getTasksForDate,
 }: UseCalendarOrderOptions) {
   // Initialize order from current data
-  const [order, setOrder] = useState<CalendarOrder>(() =>
-    initializeOrderFromData()
-  )
-
-  function initializeOrderFromData(): CalendarOrder {
+  const [order, setOrder] = useState<CalendarOrder>(() => {
     const taskOrderByDate: Record<string, string[]> = {}
-
     for (const date of dates) {
       const dayTasks = getTasksForDate(date)
       taskOrderByDate[date] = dayTasks.map((t) => t.id)
     }
-
     return { taskOrderByDate }
-  }
+  })
 
-  // Re-initialize when dates change (e.g., navigating to different week)
-  useEffect(() => {
-    setOrder(initializeOrderFromData())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dates.join(',')])
+  // Track previous dates to detect date range changes
+  const prevDatesRef = useRef<string>(dates.join(','))
 
-  // Sync order when tasks change (e.g., task added/removed)
-  // Add new tasks to end, remove deleted tasks from order
+  // Sync order when dates or tasks change
+  // - On date change: reinitialize from scratch
+  // - On task change only: preserve order, add new tasks to end, remove deleted
   useEffect(() => {
+    const datesKey = dates.join(',')
+    const datesChanged = datesKey !== prevDatesRef.current
+    prevDatesRef.current = datesKey
+
     setOrder((prev) => {
+      if (datesChanged) {
+        // Full reinitialize when navigating to different date range
+        const taskOrderByDate: Record<string, string[]> = {}
+        for (const date of dates) {
+          const dayTasks = getTasksForDate(date)
+          taskOrderByDate[date] = dayTasks.map((t) => t.id)
+        }
+        return { taskOrderByDate }
+      }
+
+      // Incremental sync: preserve order, add/remove tasks
       const newOrderByDate: Record<string, string[]> = {}
       let changed = false
 

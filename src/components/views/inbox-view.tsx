@@ -2,9 +2,11 @@ import * as React from 'react'
 
 // TODO(tauri-integration): Migrate to TanStack Query
 import { useAppData } from '@/context/app-data-context'
+import type { Task } from '@/types/data'
 import { useTaskDetailStore } from '@/store/task-detail-store'
 import { useInboxOrder } from '@/hooks/use-inbox-order'
 import { DraggableTaskList } from '@/components/tasks/task-list'
+import { EmptyState } from '@/components/ui/empty-state'
 
 export function InboxView() {
   const {
@@ -26,7 +28,7 @@ export function InboxView() {
   const orderedInboxTasks = getOrderedTasks()
 
   const handleReorder = React.useCallback(
-    (reorderedTasks: import('@/types/data').Task[]) => {
+    (reorderedTasks: Task[]) => {
       setOrder(reorderedTasks)
     },
     [setOrder]
@@ -79,12 +81,10 @@ export function InboxView() {
           showDue={true}
         />
       ) : (
-        <div className="py-12 text-center">
-          <p className="text-muted-foreground">Inbox is empty.</p>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Newly captured tasks will appear here.
-          </p>
-        </div>
+        <EmptyState
+          title="Inbox is empty."
+          description="Newly captured tasks will appear here."
+        />
       )}
     </div>
   )

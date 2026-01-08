@@ -1,4 +1,11 @@
 /**
+ * Check if a date is valid
+ */
+function isValidDate(date: Date): boolean {
+  return !isNaN(date.getTime())
+}
+
+/**
  * Format a date string as relative natural language.
  * - "Today", "Yesterday", "Tomorrow"
  * - "Last Monday", "Next Friday" (within ~7 days)
@@ -6,6 +13,8 @@
  */
 export function formatRelativeDate(dateString: string): string {
   const date = new Date(dateString)
+  if (!isValidDate(date)) return dateString
+
   const today = new Date()
 
   // Normalize to start of day for comparison
@@ -60,6 +69,8 @@ export function formatRelativeDate(dateString: string): string {
  */
 export function isOverdue(dateString: string): boolean {
   const date = new Date(dateString)
+  if (!isValidDate(date)) return false
+
   const today = new Date()
 
   const dateDay = new Date(date.getFullYear(), date.getMonth(), date.getDate())
@@ -77,6 +88,8 @@ export function isOverdue(dateString: string): boolean {
  */
 export function isToday(dateString: string): boolean {
   const date = new Date(dateString)
+  if (!isValidDate(date)) return false
+
   const today = new Date()
 
   return (

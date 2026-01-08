@@ -153,6 +153,51 @@ Six color slots for user-defined area types. Colors are assigned automatically v
 
 ---
 
+## Container Query Breakpoints
+
+We use container queries (`@container`) for component-level responsive design. This allows cards and panels to adapt based on their container width, not the viewport.
+
+### Custom Breakpoints
+
+Defined in `src/index.css`, these extend Tailwind's default container breakpoints for compact UI:
+
+| Breakpoint | Size   | Use Case                                   |
+| ---------- | ------ | ------------------------------------------ |
+| `@4xs`     | 80px   | Ultra-compact (calendar day cells)         |
+| `@5xs`     | 120px  | Task card row layout transitions           |
+| `@6xs`     | 140px  | Task card compact threshold                |
+| `@7xs`     | 180px  | Area/project cards expand                  |
+| `@8xs`     | 200px  | Area/project cards switch to row layout    |
+
+### Standard Breakpoints
+
+Tailwind's built-in container breakpoints are also available:
+
+| Breakpoint  | Size   |
+| ----------- | ------ |
+| `@3xs`      | 256px  |
+| `@2xs`      | 288px  |
+| `@xs`       | 320px  |
+| `@sm`       | 384px  |
+
+### Arbitrary Breakpoints
+
+For one-off cases, use arbitrary values: `@[280px]:flex-row`
+
+### Usage Pattern
+
+```tsx
+// Mark element as container query context
+<div className="@container">
+  {/* Child elements can use container breakpoints */}
+  <div className="flex-col @5xs:flex-row gap-1.5 @6xs:gap-2">
+    <span className="text-2xs @6xs:text-xs">...</span>
+  </div>
+</div>
+```
+
+---
+
 ## Components
 
 ### Cards

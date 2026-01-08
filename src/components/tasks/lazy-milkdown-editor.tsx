@@ -1,7 +1,40 @@
-import { lazy, Suspense } from 'react'
+import * as React from 'react'
+import { lazy, Suspense, Component } from 'react'
 import { Skeleton } from '@/components/ui/skeleton'
 
-const MilkdownEditor = lazy(() => import('./milkdown-editor'))
+const MilkdownEditor = lazy(() =>
+  import('./milkdown-editor').then((mod) => ({ default: mod.MilkdownEditor }))
+)
+
+// Error boundary to catch Milkdown rendering errors
+interface ErrorBoundaryState {
+  hasError: boolean
+}
+
+class EditorErrorBoundary extends Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="p-4 text-sm text-muted-foreground">
+          Unable to load editor. Try refreshing the page.
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 const MilkdownPreview = lazy(() =>
   import('./milkdown-editor').then((mod) => ({ default: mod.MilkdownPreview }))
@@ -16,9 +49,11 @@ interface LazyMilkdownEditorProps {
 
 export function LazyMilkdownEditor(props: LazyMilkdownEditorProps) {
   return (
-    <Suspense fallback={<EditorSkeleton />}>
-      <MilkdownEditor {...props} />
-    </Suspense>
+    <EditorErrorBoundary>
+      <Suspense fallback={<EditorSkeleton />}>
+        <MilkdownEditor {...props} />
+      </Suspense>
+    </EditorErrorBoundary>
   )
 }
 
@@ -29,9 +64,11 @@ interface LazyMilkdownPreviewProps {
 
 export function LazyMilkdownPreview(props: LazyMilkdownPreviewProps) {
   return (
-    <Suspense fallback={<PreviewSkeleton />}>
-      <MilkdownPreview {...props} />
-    </Suspense>
+    <EditorErrorBoundary>
+      <Suspense fallback={<PreviewSkeleton />}>
+        <MilkdownPreview {...props} />
+      </Suspense>
+    </EditorErrorBoundary>
   )
 }
 

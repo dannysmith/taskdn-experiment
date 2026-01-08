@@ -9,6 +9,7 @@ import { SectionTaskGroup } from '@/components/tasks/section-task-group'
 import { TaskDndContext } from '@/components/tasks/task-dnd-context'
 import { isOverdue, isToday } from '@/lib/date-utils'
 import type { Task } from '@/types/data'
+import { EmptyState } from '@/components/ui/empty-state'
 import { toHeadingId, type HeadingColor } from '@/types/headings'
 import { arrayMove } from '@dnd-kit/sortable'
 
@@ -441,14 +442,10 @@ export function TodayView(_props: TodayViewProps) {
 
         {/* Empty state */}
         {!hasAnyItems && (
-          <div className="py-12 text-center">
-            <p className="text-muted-foreground">
-              Nothing scheduled for today.
-            </p>
-            <p className="text-sm text-muted-foreground/70 mt-1">
-              Schedule tasks to see them here.
-            </p>
-          </div>
+          <EmptyState
+            title="Nothing scheduled for today."
+            description="Schedule tasks to see them here."
+          />
         )}
       </div>
     </TaskDndContext>

@@ -282,4 +282,4 @@ export function MilkdownPreview({ content, className }: MilkdownPreviewProps) {
   )
 }
 
-export default MilkdownEditor
+export { MilkdownEditor }

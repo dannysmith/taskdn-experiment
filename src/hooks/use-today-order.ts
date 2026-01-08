@@ -47,16 +47,16 @@ export function useTodayOrder(sections: TodaySections) {
   // Headings storage: headingId -> Heading data
   const [headings, setHeadings] = useState<Record<string, Heading>>({})
 
-  // Map section ID to tasks for sync
-  const sectionToTasks: Record<TodaySectionId, Task[]> = {
-    'scheduled-today': sections.scheduledToday,
-    'overdue-due-today': sections.overdueOrDueToday,
-    'became-available-today': sections.becameAvailableToday,
-  }
-
   // Sync order when tasks change (added/removed)
   // IMPORTANT: Preserve heading IDs - they don't come from the task list
   useEffect(() => {
+    // Map section ID to tasks - defined inside effect to avoid stale closure
+    const sectionToTasks: Record<TodaySectionId, Task[]> = {
+      'scheduled-today': sections.scheduledToday,
+      'overdue-due-today': sections.overdueOrDueToday,
+      'became-available-today': sections.becameAvailableToday,
+    }
+
     setSectionOrder((prev) => {
       let changed = false
       const newOrder: SectionOrder = { ...prev }
@@ -91,12 +91,7 @@ export function useTodayOrder(sections: TodaySections) {
 
       return changed ? newOrder : prev
     })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    sections.scheduledToday,
-    sections.overdueOrDueToday,
-    sections.becameAvailableToday,
-  ])
+  }, [sections.scheduledToday, sections.overdueOrDueToday, sections.becameAvailableToday])
 
   // Set section order directly (from reordered items array)
   // Now accepts an array of IDs which may include heading:* prefixed IDs
@@ -126,10 +121,25 @@ export function useTodayOrder(sections: TodaySections) {
     []
   )
 
+  // Helper to get tasks for a section
+  const getTasksForSection = useCallback(
+    (sectionId: TodaySectionId): Task[] => {
+      switch (sectionId) {
+        case 'scheduled-today':
+          return sections.scheduledToday
+        case 'overdue-due-today':
+          return sections.overdueOrDueToday
+        case 'became-available-today':
+          return sections.becameAvailableToday
+      }
+    },
+    [sections.scheduledToday, sections.overdueOrDueToday, sections.becameAvailableToday]
+  )
+
   // Get ordered tasks for a section (returns Task objects only, filters out headings)
   const getOrderedTasks = useCallback(
     (sectionId: TodaySectionId): Task[] => {
-      const tasks = sectionToTasks[sectionId]
+      const tasks = getTasksForSection(sectionId)
       const orderedIds = sectionOrder[sectionId] ?? []
       const taskMap = new Map(tasks.map((t) => [t.id, t]))
 
@@ -138,19 +148,13 @@ export function useTodayOrder(sections: TodaySections) {
         .map((id) => taskMap.get(id))
         .filter((t): t is Task => t !== undefined)
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      sectionOrder,
-      sections.scheduledToday,
-      sections.overdueOrDueToday,
-      sections.becameAvailableToday,
-    ]
+    [getTasksForSection, sectionOrder]
   )
 
   // Get ordered items for a section (returns both tasks and headings with type info)
   const getOrderedItems = useCallback(
     (sectionId: TodaySectionId): ResolvedOrderedItem[] => {
-      const tasks = sectionToTasks[sectionId]
+      const tasks = getTasksForSection(sectionId)
       const orderedIds = sectionOrder[sectionId] ?? []
       const taskMap = new Map(tasks.map((t) => [t.id, t]))
 
@@ -173,14 +177,7 @@ export function useTodayOrder(sections: TodaySections) {
 
       return items
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      sectionOrder,
-      headings,
-      sections.scheduledToday,
-      sections.overdueOrDueToday,
-      sections.becameAvailableToday,
-    ]
+    [getTasksForSection, sectionOrder, headings]
   )
 
   // Create a new heading in a section

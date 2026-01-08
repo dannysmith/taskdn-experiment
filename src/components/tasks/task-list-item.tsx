@@ -1,11 +1,12 @@
 /**
- * Re-exports from the new task item components.
+ * Task list item components.
  *
- * The TaskListItem component has been refactored into:
  * - TaskItem: Pure presentational component (no DnD)
- * - SortableTaskItem: Sortable wrapper with DnD support
+ * - TaskListItem: Basic sortable wrapper (this file)
+ * - SortableTaskItem: Advanced sortable with cross-container gap animations
  *
- * This file maintains backward compatibility for existing imports.
+ * Use TaskListItem for simple list contexts. Use SortableTaskItem when you need
+ * visual feedback for cross-container drag operations.
  */
 
 import * as React from 'react'
@@ -27,7 +28,7 @@ export interface TaskListItemProps extends Omit<TaskItemProps, 'className'> {
  * A sortable task list item for use within a SortableContext.
  * This is a wrapper around TaskItem that adds drag-and-drop support.
  *
- * @deprecated Consider using SortableTaskItem directly for new code.
+ * For cross-container drag scenarios with gap animations, use SortableTaskItem instead.
  */
 export function TaskListItem({
   task,

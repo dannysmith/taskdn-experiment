@@ -80,9 +80,8 @@ const AppDataContext = createContext<AppDataContextValue | null>(null)
 // -----------------------------------------------------------------------------
 
 // Generate a unique ID for new tasks
-let taskIdCounter = Date.now()
 function generateTaskId(): string {
-  return `task-${taskIdCounter++}`
+  return `task-${crypto.randomUUID()}`
 }
 
 export function AppDataProvider({ children }: { children: React.ReactNode }) {
