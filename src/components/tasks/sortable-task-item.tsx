@@ -1,13 +1,3 @@
-/**
- * Re-exports from the new task item components.
- *
- * The TaskListItem component has been refactored into:
- * - TaskItem: Pure presentational component (no DnD)
- * - SortableTaskItem: Sortable wrapper with DnD support
- *
- * This file maintains backward compatibility for existing imports.
- */
-
 import * as React from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -15,28 +5,26 @@ import { CSS } from '@dnd-kit/utilities'
 import { cn } from '@/lib/utils'
 import { TaskItem, type TaskItemProps } from './task-item'
 
-export interface TaskListItemProps extends Omit<TaskItemProps, 'className'> {
-  /** Used for dnd-kit sortable */
+export interface SortableTaskItemProps extends Omit<TaskItemProps, 'className'> {
+  /** Unique drag ID for this item (should be unique across all containers) */
   dragId: string
-  /** Project ID for cross-container drag detection */
-  projectId: string
+  /** Container ID for cross-container drag detection */
+  containerId: string
   className?: string
 }
 
 /**
- * A sortable task list item for use within a SortableContext.
- * This is a wrapper around TaskItem that adds drag-and-drop support.
- *
- * @deprecated Consider using SortableTaskItem directly for new code.
+ * A sortable wrapper for TaskItem that provides drag-and-drop functionality.
+ * Follows the SortableKanbanCard pattern for consistent, smooth DnD behavior.
  */
-export function TaskListItem({
+export function SortableTaskItem({
   task,
   dragId,
-  projectId,
+  containerId,
   className,
   isEditing,
   ...taskItemProps
-}: TaskListItemProps) {
+}: SortableTaskItemProps) {
   const {
     attributes,
     listeners,
@@ -49,7 +37,7 @@ export function TaskListItem({
     data: {
       type: 'task',
       taskId: task.id,
-      projectId: projectId,
+      projectId: containerId,
     },
   })
 
@@ -69,11 +57,11 @@ export function TaskListItem({
       {...dragProps}
       className={cn('touch-manipulation', isDragging && 'opacity-50', className)}
     >
-      <TaskItem task={task} isEditing={isEditing} {...taskItemProps} />
+      <TaskItem
+        task={task}
+        isEditing={isEditing}
+        {...taskItemProps}
+      />
     </div>
   )
 }
-
-// Re-export TaskItem for cases where only the presentational component is needed
-export { TaskItem } from './task-item'
-export type { TaskItemProps } from './task-item'

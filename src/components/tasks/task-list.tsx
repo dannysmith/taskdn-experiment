@@ -11,7 +11,6 @@ import {
   type DragEndEvent,
   type DropAnimation,
 } from '@dnd-kit/core'
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -20,7 +19,7 @@ import {
 
 import { cn } from '@/lib/utils'
 import type { Task } from '@/types/data'
-import { TaskListItem } from './task-list-item'
+import { SortableTaskItem } from './sortable-task-item'
 import { TaskStatusCheckbox } from './task-status-checkbox'
 import { useTaskDragPreview } from './task-dnd-context'
 
@@ -63,6 +62,8 @@ interface TaskListProps extends BaseTaskListProps {
 /**
  * A keyboard-navigable task list for use with an external DndContext.
  * Renders items within a SortableContext but expects parent to provide DndContext.
+ *
+ * Uses visual order from TaskDndContext during drag for smooth cross-container animations.
  *
  * Keyboard shortcuts:
  * - Arrow Up/Down: Move selection
@@ -110,8 +111,9 @@ export function TaskList({
       : internalEditingTaskId
   const setEditingTaskId = onEditingTaskIdChange ?? setInternalEditingTaskId
 
-  // Get drag context to check for dropped task
-  const { lastDroppedTaskId, clearLastDroppedTaskId } = useTaskDragPreview()
+  // Get drag context to check for dropped task and visual items
+  const { lastDroppedTaskId, clearLastDroppedTaskId, getVisualItems } =
+    useTaskDragPreview()
 
   // Select the dropped task after a drag ends, or clear selection if task went to another list
   React.useEffect(() => {
@@ -252,8 +254,29 @@ export function TaskList({
     containerRef.current?.focus()
   }
 
+  // Get visual items from context if dragging, otherwise use entity data
+  const visualItems = getVisualItems(projectId)
+
   // Generate drag IDs with project prefix for uniqueness across containers
-  const dragIds = tasks.map((t) => `task-${projectId}-${t.id}`)
+  const entityDragIds = tasks.map((t) => `task-${projectId}-${t.id}`)
+
+  // Use visual items during drag, entity data otherwise
+  const dragIds = visualItems ?? entityDragIds
+
+  // Build a lookup for rendering - need to match visual order if dragging
+  const taskMap = React.useMemo(() => {
+    const map = new Map<string, Task>()
+    for (const task of tasks) {
+      map.set(`task-${projectId}-${task.id}`, task)
+    }
+    return map
+  }, [tasks, projectId])
+
+  // During drag, we may have items from other containers in our visual items
+  // Filter to only show tasks we actually have data for
+  const visibleDragIds = React.useMemo(() => {
+    return dragIds.filter((id) => taskMap.has(String(id)))
+  }, [dragIds, taskMap])
 
   if (tasks.length === 0) {
     return (
@@ -286,27 +309,36 @@ export function TaskList({
     >
       <SortableContext items={dragIds} strategy={verticalListSortingStrategy}>
         <div className="space-y-0.5">
-          {tasks.map((task, index) => (
-            <TaskListItem
-              key={task.id}
-              task={task}
-              dragId={`task-${projectId}-${task.id}`}
-              projectId={projectId}
-              isSelected={selectedIndex === index}
-              isEditing={editingTaskId === task.id}
-              onSelect={() => handleSelect(index)}
-              onStartEdit={() => handleStartEdit(task.id)}
-              onEndEdit={handleEndEdit}
-              onTitleChange={(newTitle) => onTaskTitleChange(task.id, newTitle)}
-              onStatusToggle={() => onTaskStatusToggle(task.id)}
-              onOpenDetail={
-                onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
-              }
-              contextName={getContextName?.(task)}
-              showScheduled={showScheduled}
-              showDue={showDue}
-            />
-          ))}
+          {visibleDragIds.map((dragId) => {
+            const task = taskMap.get(String(dragId))
+            if (!task) return null
+
+            const index = tasks.findIndex((t) => t.id === task.id)
+
+            return (
+              <SortableTaskItem
+                key={task.id}
+                task={task}
+                dragId={String(dragId)}
+                containerId={projectId}
+                isSelected={selectedIndex === index}
+                isEditing={editingTaskId === task.id}
+                onSelect={() => handleSelect(index)}
+                onStartEdit={() => handleStartEdit(task.id)}
+                onEndEdit={handleEndEdit}
+                onTitleChange={(newTitle) =>
+                  onTaskTitleChange(task.id, newTitle)
+                }
+                onStatusToggle={() => onTaskStatusToggle(task.id)}
+                onOpenDetail={
+                  onTaskOpenDetail ? () => onTaskOpenDetail(task.id) : undefined
+                }
+                contextName={getContextName?.(task)}
+                showScheduled={showScheduled}
+                showDue={showDue}
+              />
+            )
+          })}
         </div>
       </SortableContext>
     </div>
@@ -412,7 +444,6 @@ export function DraggableTaskList({
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      modifiers={[restrictToVerticalAxis]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >

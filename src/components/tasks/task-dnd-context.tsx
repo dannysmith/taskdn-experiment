@@ -11,8 +11,8 @@ import {
   type DragEndEvent,
   type DragOverEvent,
   type DropAnimation,
+  type UniqueIdentifier,
 } from '@dnd-kit/core'
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers'
 import { arrayMove } from '@dnd-kit/sortable'
 
 import type { Task } from '@/types/data'
@@ -80,9 +80,7 @@ interface TaskDragPreviewState {
   type: 'task'
   taskId: string
   task: Task
-  sourceProjectId: string
-  currentProjectId: string
-  overTaskId: string | null
+  sourceContainerId: string
 }
 
 interface HeadingDragPreviewState {
@@ -98,6 +96,12 @@ interface TaskDndContextValue {
   dragPreview: DragPreviewState | null
   lastDroppedTaskId: string | null
   clearLastDroppedTaskId: () => void
+  /**
+   * Get the visual order of items for a container during drag.
+   * Returns drag IDs (not task IDs) for use with SortableContext.
+   * Falls back to null when not dragging (caller should use entity data).
+   */
+  getVisualItems: (containerId: string) => UniqueIdentifier[] | null
 }
 
 // Exported for reuse by other DnD contexts (e.g., TodayDndContext)
@@ -105,6 +109,7 @@ export const TaskDndReactContext = React.createContext<TaskDndContextValue>({
   dragPreview: null,
   lastDroppedTaskId: null,
   clearLastDroppedTaskId: () => {},
+  getVisualItems: () => null,
 })
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -144,13 +149,30 @@ interface TaskDndContextProps {
 }
 
 // -----------------------------------------------------------------------------
+// Helper: Generate drag ID from container and task ID
+// -----------------------------------------------------------------------------
+
+function makeDragId(containerId: string, taskId: string): string {
+  return `task-${containerId}-${taskId}`
+}
+
+function extractTaskIdFromDragId(dragId: string): string | null {
+  // Format: task-{containerId}-{taskId}
+  const match = dragId.match(/^task-.+-(.+)$/)
+  return match ? match[1] : null
+}
+
+// -----------------------------------------------------------------------------
 // TaskDndContext - Shared context for cross-project drag
 // -----------------------------------------------------------------------------
 
 /**
  * A shared DndContext for multiple project task lists.
  * Handles both same-project reordering and cross-project moves.
- * Uses onDragOver to provide visual feedback during cross-project drags.
+ *
+ * Key improvement: Uses visual order state during drag to enable smooth
+ * cross-container animations. Items shift naturally between containers
+ * instead of using transform suppression.
  */
 export function TaskDndContext({
   children,
@@ -168,9 +190,24 @@ export function TaskDndContext({
     string | null
   >(null)
 
+  // Visual order state during drag: Map<containerId, dragId[]>
+  // This is separate from entity data and only exists during drag
+  const [visualItemsByContainer, setVisualItemsByContainer] = React.useState<
+    Map<string, UniqueIdentifier[]> | null
+  >(null)
+
   const clearLastDroppedTaskId = React.useCallback(() => {
     setLastDroppedTaskId(null)
   }, [])
+
+  // Get visual items for a container (used by SortableContexts)
+  const getVisualItems = React.useCallback(
+    (containerId: string): UniqueIdentifier[] | null => {
+      if (!visualItemsByContainer) return null
+      return visualItemsByContainer.get(containerId) ?? null
+    },
+    [visualItemsByContainer]
+  )
 
   // Sensors for drag and drop - only PointerSensor
   const sensors = useSensors(
@@ -198,10 +235,18 @@ export function TaskDndContext({
           type: 'task',
           taskId: data.taskId,
           task,
-          sourceProjectId: data.projectId,
-          currentProjectId: data.projectId,
-          overTaskId: null,
+          sourceContainerId: data.projectId,
         })
+
+        // Initialize visual order from entity data
+        const initialVisualOrder = new Map<string, UniqueIdentifier[]>()
+        for (const [containerId, tasks] of tasksByProject) {
+          initialVisualOrder.set(
+            containerId,
+            tasks.map((t) => makeDragId(containerId, t.id))
+          )
+        }
+        setVisualItemsByContainer(initialVisualOrder)
       }
     } else if (data?.type === 'heading' && getHeadingById) {
       const heading = getHeadingById(data.headingId)
@@ -217,47 +262,101 @@ export function TaskDndContext({
   }
 
   const handleDragOver = (event: DragOverEvent) => {
-    if (!dragPreview) return
+    if (!dragPreview || dragPreview.type !== 'task') return
+    if (!visualItemsByContainer) return
 
-    // Headings don't participate in cross-section drag, so no preview update needed
-    if (dragPreview.type === 'heading') return
-
-    const { over } = event
+    const { active, over } = event
     if (!over) return
 
+    const activeData = active.data.current as TaskDragData | undefined
     const overData = over.data.current as DropTargetData | undefined
+    if (!activeData || activeData.type !== 'task') return
     if (!overData) return
 
-    // Only update for task drags - handle both task and empty-project targets
-    const newProjectId =
+    // Determine target container
+    const targetContainerId =
       overData.type === 'heading' ? overData.containerId : overData.projectId
-    const newOverTaskId = overData.type === 'task' ? overData.taskId : null
+    const sourceContainerId = dragPreview.sourceContainerId
 
-    // Update preview to show which project/task we're hovering over
-    // Only update if something actually changed to avoid unnecessary re-renders
-    if (
-      newProjectId !== dragPreview.currentProjectId ||
-      newOverTaskId !== dragPreview.overTaskId
-    ) {
-      setDragPreview((prev) =>
-        prev && prev.type === 'task'
-          ? {
-              ...prev,
-              currentProjectId: newProjectId,
-              overTaskId: newOverTaskId,
-            }
-          : prev
-      )
+    // Find current container of the dragged item (may have moved during drag)
+    let currentContainerId = sourceContainerId
+    for (const [containerId, items] of visualItemsByContainer) {
+      if (items.includes(active.id)) {
+        currentContainerId = containerId
+        break
+      }
+    }
+
+    // If moving to a different container, update visual order
+    if (currentContainerId !== targetContainerId) {
+      setVisualItemsByContainer((prev) => {
+        if (!prev) return prev
+
+        const newMap = new Map(prev)
+
+        // Remove from current container
+        const currentItems = newMap.get(currentContainerId) ?? []
+        const filteredCurrentItems = currentItems.filter(
+          (id) => id !== active.id
+        )
+        newMap.set(currentContainerId, filteredCurrentItems)
+
+        // Add to target container
+        const targetItems = [...(newMap.get(targetContainerId) ?? [])]
+
+        // Find insertion position
+        // IMPORTANT: Use active.id (the original drag ID), NOT a new drag ID.
+        // active.id never changes during drag - dnd-kit tracks items by this ID.
+        if (overData.type === 'task') {
+          // Insert at the position of the hovered task
+          const targetDragId = makeDragId(targetContainerId, overData.taskId)
+          const overIndex = targetItems.indexOf(targetDragId)
+          if (overIndex !== -1) {
+            targetItems.splice(overIndex, 0, active.id)
+          } else {
+            // Fallback: append at end
+            targetItems.push(active.id)
+          }
+        } else {
+          // Empty container or heading - append at end
+          targetItems.push(active.id)
+        }
+
+        newMap.set(targetContainerId, targetItems)
+        return newMap
+      })
+    } else if (overData.type === 'task') {
+      // Same container - reorder within
+      const overDragId = makeDragId(targetContainerId, overData.taskId)
+      if (active.id !== overDragId) {
+        setVisualItemsByContainer((prev) => {
+          if (!prev) return prev
+
+          const newMap = new Map(prev)
+          const items = [...(newMap.get(targetContainerId) ?? [])]
+          const oldIndex = items.indexOf(active.id)
+          const newIndex = items.indexOf(overDragId)
+
+          if (oldIndex !== -1 && newIndex !== -1) {
+            newMap.set(targetContainerId, arrayMove(items, oldIndex, newIndex))
+          }
+          return newMap
+        })
+      }
     }
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    if (!dragPreview) return
+    if (!dragPreview) {
+      setVisualItemsByContainer(null)
+      return
+    }
 
     const { active, over } = event
 
     if (!over) {
       setDragPreview(null)
+      setVisualItemsByContainer(null)
       return
     }
 
@@ -285,6 +384,7 @@ export function TaskDndContext({
       }
 
       setDragPreview(null)
+      setVisualItemsByContainer(null)
       return
     }
 
@@ -294,25 +394,38 @@ export function TaskDndContext({
 
     if (!activeData || activeData.type !== 'task') {
       setDragPreview(null)
+      setVisualItemsByContainer(null)
       return
     }
 
-    // Determine target project from where we dropped
-    // Handle dropping on headings (use their containerId) or tasks/empty-projects
-    const targetProjectId =
-      overData?.type === 'heading'
-        ? overData.containerId
-        : (overData?.projectId ?? dragPreview.sourceProjectId)
+    // Find final container of the dragged item from visual state
+    // Since we keep active.id consistent, we can search for it directly
+    let finalContainerId = dragPreview.sourceContainerId
+    if (visualItemsByContainer) {
+      for (const [containerId, items] of visualItemsByContainer) {
+        if (items.includes(active.id)) {
+          finalContainerId = containerId
+          break
+        }
+      }
+    }
 
-    if (targetProjectId !== dragPreview.sourceProjectId) {
-      // Cross-project move (including drops on empty projects)
-      // Pass the overTaskId so the handler can insert at the correct position
-      const insertBeforeTaskId =
-        overData?.type === 'task' ? overData.taskId : null
+    // Determine insertion position from final visual order
+    const finalItems = visualItemsByContainer?.get(finalContainerId) ?? []
+    const draggedIndex = finalItems.findIndex((id) => id === active.id)
+    let insertBeforeTaskId: string | null = null
+    if (draggedIndex !== -1 && draggedIndex < finalItems.length - 1) {
+      insertBeforeTaskId = extractTaskIdFromDragId(
+        String(finalItems[draggedIndex + 1])
+      )
+    }
+
+    if (finalContainerId !== dragPreview.sourceContainerId) {
+      // Cross-project move
       onTaskMove(
         dragPreview.taskId,
-        dragPreview.sourceProjectId,
-        targetProjectId,
+        dragPreview.sourceContainerId,
+        finalContainerId,
         insertBeforeTaskId
       )
       setLastDroppedTaskId(dragPreview.taskId)
@@ -320,11 +433,11 @@ export function TaskDndContext({
       // Same-container reorder
       if (onItemsReorder) {
         // Use items reorder callback (for mixed containers with headings)
-        onItemsReorder(targetProjectId, String(active.id), String(over.id))
+        onItemsReorder(finalContainerId, String(active.id), String(over.id))
         setLastDroppedTaskId(activeData.taskId)
       } else if (overData?.type === 'task') {
         // Fall back to task-only reorder
-        const projectTasks = tasksByProject.get(targetProjectId) ?? []
+        const projectTasks = tasksByProject.get(finalContainerId) ?? []
         const oldIndex = projectTasks.findIndex(
           (t) => t.id === activeData.taskId
         )
@@ -332,23 +445,26 @@ export function TaskDndContext({
 
         if (oldIndex !== -1 && newIndex !== -1) {
           const newTasks = arrayMove(projectTasks, oldIndex, newIndex)
-          onTasksReorder(targetProjectId, newTasks)
+          onTasksReorder(finalContainerId, newTasks)
           setLastDroppedTaskId(activeData.taskId)
         }
       }
     }
 
     setDragPreview(null)
+    setVisualItemsByContainer(null)
   }
 
   const handleDragCancel = () => {
     setDragPreview(null)
+    setVisualItemsByContainer(null)
   }
 
   const contextValue: TaskDndContextValue = {
     dragPreview,
     lastDroppedTaskId,
     clearLastDroppedTaskId,
+    getVisualItems,
   }
 
   return (
@@ -356,7 +472,7 @@ export function TaskDndContext({
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
-        modifiers={[restrictToVerticalAxis]}
+        // Removed restrictToVerticalAxis - items move freely for better UX
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
@@ -379,42 +495,19 @@ export function TaskDndContext({
 }
 
 // -----------------------------------------------------------------------------
-// Helper: Check if a task should show a drop indicator
+// Deprecated - kept for backward compatibility during migration
 // -----------------------------------------------------------------------------
 
-// Today view section IDs that have restricted drop targets
-const TODAY_SECTION_IDS = new Set([
-  'scheduled-today',
-  'overdue-due-today',
-  'became-available-today',
-])
-
 /**
- * Returns whether to show a drop indicator above this task.
- * Used for visual feedback during cross-project drag.
+ * @deprecated No longer needed - transforms are always applied now.
+ * The visual order state in TaskDndContext handles cross-container moves.
  */
 // eslint-disable-next-line react-refresh/only-export-components
 export function shouldShowDropIndicator(
-  taskId: string,
-  projectId: string,
-  dragPreview: DragPreviewState | null
+  _taskId: string,
+  _projectId: string,
+  _dragPreview: DragPreviewState | null
 ): boolean {
-  if (!dragPreview) return false
-
-  // Only task drags can show drop indicators (not heading drags)
-  if (dragPreview.type !== 'task') return false
-
-  // Only show indicator if dragging to a different project
-  if (dragPreview.sourceProjectId === dragPreview.currentProjectId) return false
-
-  // For Today view: only show indicator when target is "scheduled-today"
-  if (TODAY_SECTION_IDS.has(dragPreview.sourceProjectId)) {
-    if (dragPreview.currentProjectId !== 'scheduled-today') return false
-  }
-
-  // Show indicator on the task we're hovering over in the target project
-  return (
-    dragPreview.currentProjectId === projectId &&
-    dragPreview.overTaskId === taskId
-  )
+  // Always return false - natural item shifting replaces drop indicators
+  return false
 }

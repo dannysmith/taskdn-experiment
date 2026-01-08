@@ -221,7 +221,7 @@ function EmptySectionDropZone({ sectionId }: { sectionId: string }) {
   const isDraggingFromOtherSection =
     dragPreview &&
     dragPreview.type === 'task' &&
-    dragPreview.sourceProjectId !== sectionId
+    dragPreview.sourceContainerId !== sectionId
 
   return (
     <div
