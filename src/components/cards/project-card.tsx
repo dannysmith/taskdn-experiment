@@ -119,7 +119,7 @@ export function ProjectCard({
             type="button"
             onClick={handleAreaClick}
             className={cn(
-              'truncate max-w-20 @8xs:max-w-[100px] @[280px]:max-w-[140px] transition-colors text-left',
+              'truncate max-w-20 @8xs:max-w-24 @[280px]:max-w-[140px] transition-colors text-left',
               onAreaClick && 'hover:text-foreground hover:underline'
             )}
           >

@@ -282,7 +282,7 @@ function TaskMetadata({
     <div className={cn('flex items-center gap-1.5 text-xs min-w-0', mutedClass)}>
       {/* Context (project/area name) - flexible width, truncates */}
       {contextName && (
-        <span className="text-muted-foreground truncate min-w-0 max-w-[100px]">
+        <span className="text-muted-foreground truncate min-w-0 max-w-24">
           {contextName}
         </span>
       )}

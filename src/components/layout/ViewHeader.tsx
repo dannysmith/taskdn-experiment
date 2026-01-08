@@ -20,10 +20,10 @@ export function ViewHeader({
   onProjectStatusChange,
 }: ViewHeaderProps) {
   return (
-    <header className="@container flex h-14 shrink-0 items-center gap-2 @[400px]:gap-3 border-b px-3 @[400px]:px-4">
-      <h1 className="text-lg @[400px]:text-xl font-semibold truncate shrink-0">{title}</h1>
+    <header className="@container flex h-14 shrink-0 items-center gap-2 @sm:gap-3 border-b px-3 @sm:px-4">
+      <h1 className="text-lg @sm:text-xl font-semibold truncate shrink-0">{title}</h1>
       {projectStatusCounts && (
-        <div className="hidden @[500px]:block overflow-hidden">
+        <div className="hidden @lg:block overflow-hidden">
           <ProjectStatusBadges counts={projectStatusCounts} />
         </div>
       )}
