@@ -12,6 +12,9 @@ export function DetailSideBar({
   children,
   width = 400,
 }: DetailSideBarProps) {
+  // Use min() to prevent overflow on mobile - cap at 90vw
+  const responsiveWidth = `min(${width}px, 90vw)`
+
   return (
     <aside
       className={cn(
@@ -19,9 +22,9 @@ export function DetailSideBar({
         'transition-[width,opacity] duration-150 ease-out',
         isOpen ? 'opacity-100' : 'w-0 opacity-0'
       )}
-      style={{ width: isOpen ? width : 0 }}
+      style={{ width: isOpen ? responsiveWidth : 0 }}
     >
-      <div className="h-full" style={{ width }}>
+      <div className="h-full" style={{ width: responsiveWidth }}>
         {children}
       </div>
     </aside>

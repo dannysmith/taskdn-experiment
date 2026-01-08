@@ -80,7 +80,7 @@ export function DateButton({
             variant="ghost"
             size="sm"
             className={cn(
-              'h-7 gap-1 px-2 text-xs font-normal border-0',
+              'h-6 @[280px]:h-7 gap-0.5 @[280px]:gap-1 px-1.5 @[280px]:px-2 text-[10px] @[280px]:text-xs font-normal border-0',
               value ? styles.active : styles.base
             )}
             title={tooltip}
@@ -88,7 +88,7 @@ export function DateButton({
         }
       >
         {icon}
-        <span>{value ? format(new Date(value), 'MMM d') : tooltip}</span>
+        <span className="truncate">{value ? format(new Date(value), 'MMM d') : tooltip}</span>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="end">
         <CalendarComponent

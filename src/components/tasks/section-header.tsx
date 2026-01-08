@@ -52,10 +52,10 @@ export function SectionHeader({
       {/* Optional icon */}
       {icon && <span className="text-muted-foreground shrink-0">{icon}</span>}
 
-      {/* Section title */}
-      <span className="font-semibold text-sm truncate">{title}</span>
+      {/* Section title - flex-1 so it takes available space and truncates */}
+      <span className="font-semibold text-sm truncate flex-1 min-w-0">{title}</span>
 
-      {/* Action buttons - always visible, right after title */}
+      {/* Action buttons - stay fixed size */}
       {(onAddTask || onAddHeading) && (
         <div className="flex items-center gap-0.5 shrink-0">
           {onAddHeading && (
@@ -96,9 +96,6 @@ export function SectionHeader({
           )}
         </div>
       )}
-
-      {/* Spacer */}
-      <div className="flex-1" />
 
       {/* Task count badge */}
       {taskCount !== undefined && taskCount > 0 && (

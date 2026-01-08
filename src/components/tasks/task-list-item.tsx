@@ -206,10 +206,10 @@ export function TaskListItem({
         />
       ) : (
         <>
-          {/* Title + chevron grouped together */}
+          {/* Title */}
           <span
             className={cn(
-              'text-sm truncate',
+              'text-sm truncate min-w-0',
               (isDone || isDropped) && 'line-through text-muted-foreground'
             )}
           >
@@ -279,26 +279,26 @@ function TaskMetadata({
   const mutedClass = isDone ? 'opacity-50' : ''
 
   return (
-    <div className={cn('flex items-center gap-2 text-xs shrink-0', mutedClass)}>
-      {/* Context (project/area name) */}
+    <div className={cn('flex items-center gap-1.5 text-xs min-w-0', mutedClass)}>
+      {/* Context (project/area name) - flexible width, truncates */}
       {contextName && (
-        <span className="text-muted-foreground truncate max-w-[120px]">
+        <span className="text-muted-foreground truncate min-w-0 max-w-[100px]">
           {contextName}
         </span>
       )}
 
-      {/* Scheduled date */}
+      {/* Scheduled date - shrinks to fit */}
       {scheduled && (
-        <span className="text-muted-foreground">
+        <span className="text-muted-foreground whitespace-nowrap shrink-0">
           {formatRelativeDate(scheduled)}
         </span>
       )}
 
-      {/* Due date with flag */}
+      {/* Due date with flag - shrinks to fit */}
       {due && (
         <span
           className={cn(
-            'flex items-center gap-1',
+            'flex items-center gap-0.5 whitespace-nowrap shrink-0',
             isOverdue(due) && !isDone
               ? 'text-red-500 dark:text-red-400'
               : 'text-red-400/80 dark:text-red-400/70'

@@ -53,7 +53,7 @@ export function ProjectCard({
     <div
       onClick={onClick}
       className={cn(
-        'group bg-card rounded-xl border border-border/60 p-4 transition-all',
+        '@container group bg-card rounded-xl border border-border/60 p-3 @[180px]:p-4 transition-all',
         'hover:border-border hover:shadow-sm',
         onClick && 'cursor-pointer',
         isSelected && 'ring-2 ring-primary border-primary',
@@ -62,10 +62,10 @@ export function ProjectCard({
       )}
     >
       {/* Header: Title + Status Badge */}
-      <div className="flex items-start justify-between gap-2 mb-2">
+      <div className="flex items-start justify-between gap-1.5 @[180px]:gap-2 mb-2">
         <h3
           className={cn(
-            'font-medium text-sm leading-snug',
+            'font-medium text-xs @[180px]:text-sm leading-snug flex-1 min-w-0',
             isDone && 'line-through text-muted-foreground'
           )}
         >
@@ -93,13 +93,13 @@ export function ProjectCard({
         </div>
       )}
 
-      {/* Footer: Metadata */}
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
-        <div className="flex items-center gap-3">
+      {/* Footer: Metadata - stacks on narrow, row on wider */}
+      <div className="flex flex-col @[200px]:flex-row @[200px]:items-center @[200px]:justify-between gap-1.5 @[200px]:gap-2 text-[10px] @[180px]:text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 @[180px]:gap-3">
           {/* Task count with progress circle */}
-          <span className="flex items-center gap-1.5">
-            <ProgressCircle value={completion} size={14} strokeWidth={2} />
-            <span>
+          <span className="flex items-center gap-1 @[180px]:gap-1.5">
+            <ProgressCircle value={completion} size={12} strokeWidth={2} className="@[180px]:size-3.5" />
+            <span className="tabular-nums">
               {completedTaskCount}/{taskCount}
             </span>
           </span>
@@ -107,7 +107,7 @@ export function ProjectCard({
           {/* End date if set */}
           {project.endDate && (
             <span className="flex items-center gap-1">
-              <Calendar className="size-3" />
+              <Calendar className="size-2.5 @[180px]:size-3" />
               {formatRelativeDate(project.endDate)}
             </span>
           )}
@@ -119,7 +119,7 @@ export function ProjectCard({
             type="button"
             onClick={handleAreaClick}
             className={cn(
-              'truncate max-w-[100px] transition-colors',
+              'truncate max-w-[80px] @[200px]:max-w-[100px] @[280px]:max-w-[140px] transition-colors text-left',
               onAreaClick && 'hover:text-foreground hover:underline'
             )}
           >
@@ -141,7 +141,7 @@ function ProjectStatusBadge({ status }: { status: ProjectStatus }) {
   return (
     <span
       className={cn(
-        'shrink-0 text-[10px] font-medium h-5 px-2 rounded-full inline-flex items-center',
+        'shrink-0 text-[9px] @[180px]:text-[10px] font-medium h-4 @[180px]:h-5 px-1.5 @[180px]:px-2 rounded-full inline-flex items-center',
         config.color
       )}
     >

@@ -123,7 +123,7 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        'flex flex-col w-72 shrink-0 rounded-lg border bg-muted/30',
+        '@container flex flex-col w-72 shrink-0 rounded-lg border bg-muted/30',
         isDragTarget && 'ring-2 ring-primary/30',
         className
       )}
@@ -132,18 +132,18 @@ export function KanbanColumn({
       <button
         type="button"
         onClick={() => onCollapseChange(true)}
-        className="flex items-center gap-2 px-3 py-2.5 border-b hover:bg-muted/50 transition-colors"
+        className="flex items-center gap-2 px-3 py-2.5 border-b hover:bg-muted/50 transition-colors min-w-0"
       >
         <span
           className={cn(
-            'px-2 py-0.5 rounded-full text-xs font-medium',
+            'px-2 py-0.5 rounded-full text-xs font-medium shrink-0',
             config.color
           )}
         >
           {config.label}
         </span>
-        <span className="text-xs text-muted-foreground">{tasks.length}</span>
-        <ChevronRight className="size-4 text-muted-foreground ml-auto rotate-90" />
+        <span className="text-xs text-muted-foreground tabular-nums shrink-0">{tasks.length}</span>
+        <ChevronRight className="size-4 text-muted-foreground ml-auto rotate-90 shrink-0" />
       </button>
 
       {/* Column Content */}

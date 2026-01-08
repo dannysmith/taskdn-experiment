@@ -109,9 +109,9 @@ export function TaskDetailPanel() {
       </div>
 
       {/* Metadata section */}
-      <div className="px-4 pb-3 space-y-2.5">
-        {/* Project & Area row */}
-        <div className="flex gap-2">
+      <div className="@container px-4 pb-3 space-y-2.5">
+        {/* Project & Area row - stacks on narrow, row on wider */}
+        <div className="flex flex-col @[280px]:flex-row gap-2">
           <SearchableSelect
             value={task.projectId}
             options={allProjects.map((p) => ({ value: p.id, label: p.title }))}
@@ -132,34 +132,36 @@ export function TaskDetailPanel() {
           />
         </div>
 
-        {/* Status + Dates row */}
-        <div className="flex items-center gap-2">
+        {/* Status + Dates row - wraps on narrow */}
+        <div className="flex flex-wrap items-center gap-2">
           <TaskStatusPill
             status={task.status}
             onStatusChange={(newStatus) => updateTaskStatus(task.id, newStatus)}
           />
-          <div className="flex-1" />
-          <DateButton
-            icon={<Calendar className="size-3" />}
-            value={task.scheduled}
-            onChange={(date) => updateTaskScheduled(task.id, date)}
-            tooltip="Scheduled"
-            variant="scheduled"
-          />
-          <DateButton
-            icon={<Flag className="size-3" />}
-            value={task.due}
-            onChange={(date) => updateTaskDue(task.id, date)}
-            tooltip="Due"
-            variant="due"
-          />
-          <DateButton
-            icon={<Snowflake className="size-3" />}
-            value={task.deferUntil}
-            onChange={(date) => updateTaskDeferUntil(task.id, date)}
-            tooltip="Defer"
-            variant="defer"
-          />
+          <div className="flex-1 min-w-4" />
+          <div className="flex items-center gap-1.5 @[280px]:gap-2">
+            <DateButton
+              icon={<Calendar className="size-3" />}
+              value={task.scheduled}
+              onChange={(date) => updateTaskScheduled(task.id, date)}
+              tooltip="Scheduled"
+              variant="scheduled"
+            />
+            <DateButton
+              icon={<Flag className="size-3" />}
+              value={task.due}
+              onChange={(date) => updateTaskDue(task.id, date)}
+              tooltip="Due"
+              variant="due"
+            />
+            <DateButton
+              icon={<Snowflake className="size-3" />}
+              value={task.deferUntil}
+              onChange={(date) => updateTaskDeferUntil(task.id, date)}
+              tooltip="Defer"
+              variant="defer"
+            />
+          </div>
         </div>
       </div>
 
@@ -176,13 +178,13 @@ export function TaskDetailPanel() {
       </div>
 
       {/* Footer - Metadata */}
-      <div className="px-4 py-2 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
+      <div className="px-4 py-2 flex flex-wrap gap-x-2 @[280px]:gap-x-4 gap-y-0.5 text-[10px] @[280px]:text-xs text-muted-foreground">
         <span>Created {formatShortDate(task.createdAt)}</span>
         <span>Updated {formatShortDate(task.updatedAt)}</span>
         {task.completedAt && (
           <span>Completed {formatShortDate(task.completedAt)}</span>
         )}
-        <span className="font-mono opacity-50">{task.id}</span>
+        <span className="font-mono opacity-50 truncate max-w-[80px] @[320px]:max-w-none">{task.id}</span>
       </div>
     </div>
   )

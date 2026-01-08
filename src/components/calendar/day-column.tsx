@@ -77,7 +77,7 @@ export function DayColumn({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex flex-col min-h-[400px] border-r border-border/50 last:border-r-0',
+        '@container flex flex-col min-h-[300px] border-r border-border/50 last:border-r-0',
         isWeekendDay && 'bg-muted/20',
         (isOver || isDropTarget) && 'bg-primary/5'
       )}
@@ -95,9 +95,10 @@ export function DayColumn({
           </span>
           <span
             className={cn(
-              'text-sm font-semibold tabular-nums',
-              isCurrentDay &&
-                'bg-primary text-primary-foreground rounded-full w-7 h-7 flex items-center justify-center'
+              'size-6 flex items-center justify-center text-sm font-semibold tabular-nums rounded-full',
+              isCurrentDay
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-transparent'
             )}
           >
             {format(date, 'd')}

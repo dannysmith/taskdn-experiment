@@ -33,7 +33,7 @@ export function AreaCard({
     <div
       onClick={onClick}
       className={cn(
-        'group bg-card rounded-xl border border-border/60 p-4 transition-all',
+        '@container group bg-card rounded-xl border border-border/60 p-3 @[180px]:p-4 transition-all',
         'hover:border-border hover:shadow-sm',
         onClick && 'cursor-pointer',
         isSelected && 'ring-2 ring-primary border-primary',
@@ -42,24 +42,24 @@ export function AreaCard({
       )}
     >
       {/* Header: Icon + Title + Type Badge */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-2 @[180px]:gap-3">
         {/* Folder icon */}
         <div
           className={cn(
-            'shrink-0 size-8 rounded-lg flex items-center justify-center',
+            'shrink-0 size-6 @[180px]:size-8 rounded-lg flex items-center justify-center',
             'bg-entity-area/10 text-entity-area'
           )}
         >
           {activeProjectCount > 0 ? (
-            <FolderOpen className="size-4" />
+            <FolderOpen className="size-3 @[180px]:size-4" />
           ) : (
-            <Folder className="size-4" />
+            <Folder className="size-3 @[180px]:size-4" />
           )}
         </div>
 
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-medium text-sm leading-snug truncate">
+          <div className="flex items-start justify-between gap-1.5 @[180px]:gap-2 mb-1">
+            <h3 className="font-medium text-xs @[180px]:text-sm leading-snug truncate flex-1 min-w-0">
               {area.title}
             </h3>
             {area.type && <AreaTypeBadge type={area.type} />}
@@ -67,15 +67,15 @@ export function AreaCard({
 
           {/* Description (if present) */}
           {area.description && (
-            <p className="text-xs text-muted-foreground line-clamp-2">
+            <p className="text-[10px] @[180px]:text-xs text-muted-foreground line-clamp-2">
               {area.description}
             </p>
           )}
         </div>
       </div>
 
-      {/* Footer: Project count */}
-      <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between text-xs text-muted-foreground">
+      {/* Footer: Project count - stacks on narrow */}
+      <div className="mt-2 @[180px]:mt-3 pt-2 @[180px]:pt-3 border-t border-border/40 flex flex-col @[200px]:flex-row @[200px]:items-center @[200px]:justify-between gap-0.5 @[200px]:gap-2 text-[10px] @[180px]:text-xs text-muted-foreground">
         <span>
           {activeProjectCount} active project
           {activeProjectCount !== 1 ? 's' : ''}
@@ -106,7 +106,7 @@ function AreaTypeBadge({ type }: { type: string }) {
   return (
     <span
       className={cn(
-        'shrink-0 text-[10px] font-medium px-1.5 py-0.5 rounded capitalize',
+        'shrink-0 text-[9px] @[180px]:text-[10px] font-medium px-1 @[180px]:px-1.5 py-0.5 rounded capitalize',
         colorClass
       )}
     >

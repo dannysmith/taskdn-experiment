@@ -37,7 +37,7 @@ export function TaskStatusPill({
     return (
       <span
         className={cn(
-          'px-2 py-0.5 rounded-full text-xs font-medium shrink-0',
+          'px-1.5 @[140px]:px-2 py-0.5 rounded-full text-[10px] @[140px]:text-xs font-medium shrink-0',
           config.color,
           className
         )}
@@ -52,13 +52,13 @@ export function TaskStatusPill({
       <DropdownMenuTrigger
         onClick={handleClick}
         className={cn(
-          'px-2 py-0.5 rounded-full text-xs font-medium shrink-0 inline-flex items-center gap-1 transition-opacity hover:opacity-80',
+          'px-1.5 @[140px]:px-2 py-0.5 rounded-full text-[10px] @[140px]:text-xs font-medium shrink-0 inline-flex items-center gap-0.5 @[140px]:gap-1 transition-opacity hover:opacity-80',
           config.color,
           className
         )}
       >
         {config.label}
-        <ChevronDown className="size-3 opacity-60" />
+        <ChevronDown className="size-2.5 @[140px]:size-3 opacity-60" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         {taskPrimaryStatuses.map((s) => (

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Flag, Calendar, X, Pencil, Hourglass } from 'lucide-react'
+import { Flag, Calendar, X, CircleChevronRight, Hourglass } from 'lucide-react'
 
 import { cn } from '@/lib/utils'
 import { formatRelativeDate, isOverdue } from '@/lib/date-utils'
@@ -218,7 +218,7 @@ export function TaskCard({
     )
   }
 
-  // Default size - full card
+  // Default size - full card with container query responsive behavior
   return (
     <div
       onClick={onClick}
@@ -226,7 +226,7 @@ export function TaskCard({
       onKeyDown={handleKeyDown}
       tabIndex={0}
       className={cn(
-        'group rounded-xl border p-3.5 transition-all outline-none',
+        '@container group rounded-xl border p-2.5 @[140px]:p-3.5 transition-all outline-none',
         'hover:shadow-md hover:shadow-black/5',
         'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         // Variant styles
@@ -244,10 +244,10 @@ export function TaskCard({
       )}
     >
       {/* Title row */}
-      <div className="flex items-start gap-2">
+      <div className="flex items-start gap-1.5 @[140px]:gap-2">
         {/* Deferred indicator */}
         {variant === 'deferred' && !isEditing && (
-          <Hourglass className="size-3.5 text-muted-foreground shrink-0 mt-0.5" />
+          <Hourglass className="size-3 @[140px]:size-3.5 text-muted-foreground shrink-0 mt-0.5" />
         )}
         {isEditing ? (
           <textarea
@@ -256,7 +256,7 @@ export function TaskCard({
             onChange={handleTextareaInput}
             onBlur={handleInputBlur}
             onKeyDown={handleTextareaKeyDown}
-            className="flex-1 text-sm font-medium bg-transparent outline-none resize-none overflow-hidden leading-snug"
+            className="flex-1 text-xs @[140px]:text-sm font-medium bg-transparent outline-none resize-none overflow-hidden leading-snug"
             placeholder="Task title..."
             rows={1}
           />
@@ -264,7 +264,7 @@ export function TaskCard({
           <>
             <span
               className={cn(
-                'flex-1 text-sm font-medium leading-snug',
+                'flex-1 text-xs @[140px]:text-sm font-medium leading-snug',
                 isCompleted && 'line-through text-muted-foreground'
               )}
             >
@@ -278,61 +278,59 @@ export function TaskCard({
                   onEditClick()
                 }}
                 className={cn(
-                  'shrink-0 p-1 -m-1 rounded text-muted-foreground/50',
+                  'shrink-0 p-1 @[140px]:p-1.5 -m-1 rounded-full text-primary/70',
                   'opacity-0 group-hover:opacity-100 transition-opacity',
-                  'hover:text-muted-foreground hover:bg-muted/50',
+                  'hover:text-primary hover:bg-primary/10',
                   isSelected && 'opacity-100'
                 )}
-                title="Edit task"
+                title="Open details"
               >
-                <Pencil className="size-3.5" />
+                <CircleChevronRight className="size-3.5 @[140px]:size-4" />
               </button>
             )}
           </>
         )}
       </div>
 
-      {/* Footer: status pill + dates + context */}
+      {/* Footer: status pill + dates + context - stacks vertically on narrow, horizontal on wider */}
       <div
         className={cn(
-          'mt-3 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs',
+          'mt-2 @[140px]:mt-3 flex flex-col @[120px]:flex-row @[120px]:flex-wrap @[120px]:items-center gap-1.5 @[120px]:gap-x-3 @[120px]:gap-y-1.5 text-[10px] @[140px]:text-xs',
           isCompleted && 'opacity-60'
         )}
       >
         {/* Status pill dropdown */}
         <TaskStatusPill status={task.status} onStatusChange={onStatusChange} />
 
-        {/* Dates - placed early so they're visible on narrow cards */}
-        <div className="flex items-center gap-2">
-          <DatePickerButton
-            date={scheduledDate}
-            icon={<Calendar className="size-3" />}
-            open={scheduledOpen}
-            onOpenChange={setScheduledOpen}
-            onSelect={handleScheduledSelect}
-            canEdit={!!onScheduledChange}
-            label="Scheduled"
-          />
+        {/* Dates - stack with other metadata when narrow */}
+        <DatePickerButton
+          date={scheduledDate}
+          icon={<Calendar className="size-2.5 @[140px]:size-3" />}
+          open={scheduledOpen}
+          onOpenChange={setScheduledOpen}
+          onSelect={handleScheduledSelect}
+          canEdit={!!onScheduledChange}
+          label="Scheduled"
+        />
 
-          <DatePickerButton
-            date={dueDate}
-            icon={<Flag className="size-3" />}
-            open={dueOpen}
-            onOpenChange={setDueOpen}
-            onSelect={handleDueSelect}
-            canEdit={!!onDueChange}
-            label="Due"
-            isOverdue={dueDate ? isOverdue(task.due!) && !isCompleted : false}
-          />
-        </div>
+        <DatePickerButton
+          date={dueDate}
+          icon={<Flag className="size-2.5 @[140px]:size-3" />}
+          open={dueOpen}
+          onOpenChange={setDueOpen}
+          onSelect={handleDueSelect}
+          canEdit={!!onDueChange}
+          label="Due"
+          isOverdue={dueDate ? isOverdue(task.due!) && !isCompleted : false}
+        />
 
-        {/* Context (project or area) - can wrap to next line if needed */}
+        {/* Context (project or area) */}
         {contextName && (
           <button
             type="button"
             onClick={handleContextClick}
             className={cn(
-              'truncate max-w-full text-muted-foreground',
+              'truncate max-w-full text-muted-foreground text-left',
               hasContextClick && 'hover:text-foreground hover:underline'
             )}
           >

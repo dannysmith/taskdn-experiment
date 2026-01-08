@@ -57,14 +57,14 @@ export function MonthDayCell({
     <div
       ref={setNodeRef}
       className={cn(
-        'flex flex-col min-h-[120px] border-r border-border/30 last:border-r-0',
+        '@container flex flex-col min-h-[100px] border-r border-border/30 last:border-r-0',
         !isCurrentMonth && 'bg-muted/30 opacity-50',
         isWeekendDay && isCurrentMonth && 'bg-muted/10',
         (isOver || isDropTarget) && 'bg-primary/5'
       )}
     >
       {/* Day header */}
-      <div className="group/header px-1.5 py-1 flex justify-between items-center">
+      <div className="group/header px-1 py-0.5 @[80px]:px-1.5 @[80px]:py-1 flex justify-between items-center">
         {/* Add task button - shown on hover */}
         {onCreateTask && (
           <button
@@ -76,14 +76,15 @@ export function MonthDayCell({
           </button>
         )}
         {!onCreateTask && <div />}
+        {/* Date number - consistent size container */}
         <span
           className={cn(
-            'text-xs tabular-nums',
+            'size-5 @[80px]:size-6 flex items-center justify-center text-[10px] @[80px]:text-xs tabular-nums rounded-full',
             isCurrentDay
-              ? 'bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center font-semibold'
+              ? 'bg-primary text-primary-foreground font-semibold'
               : isCurrentMonth
-                ? 'text-foreground font-medium'
-                : 'text-muted-foreground'
+                ? 'text-foreground font-medium bg-transparent'
+                : 'text-muted-foreground bg-transparent'
           )}
         >
           {format(date, 'd')}

@@ -20,10 +20,12 @@ export function ViewHeader({
   onProjectStatusChange,
 }: ViewHeaderProps) {
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b px-4">
-      <h1 className="text-xl font-semibold">{title}</h1>
+    <header className="@container flex h-14 shrink-0 items-center gap-2 @[400px]:gap-3 border-b px-3 @[400px]:px-4">
+      <h1 className="text-lg @[400px]:text-xl font-semibold truncate shrink-0">{title}</h1>
       {projectStatusCounts && (
-        <ProjectStatusBadges counts={projectStatusCounts} />
+        <div className="hidden @[500px]:block overflow-hidden">
+          <ProjectStatusBadges counts={projectStatusCounts} />
+        </div>
       )}
       {currentProject && onProjectStatusChange && (
         <ProjectStatusPill
@@ -35,7 +37,7 @@ export function ViewHeader({
       )}
       {/* View mode toggle - pushed to right */}
       {viewModeKey && (
-        <div className="ml-auto">
+        <div className="ml-auto shrink-0">
           <HeaderViewToggle viewModeKey={viewModeKey} />
         </div>
       )}
